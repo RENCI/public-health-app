@@ -6,6 +6,7 @@ from src.components.theme_toggle import theme_toggle
 nav_items = [
   {'label': 'Home', 'href': '/', 'icon': 'feather:home'},
   {'label': 'Scenarios', 'href': '/scenarios', 'icon': 'feather:crosshair'},
+  {'label': 'Map', 'href': '/map', 'icon': 'feather:map'},
 ]
 
 def nav_link(label, href, icon, active):
