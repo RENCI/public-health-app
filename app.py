@@ -1,6 +1,5 @@
-from dash import Dash, _dash_renderer, dcc, Input, Output, State, callback, clientside_callback
+from dash import Dash, _dash_renderer
 import dash_mantine_components as dmc
-from dash_iconify import DashIconify
 from src.theme import DEFAULT_THEME
 from src.components.layout import layout
 
@@ -22,4 +21,4 @@ app.layout = dmc.MantineProvider(
 server = app.server
 
 if __name__ == '__main__':
-  app.run_server(debug=True)
+  app.run(debug=True)

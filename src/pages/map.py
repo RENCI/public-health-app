@@ -3,15 +3,15 @@ from dash import html, dcc, Input, Output, callback
 import dash_mantine_components as dmc
 import plotly.express as px
 import pandas as pd
+from src.options import locations
 
 # Register page
 dash.register_page(__name__)
 
 # Sample data: US states
-states = ['CA', 'CO', 'CT', 'GA', 'MD', 'MI', 'MN', 'NM', 'NY', 'OR', 'TN', 'US', 'UT']
 df = pd.DataFrame({
-  'state': states,
-  'value': list(range(1, len(states) + 1))
+  'state': locations,
+  'value': list(range(1, len(locations) + 1))
 })
 
 # Create Plotly figure

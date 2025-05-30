@@ -5,10 +5,12 @@ name = "pypi"
 
 [packages]
 dash = "*"
-dash-mantine-components = "*"
 dash-iconify = "*"
+dash-mantine-components = "*"
 dash-ag-grid = "*"
+gunicorn = "*"
 pandas = "*"
+numpy = "*"
 
 [dev-packages]
 

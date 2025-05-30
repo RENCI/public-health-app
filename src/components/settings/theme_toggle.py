@@ -14,7 +14,7 @@ theme_toggle = dmc.ActionIcon(
     dmc.Box(DashIconify(icon='feather:moon', width=24, height=24), darkHidden=True),
     dmc.Box(DashIconify(icon='feather:sun', width=24, height=24), lightHidden=True),
   ],
-  variant='transparent',
+  variant='subtle',
   color='goldenrod',
   id='color-scheme-toggle',
   size='lg',

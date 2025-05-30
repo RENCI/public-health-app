@@ -1,4 +1,0 @@
-dash
-dash_iconify
-dash_mantine_components
-gunicorn
