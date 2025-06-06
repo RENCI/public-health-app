@@ -18,12 +18,12 @@ layout = dmc.AppShell(
   navbar={
     'width': 350,
     'breakpoint': 'sm',
-    'collapsed': {'mobile': True, 'desktop': True},
+    'collapsed': {'mobile': True, 'desktop': False},
   },
   aside={
     'width': 250,
     'breakpoint': 'sm',
-    'collapsed': {'mobile': True, 'desktop': False},
+    'collapsed': {'mobile': True, 'desktop': True},
   },
   id='appshell',
 )
@@ -33,6 +33,7 @@ layout = dmc.AppShell(
   Output('navbar-toggle', 'opened'),
   Input('navbar-toggle', 'opened'),
   State('appshell', 'navbar'),
+  prevent_initial_call=True,
 )
 def toggle_navbar(opened, navbar):
   is_collapsed = not opened

@@ -1,0 +1,9 @@
+.mantine-Button-inner:hover .mantine-Button-section:last-child {
+  filter: opacity(1.0);
+}
+.mantine-Button-section {}
+.mantine-Button-label {}
+.mantine-Button-section:last-child {
+  filter: opacity(0.0);
+  transition: filter 250ms;
+}

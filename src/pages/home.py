@@ -1,7 +1,8 @@
 import dash
-from dash import dcc, html
+from dash import callback, dcc, html
 import dash_mantine_components as dmc
-from src.components.controls import controls_debugger
+
+from src.components.controls.debugger import controls_debugger
 
 dummy_content = dcc.Markdown('''
 ## Lorem Ipsum Dolor Sit Amet

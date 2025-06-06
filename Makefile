@@ -8,7 +8,7 @@ PHONY_TARGETS := $(shell awk -F':.*?##' '/^[a-zA-Z0-9_.-]+:.*##/ {print $$1}' $(
 # ============
 # ⚙️ CONFIG
 APP_NAME := accidda-ui
-TAG := 0.3.0
+TAG := 0.4.0
 IMAGE_NAME := containers.renci.org/comms/$(APP_NAME):$(TAG)
 PORT := 80
 RELEASE_NAME ?= $(APP_NAME)
@@ -31,7 +31,7 @@ requirements: ## 🔐 Generate requirements.txt from Pipfile.lock (with Pipenv)
 
 ##@ Docker Commands
 
-build: deps ## 🛠️  Build Docker image
+build: requirements ## 🛠️  Build Docker image
 	docker build -t $(IMAGE_NAME) .
 
 run: ## ▶️  Run Docker container
