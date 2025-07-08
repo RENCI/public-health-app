@@ -28,16 +28,38 @@ insight_input = dmc.Textarea(
   ),
 )
 
-insight_buttons = [
-  dmc.Button(
-    label,
-    id={'type': 'insight-button', 'index': i},
-    variant='outline',
-    size='sm',
-    fullWidth=True,
+def create_insight_button(title, description, index):
+  return dmc.Paper(
+    children=[
+      dmc.Group([
+        dmc.Button(
+          children='Select',
+          id={'type': 'insight-button', 'index': index},
+          rightSection=DashIconify(icon='feather:check'),
+          variant='light',
+          size='xs',
+        ),
+        dmc.Text(title, fz='md', style=dict(flex=1)),
+        dmc.Button(
+          DashIconify(icon='feather:info'),
+          id=f'collapse-insight-{index}',
+          size='xs',
+          variant='subtle',
+        ),
+      ]),
+      dmc.Collapse(
+        children=description,
+        id=f'insight-button-{index}',
+        opened=False,
+        p='sm',
+      ),
+    ],
+    p="xs",
+    radius="sm",
+    withBorder=True,
   )
-  for i, label in enumerate(insights)
-]
+
+insight_buttons = [create_insight_button(insight['title'], insight['description'], i) for i, insight in enumerate(insights)]
 
 insight_select_grid = html.Div(
   dmc.SimpleGrid(
@@ -45,7 +67,10 @@ insight_select_grid = html.Div(
     type='container',
     cols=1,
     spacing='lg',
-    children=insight_buttons,
+    children=[
+      *insight_buttons,
+      dcc.Store(id='collapse-state-store', data={}),
+    ],
     p='lg',
   ),
   style=dict(height='400px', overflowY='scroll')   
@@ -54,11 +79,10 @@ insight_select_grid = html.Div(
 insight_modal = dmc.Modal(
   id='insight-modal',
   opened=False,
-  title='insight',
+  title='Select an Insight',
   size='lg',
   children=[
     dcc.Store(id='working-insight-store', data=''),
-    html.H1('Select an Insight'),
     insight_select_grid,
   ],
   style=dict(display='flex', gap='2rem'),
@@ -70,11 +94,38 @@ insight_select = dmc.Group([
 ])
 
 @callback(
+  Output('collapse-state-store', 'data'),
+  Input({'type': 'insight-button', 'index': ALL}, 'id'),  # dummy input to register components
+  [Input(f'collapse-insight-{i}', 'n_clicks') for i in range(len(insights))],
+  State('collapse-state-store', 'data'),
+  prevent_initial_call=True
+)
+def toggle_collapse(_, *args):
+  collapse_state = args[-1] or {}
+  triggered = ctx.triggered_id
+
+  if triggered and isinstance(triggered, str) and triggered.startswith('collapse-insight-'):
+    index = int(triggered.split('-')[-1])
+    current = collapse_state.get(str(index), False)
+    collapse_state[str(index)] = not current
+    return collapse_state
+
+  raise dash.exceptions.PreventUpdate
+
+for i in range(len(insights)):
+  @callback(
+    Output(f'insight-button-{i}', 'opened'),
+    Input('collapse-state-store', 'data')
+  )
+  def update_collapse(collapse_state, i=i):
+    return collapse_state.get(str(i), False)
+
+@callback(
   Output('insight-input', 'value'),
   Input('insight-store', 'data'),
 )
 def update_input_text(selected_insight):
-  return selected_insight or '...'
+  return selected_insight['title'] or '...'
 
 @callback(
   [Output('insight-modal', 'opened'),

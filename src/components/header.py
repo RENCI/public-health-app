@@ -14,7 +14,7 @@ aside_toggle_button = dmc.ActionIcon(
 header = dmc.Flex(
   children=[
     dmc.Group([
-      dmc.Burger(id='navbar-toggle', size='sm', opened=False),
+      dmc.Burger(id='navbar-toggle', size='sm', opened={'mobile': True, 'desktop': False}),
       logo,
     ]),
     dmc.Group([
