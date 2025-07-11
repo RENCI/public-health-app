@@ -8,7 +8,7 @@ PHONY_TARGETS := $(shell awk -F':.*?##' '/^[a-zA-Z0-9_.-]+:.*##/ {print $$1}' $(
 # ============
 # ⚙️ CONFIG
 APP_NAME := accidda-ui
-TAG := 0.4.0
+TAG := 0.5.0
 IMAGE_NAME := containers.renci.org/comms/$(APP_NAME):$(TAG)
 PORT := 80
 RELEASE_NAME ?= $(APP_NAME)
