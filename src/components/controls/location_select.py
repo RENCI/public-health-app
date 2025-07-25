@@ -21,9 +21,6 @@ location_input = dmc.TextInput(
   value='...',
   readOnly=True,
   pointer=True,
-  inputProps=dict(
-    style=dict(pointerEvents='none'),
-  ),
   style=dict(
     width='100%',
   ),
