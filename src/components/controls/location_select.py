@@ -41,7 +41,7 @@ df = pd.DataFrame({
 def make_figure(highlight_state=None):
   color_column = []
   for state in df['state']:
-    if state == highlight_state:
+    if state == highlight_state or highlight_state == None:
       color_column.append('selected')
     else:
       color_column.append('normal')
