@@ -1,0 +1,2 @@
+id: template-a
+controls: ['location', 'target', 'age_group', 'uncertainty']

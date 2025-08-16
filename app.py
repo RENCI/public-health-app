@@ -1,9 +1,11 @@
-from dash import Dash, _dash_renderer
+import dash
+from dash import Dash, _dash_renderer, dcc
 import dash_mantine_components as dmc
 from src.theme import DEFAULT_THEME
 from src.components.layout import layout
 
 _dash_renderer._set_react_version('18.2.0')
+insight_store = dcc.Store(id='selected_insight', storage_type='local')
 
 app = Dash(
   external_stylesheets=dmc.styles.ALL,
@@ -15,7 +17,10 @@ app.title = 'ACCIDDA'
 app.layout = dmc.MantineProvider(
   theme=DEFAULT_THEME,
   id='mantine-provider',
-  children=layout,
+  children=[
+    layout,
+    insight_store,
+  ],
 )
 
 server = app.server

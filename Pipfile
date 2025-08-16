@@ -11,6 +11,7 @@ dash-ag-grid = "*"
 gunicorn = "*"
 pandas = "*"
 numpy = "*"
+pyyaml = "*"
 
 [dev-packages]
 

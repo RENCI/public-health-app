@@ -8,7 +8,7 @@ image:
   repository: containers.renci.org/comms/accidda-ui
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.5.0"
+  tag: "0.6.0"
 
 nameOverride: ""
 fullnameOverride: ""
@@ -62,11 +62,11 @@ resources:
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   limits:
-    cpu: 500m
-    memory: 1024Mi
+    cpu: 100m
+    memory: 128Mi
   requests:
-    cpu: 250m
-    memory: 512Mi
+    cpu: 100m
+    memory: 128Mi
 
 autoscaling:
   enabled: false
