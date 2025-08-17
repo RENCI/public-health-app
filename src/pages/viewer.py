@@ -13,8 +13,8 @@ back_button = dmc.Anchor(
 )
 editor_button = dcc.Link(
   dmc.Button(
-    'Open in Insight Editor',
-    leftSection=DashIconify(icon='feather:edit-3'),
+    'Explore',
+    leftSection=DashIconify(icon='feather:arrow-up-right'),
   ),
   id='editor-button',
   href='#',
@@ -42,16 +42,16 @@ layout = dmc.Container(
   [
     toolbar,
     dmc.Space(h=48),
-    dmc.Image(id='detail-image', radius='sm', style=dict(width='100%', height='auto', objectFit='cover')),
+    dmc.Image(id='insight-view-image', radius='sm', style=dict(width='100%', height='auto', objectFit='cover')),
     dmc.Divider(my=24),
-    dcc.Markdown(id='detail-details'),
+    dcc.Markdown(id='insight-view-details'),
   ],
   fluid=True
 )
 
 @callback(
-  Output('detail-image', 'src'),
-  Output('detail-details', 'children'),
+  Output('insight-view-image', 'src'),
+  Output('insight-view-details', 'children'),
   Input('url', 'search'),
 )
 def show_details(search):
@@ -59,8 +59,17 @@ def show_details(search):
   insight_id = query.get('id', [None])[0]
   item = next((x for x in insights if x['id'] == insight_id), None)
   if not item:
-    return 'https://placehold.co/1200x800?text=Not found', f'## Insight not found'
+    return 'https://placehold.co/1200x400?text=Not found', f'## Insight not found'
   return item['image_url'], item['details']
+
+# @callback(
+#   Output('back-to-insights-button', 'href'),
+#   Input('url', 'search'),
+# )
+# def update_back_button_href(search):
+#   query = parse_qs(search.lstrip('?'))
+#   insight_id = query.get('id', [None])[0]
+#   return f'/viewer?id={insight_id}' if insight_id else '/'
 
 @callback(
   Output('editor-button', 'href'),

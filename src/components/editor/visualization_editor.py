@@ -13,30 +13,31 @@ controls_toggle = dmc.Button(
   size='xs',
 )
 
-visualization_editor = dmc.Grid(
-  children=[
-    dmc.GridCol(
-      [
-        controls_visibility_store,
-        dmc.ButtonGroup([
-          controls_toggle,
-        ], style=dict(justifyContent='flex-end')),
-      ],
-      span=dict(base=12),
-    ),
-    dmc.GridCol(
-      dmc.Image(id='insight-visualization', src='https://placehold.co/1200x400', radius='sm'),
-      id='visualization-column',
-      span=8,
-    ),
-    dmc.GridCol(
-      controls,
-      id='controls-column',
-      span=4,
-    )
-  ],
-  mb=12,
-)
+def visualization_editor(image_url='https://placehold.co/1200x400'):
+  return dmc.Grid(
+    children=[
+      dmc.GridCol(
+        [
+          controls_visibility_store,
+          dmc.ButtonGroup([
+            controls_toggle,
+          ], style=dict(justifyContent='flex-end')),
+        ],
+        span=dict(base=12),
+      ),
+      dmc.GridCol(
+        dmc.Image(id='insight-visualization', src=image_url, radius='sm'),
+        id='visualization-column',
+        span=8,
+      ),
+      dmc.GridCol(
+        controls,
+        id='controls-column',
+        span=4,
+      )
+    ],
+    mb=12,
+  )
 
 # toggle the controls visibility store value when clicking the button
 @callback(

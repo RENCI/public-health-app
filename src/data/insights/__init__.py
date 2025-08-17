@@ -15,3 +15,9 @@ def load_insights():
   return insights
 
 insights = load_insights()
+
+def get_insight(insight_id: str | None):
+  '''Return a single insight by ID, or None if not found.'''
+  if not insight_id:
+    return None
+  return next((x for x in insights if x.get('id') == insight_id), None)

@@ -1,4 +1,5 @@
 from dash import callback, dcc, html, Input, Output, State
+from dash.dependencies import MATCH
 import dash_mantine_components as dmc
 from dash_iconify import DashIconify
 
@@ -6,14 +7,8 @@ def markdown_editor(
   editor_id='content-editor',
   preview_id='content-preview',
   label='',
+  initial_value='',
 ):
-  callback(
-    Output(preview_id, 'children'),
-    Input(editor_id, 'n_blur'),
-    Input(editor_id, 'value'),  # triggers on page load
-    State(editor_id, 'value'),
-  )(lambda n_blur, value, state: '## Nothing to preview :(' if not state else state)  
-  
   tabs = [
     dmc.TabsTab('Edit', value='edit', leftSection=DashIconify(icon='feather:edit-3')),
     dmc.TabsTab('Preview', value='preview', leftSection=DashIconify(icon='feather:eye')),
@@ -26,11 +21,11 @@ def markdown_editor(
     [
       dmc.TabsList(tabs, mb=8),
       dmc.TabsPanel(
-        dcc.Textarea(id=editor_id, placeholder='Write markdown here...', className='content-editor'),
+        dcc.Textarea(value=initial_value, id={'type': 'editor', 'id': editor_id}, placeholder='Write markdown here...', className='content-editor'),
         value='edit',
       ),
       dmc.TabsPanel(
-        dcc.Markdown(id=preview_id, className='content-preview'),
+        dcc.Markdown(initial_value, id={'type': 'preview', 'id': editor_id}, className='content-preview'),
         value='preview',
       ),
     ],
@@ -39,3 +34,9 @@ def markdown_editor(
     value='edit',
   )
 
+@callback(
+  Output({'type': 'preview', 'id': MATCH}, 'children'),
+  Input({'type': 'editor', 'id': MATCH}, 'value'),
+)
+def update_preview(value):
+  return '## Nothing to preview :(' if not value else value
