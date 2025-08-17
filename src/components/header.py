@@ -1,5 +1,6 @@
 from dash import callback, dcc, html, Input, Output, State
 import dash_mantine_components as dmc
+import re
 from dash_iconify import DashIconify
 from .theme_toggle import theme_toggle
 
@@ -7,14 +8,13 @@ logo = dcc.Link(dmc.Text('[ 📈 ACCIDDA ]', c='blue'), href='/', style=dict(tex
 
 header = dmc.Flex(
   children=[
-    logo,
+    dmc.Group([
+      logo,
+      dmc.Anchor('Viewer', href='/', id='nav-viewer'),
+      dmc.Anchor('Editor', href='/editor', id='nav-editor'),
+    ]),
     dmc.Group([
       theme_toggle,
-      dmc.Burger(id='aside-toggle', size='sm', opened=False, style=dict(display='none')),
-      # ^ this button is purely here prevent an error thrown by the callback in /editor
-      # that actually uses a duplicate of this button defined in that view.
-      # perhaps not the most elegant, but it keeps the callback happy. :/
-      # todo: consider nested AppShells
     ]),
   ],
   align='center',
@@ -23,3 +23,16 @@ header = dmc.Flex(
   h='100%',
   px='md',
 )
+
+@callback(
+  Output('nav-viewer', 'aria-current'),
+  Output('nav-editor', 'aria-current'),
+  Input('url', 'pathname'),
+)
+def update_active_link(pathname):
+  def active_if(pattern):
+    if isinstance(pattern, (list, tuple)):
+      return 'page' if any(re.fullmatch(p, pathname) for p in pattern) else ''
+    return 'page' if re.fullmatch(pattern, pathname) else ''
+
+  return active_if(['/', r'^/viewer$', r'^/viewer/.*$']), active_if([r'^/editor$', r'^/editor/.*$'])

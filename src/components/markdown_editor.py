@@ -15,7 +15,7 @@ def markdown_editor(
   )(lambda n_blur, value, state: '## Nothing to preview :(' if not state else state)  
   
   tabs = [
-    dmc.TabsTab('Edit', value='edit', leftSection=DashIconify(icon='feather:code')),
+    dmc.TabsTab('Edit', value='edit', leftSection=DashIconify(icon='feather:edit-3')),
     dmc.TabsTab('Preview', value='preview', leftSection=DashIconify(icon='feather:eye')),
   ]
 

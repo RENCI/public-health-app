@@ -1,9 +1,10 @@
 from dash import callback, dcc, html, Input, no_update, Output, register_page
 import dash_mantine_components as dmc
+from urllib.parse import parse_qs
 from dash_iconify import DashIconify
 from src.data.insights import insights
 
-register_page(__name__, path_template='/viewer/<insight_id>', name='Insight Details')
+register_page(__name__, path_template='/viewer', name='Insight Details')
 
 back_button = dmc.Anchor(
   '← Back to Insights',
@@ -51,19 +52,21 @@ layout = dmc.Container(
 @callback(
   Output('detail-image', 'src'),
   Output('detail-details', 'children'),
-  Input('url', 'pathname'),
+  Input('url', 'search'),
 )
-def show_details(pathname):
-  insight_id = pathname.split('/')[-1]
+def show_details(search):
+  query = parse_qs(search.lstrip('?'))
+  insight_id = query.get('id', [None])[0]
   item = next((x for x in insights if x['id'] == insight_id), None)
   if not item:
-    return '', ''
+    return 'https://placehold.co/1200x800?text=Not found', f'## Insight not found'
   return item['image_url'], item['details']
 
 @callback(
   Output('editor-button', 'href'),
-  Input('url', 'pathname')
+  Input('url', 'search')
 )
-def add_back_link_href(pathname):
-  insight_id = pathname.split('/')[-1]
-  return f'/editor/{insight_id}'
+def add_back_link_href(search):
+  query = parse_qs(search.lstrip('?'))
+  insight_id = query.get('id', [None])[0]
+  return f'/editor?starter={insight_id}'

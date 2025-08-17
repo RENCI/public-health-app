@@ -52,3 +52,15 @@ def toggle_controls_visibility_store(n_clicks, is_open):
   new_label = 'Hide Controls' if new_open else 'Show Controls'
   new_icon = DashIconify(icon='feather:chevron-right') if new_open else DashIconify(icon='feather:chevron-left')
   return new_open, new_label, new_icon
+
+# update layout based on store value
+@callback(
+  Output('visualization-column', 'span'),
+  Output('controls-column', 'span'),
+  Output('controls-column', 'style'),
+  Input('controls-visibility', 'data'),
+)
+def update_sidebar_display(is_open):
+  if is_open:
+    return 8, 4, {}
+  else: return 12, 0, {'display': 'none'}

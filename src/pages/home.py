@@ -16,13 +16,13 @@ def create_insight_button(item):
 
   description = dmc.Text(item['overview'], size='sm', style=dict(whiteSpace='normal', textAlign='left'))
 
-  button = dmc.Anchor(
+  view_button = dmc.Anchor(
     [
       'View',
       dmc.Space(w=8),
       DashIconify(icon='feather:arrow-right', width=20),
     ],
-    href=f"/viewer/{item['id']}",
+    href=f"/viewer?id={item['id']}",
     style=dict(
       textDecoration='none',
       padding='1rem',
@@ -43,7 +43,7 @@ def create_insight_button(item):
         align='flex-start',
         style=dict(flex=1),
       ),
-      button,
+      view_button,
     ],
     style=dict(
       display='flex', 
@@ -60,7 +60,7 @@ insight_buttons = [create_insight_button(item) for item in insights]
 
 layout = dmc.Container(
   [
-    dmc.Title('Select an Insight', order=1, my=24, style=dict(textAlign='center')),
+    dmc.Title('Insights', order=1, my=24, style=dict(textAlign='center')),
     dmc.Stack(
       insight_buttons, 
       gap='md', 

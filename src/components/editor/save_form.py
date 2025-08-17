@@ -1,5 +1,6 @@
 from dash import callback, dcc, Input, Output, State
 import dash_mantine_components as dmc
+from urllib.parse import parse_qs
 from dash_iconify import DashIconify
 from src.components.editor.metadata_editor import metadata_editor
 
@@ -26,16 +27,21 @@ save_modal = dmc.Modal(
     dmc.Space(h=48),
     dmc.Group(
       [
-        dcc.Link(
-          dmc.Button('Save', leftSection=DashIconify(icon='feather:save'), id='save-button'),
-          id='save-link',
-          href='/',
-        ),
         dmc.Button(
-          'Close',
+          'Cancel',
+          leftSection=DashIconify(icon='feather:x'),
           color='crimson',
           variant='outline',
           id='modal-close-button',
+        ),
+        dcc.Link(
+          dmc.Button(
+            'Save',
+            leftSection=DashIconify(icon='feather:check'),
+            id='save-button',
+          ),
+          id='save-link',
+          href='/',
         ),
       ],
       justify='flex-end',
@@ -45,6 +51,7 @@ save_modal = dmc.Modal(
 
 modal_toggle_button = dmc.Button(
   'Save as New Insight',
+  leftSection=DashIconify(icon='feather:save'),
   size='lg',
   id='modal-open-button',
 )
@@ -56,11 +63,12 @@ save_form = dmc.Center(
 
 @callback(
   Output('save-link', 'href'), # temp send back to original
-  Input('url', 'pathname')
+  Input('url', 'search')
 )
-def add_save_href(pathname):
-  insight_id = pathname.split('/')[-1]
-  return f'/viewer/{insight_id}'
+def add_save_href(search):
+  query = parse_qs(search.lstrip('?'))
+  insight_id = query.get('starter', [None])[0]
+  return f'/viewer?id={insight_id}'
 
 @callback(
   Output('save-modal', 'opened'),
