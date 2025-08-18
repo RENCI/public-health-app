@@ -2,7 +2,7 @@ from dash import callback, dcc, Input, Output, State
 import dash_mantine_components as dmc
 from urllib.parse import parse_qs
 from dash_iconify import DashIconify
-from src.components.editor.metadata_editor import metadata_editor
+from src.components.explorer.metadata_editor import metadata_editor
 
 metadata_editor = dmc.Stack([
   dmc.TextInput(

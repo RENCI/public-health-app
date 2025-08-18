@@ -4,7 +4,7 @@ import dash_mantine_components as dmc
 from dash_iconify import DashIconify
 
 def markdown_editor(
-  editor_id='content-editor',
+  explorer_id='content-editor',
   preview_id='content-preview',
   label='',
   initial_value='',
@@ -21,11 +21,11 @@ def markdown_editor(
     [
       dmc.TabsList(tabs, mb=8),
       dmc.TabsPanel(
-        dcc.Textarea(value=initial_value, id={'type': 'editor', 'id': editor_id}, placeholder='Write markdown here...', className='content-editor'),
+        dcc.Textarea(value=initial_value, id={'type': 'explorer', 'id': explorer_id}, placeholder='Write markdown here...', className='content-editor'),
         value='edit',
       ),
       dmc.TabsPanel(
-        dcc.Markdown(initial_value, id={'type': 'preview', 'id': editor_id}, className='content-preview'),
+        dcc.Markdown(initial_value, id={'type': 'preview', 'id': explorer_id}, className='content-preview'),
         value='preview',
       ),
     ],
@@ -36,7 +36,7 @@ def markdown_editor(
 
 @callback(
   Output({'type': 'preview', 'id': MATCH}, 'children'),
-  Input({'type': 'editor', 'id': MATCH}, 'value'),
+  Input({'type': 'explorer', 'id': MATCH}, 'value'),
 )
 def update_preview(value):
   return '## Nothing to preview :(' if not value else value

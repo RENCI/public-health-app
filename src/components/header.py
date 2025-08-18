@@ -11,7 +11,7 @@ header = dmc.Flex(
     dmc.Group([
       logo,
       dmc.Anchor('Viewer', href='/', id='nav-viewer'),
-      dmc.Anchor('Editor', href='/editor', id='nav-editor'),
+      dmc.Anchor('Explorer', href='/explorer', id='nav-explorer'),
     ]),
     dmc.Group([
       theme_toggle,
@@ -26,7 +26,7 @@ header = dmc.Flex(
 
 @callback(
   Output('nav-viewer', 'aria-current'),
-  Output('nav-editor', 'aria-current'),
+  Output('nav-explorer', 'aria-current'),
   Input('url', 'pathname'),
 )
 def update_active_link(pathname):
@@ -35,4 +35,4 @@ def update_active_link(pathname):
       return 'page' if any(re.fullmatch(p, pathname) for p in pattern) else ''
     return 'page' if re.fullmatch(pattern, pathname) else ''
 
-  return active_if(['/', r'^/viewer$', r'^/viewer/.*$']), active_if([r'^/editor$', r'^/editor/.*$'])
+  return active_if(['/', r'^/viewer$', r'^/viewer/.*$']), active_if([r'^/explorer$', r'^/explorer/.*$'])

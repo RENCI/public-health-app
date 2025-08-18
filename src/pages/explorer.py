@@ -5,10 +5,10 @@ from dash_iconify import DashIconify
 from src.data.insights import get_insight
 from src.data.templates import templates
 from src.components.markdown_editor import markdown_editor
-from src.components.editor import save_form, visualization_editor
+from src.components.explorer import save_form, visualization_editor
 from src.util.get_query_param import get_query_param
 
-register_page(__name__, path_template='/editor', name='Insight Editor')
+register_page(__name__, path_template='/explorer', name='Insight Explorer')
 
 back_button = dmc.Anchor('← Abandon Changes', href='/', id='back-button')
 
@@ -41,13 +41,13 @@ def layout(starter=None):
   return dmc.Container(
     [
       toolbar,
-      dmc.Title(f'Insight Editor: {title}', order=1, mt=24),
+      dmc.Title(f'Insight Explorer: {title}', order=1, mt=24),
       visualization_editor(image_url),
       dmc.Space(h=24),
       markdown_editor(
         label='Insight Details',
         initial_value=details,
-        editor_id='insight-details',
+        explorer_id='insight-details',
       ),
       save_form,
     ],
@@ -65,7 +65,7 @@ def update_back_button_href(search):
   return f'/viewer?id={starter}' if starter else '/'
 
 # @callback(
-#   Output('insight-editor-title', 'children'),
+#   Output('insight-explorer-title', 'children'),
 #   Output('insight-title', 'value'),  # in the save form
 #   Output('insight-overview', 'value'),  # in the save form
 #   Output('insight-visualization', 'src'),
@@ -75,7 +75,7 @@ def update_back_button_href(search):
 # def hydrate_insight_template(search):
 #   placeholder_image = 'https://placehold.co/1200x800?text=Placeholder'
 #   if not search:
-#     # new insight, blank editor
+#     # new insight, blank explorer
 #     return 'New Insight', '', '', placeholder_image, ''
 
 #   # we have params. look for starter insight

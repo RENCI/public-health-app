@@ -11,12 +11,12 @@ back_button = dmc.Anchor(
   id='back-to-insights-button',
   href='/',
 )
-editor_button = dcc.Link(
+explorer_button = dcc.Link(
   dmc.Button(
     'Explore',
     leftSection=DashIconify(icon='feather:arrow-up-right'),
   ),
-  id='editor-button',
+  id='explorer-button',
   href='#',
 )
 download_button = dcc.Link(
@@ -32,7 +32,7 @@ download_button = dcc.Link(
 toolbar = dmc.Flex(
   children=[
     back_button,
-    dmc.Group([download_button, editor_button])
+    dmc.Group([download_button, explorer_button])
   ],
   justify='space-between',
   align='center',
@@ -72,10 +72,10 @@ def show_details(search):
 #   return f'/viewer?id={insight_id}' if insight_id else '/'
 
 @callback(
-  Output('editor-button', 'href'),
+  Output('explorer-button', 'href'),
   Input('url', 'search')
 )
 def add_back_link_href(search):
   query = parse_qs(search.lstrip('?'))
   insight_id = query.get('id', [None])[0]
-  return f'/editor?starter={insight_id}'
+  return f'/explorer?starter={insight_id}'
