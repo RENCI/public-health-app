@@ -17,15 +17,6 @@ def visualization_editor(image_url='https://placehold.co/1200x400'):
   return dmc.Grid(
     children=[
       dmc.GridCol(
-        [
-          controls_visibility_store,
-          dmc.ButtonGroup([
-            controls_toggle,
-          ], style=dict(justifyContent='flex-end')),
-        ],
-        span=dict(base=12),
-      ),
-      dmc.GridCol(
         dmc.Image(id='insight-visualization', src=image_url, radius='sm'),
         id='visualization-column',
         span=8,
@@ -34,7 +25,16 @@ def visualization_editor(image_url='https://placehold.co/1200x400'):
         controls,
         id='controls-column',
         span=4,
-      )
+      ),
+      dmc.GridCol(
+        [
+          controls_visibility_store,
+          dmc.ButtonGroup([
+            controls_toggle,
+          ], style=dict(justifyContent='flex-end')),
+        ],
+        span=dict(base=12),
+      ),
     ],
     mb=12,
   )

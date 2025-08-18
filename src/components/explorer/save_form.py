@@ -3,6 +3,7 @@ import dash_mantine_components as dmc
 from urllib.parse import parse_qs
 from dash_iconify import DashIconify
 from src.components.explorer.metadata_editor import metadata_editor
+from src.components.markdown_editor import markdown_editor
 
 metadata_editor = dmc.Stack([
   dmc.TextInput(
@@ -18,6 +19,7 @@ metadata_editor = dmc.Stack([
 ], gap=24)
 
 save_modal = dmc.Modal(
+  opened=False,
   title='Save Insight',
   id='save-modal',
   size='lg',
@@ -25,6 +27,8 @@ save_modal = dmc.Modal(
     dmc.Divider(mb=12),
     metadata_editor,
     dmc.Space(h=48),
+    markdown_editor(),
+    dmc.Divider(my=12),
     dmc.Group(
       [
         dmc.Button(
