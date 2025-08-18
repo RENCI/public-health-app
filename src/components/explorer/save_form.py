@@ -1,4 +1,4 @@
-from dash import callback, dcc, Input, Output, State
+from dash import callback, dcc, html, Input, Output, State
 import dash_mantine_components as dmc
 from urllib.parse import parse_qs
 from dash_iconify import DashIconify
@@ -20,7 +20,7 @@ metadata_editor = dmc.Stack([
 
 save_modal = dmc.Modal(
   opened=False,
-  title='Save Insight',
+  title='Save New Insight',
   id='save-modal',
   size='lg',
   children=[
@@ -53,17 +53,19 @@ save_modal = dmc.Modal(
   ],
 )
 
-modal_toggle_button = dmc.Button(
-  'Save as New Insight',
-  leftSection=DashIconify(icon='feather:save'),
-  size='lg',
-  id='modal-open-button',
-)
+save_button = html.Span([
+  dmc.Button(
+    'Save as New Insight',
+    leftSection=DashIconify(icon='feather:save'),
+    id='modal-open-button',
+  ),
+  save_modal,
+])
 
-save_form = dmc.Center(
-  style=dict(height=300, width='100%'),
-  children=[modal_toggle_button, save_modal],
-)
+# save_form = dmc.Center(
+#   style=dict(height=300, width='100%'),
+#   children=[modal_toggle_button, ],
+# )
 
 @callback(
   Output('save-link', 'href'), # temp send back to original

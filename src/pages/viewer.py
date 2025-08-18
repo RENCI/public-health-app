@@ -21,7 +21,7 @@ explorer_button = dcc.Link(
 )
 download_button = dcc.Link(
   dmc.Button(
-    'Download Insight',
+    'Download',
     leftSection=DashIconify(icon='feather:download'),
     variant='outline',
   ),
@@ -36,12 +36,12 @@ toolbar = dmc.Flex(
   ],
   justify='space-between',
   align='center',
+  mb=24,
 )
 
 layout = dmc.Container(
   [
     toolbar,
-    dmc.Space(h=48),
     dmc.Image(id='insight-view-image', radius='sm', style=dict(width='100%', height='auto', objectFit='cover')),
     dmc.Divider(my=24),
     dcc.Markdown(id='insight-view-details'),

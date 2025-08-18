@@ -4,7 +4,7 @@ from urllib.parse import parse_qs
 from dash_iconify import DashIconify
 from src.data.insights import get_insight
 from src.data.templates import templates
-from src.components.explorer import save_form, visualization_editor
+from src.components.explorer import save_button, visualization_editor
 from src.util.get_query_param import get_query_param
 
 register_page(__name__, path_template='/explorer', name='Insight Explorer')
@@ -24,10 +24,11 @@ reset_button = dcc.Link(
 toolbar = dmc.Flex(
   children=[
     back_button,
-    dmc.Group([reset_button])
+    dmc.Group([reset_button, save_button])
   ],
   justify='space-between',
   align='center',
+  mb=24,
 )
 
 def layout(starter=None):
@@ -41,8 +42,6 @@ def layout(starter=None):
     [
       toolbar,
       visualization_editor(image_url),
-      dmc.Space(h=24),
-      save_form,
     ],
     fluid=True,
   )
