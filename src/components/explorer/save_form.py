@@ -28,7 +28,7 @@ save_modal = dmc.Modal(
     metadata_editor,
     dmc.Space(h=48),
     markdown_editor(),
-    dmc.Divider(my=12),
+    dmc.Divider(my=24),
     dmc.Group(
       [
         dmc.Button(
@@ -62,11 +62,6 @@ save_button = html.Span([
   save_modal,
 ])
 
-# save_form = dmc.Center(
-#   style=dict(height=300, width='100%'),
-#   children=[modal_toggle_button, ],
-# )
-
 @callback(
   Output('save-link', 'href'), # temp send back to original
   Input('url', 'search')
@@ -84,5 +79,5 @@ def add_save_href(search):
   State('save-modal', 'opened'),
   prevent_initial_call=True,
 )
-def modal_demo(nc1, nc2, nc3, opened):
+def modal_demo(clicks1, clicks2, clicks3, opened):
   return not opened

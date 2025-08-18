@@ -1,2 +1,8 @@
 id: template-a
-controls: ['location', 'target', 'age_group', 'uncertainty']
+controls:
+  - scenarios_select
+  - location_select
+  - target_select
+  - age_group_select
+  - uncertainty_select
+  - ensemble_select

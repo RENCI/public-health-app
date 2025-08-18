@@ -1,7 +1,10 @@
 from dash import callback, dcc, Input, Output, State
 import dash_mantine_components as dmc
 from dash_iconify import DashIconify
-from .controls import controls
+from src.components.controls import (
+  scenarios_select, location_select, target_select,
+  age_group_select, uncertainty_select, ensemble_select
+)
 
 controls_visibility_store = dcc.Store(id='controls-visibility', data=True)  # True = open, False = closed
 
@@ -22,7 +25,21 @@ def visualization_editor(image_url='https://placehold.co/1200x400'):
         span=8,
       ),
       dmc.GridCol(
-        controls,
+        dmc.Card(
+          dmc.Grid(
+            children=[
+              dmc.GridCol(scenarios_select,   style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
+              dmc.GridCol(location_select,    style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
+              dmc.GridCol(target_select,      style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
+              dmc.GridCol(age_group_select,   style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
+              dmc.GridCol(uncertainty_select, style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
+              dmc.GridCol(ensemble_select,    style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
+            ],
+            gutter=0,
+          ),
+          variant='soft',
+          style=dict(height='100%'),
+        ),
         id='controls-column',
         span=4,
       ),
