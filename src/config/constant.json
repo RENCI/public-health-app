@@ -1,0 +1,71 @@
+{
+  "pathogen": "RSV",
+  "pathogen_display_name": "RSV",
+  "scenario_id": {
+    "1": "A-2023-10-27",
+    "2": "B-2023-10-27",
+    "3": "C-2023-10-27",
+    "4": "D-2023-10-27",
+    "5": "E-2023-10-27",
+    "6": "A-2024-09-20",
+    "7": "B-2024-09-20",
+    "8": "C-2024-09-20",
+    "9": "D-2024-09-20",
+    "10": "E-2024-09-20"
+  },
+  "model_name": {
+    "1": "Ensemble_LOP",
+    "2": "Ensemble_LOP_untrimmed",
+    "3": "Ensemble",
+    "4": "UT-ImmunoSEIRS",
+    "5": "NotreDame-FRED",
+    "6": "USC-SIkJalpha",
+    "7": "CU-RSV_SVIRS",
+    "8": "UVA-EpiHiperRSV",
+    "9": "NIH-RSV_WIN",
+    "10": "PSI-PROF",
+    "11": "NIH-RSV_MSIRS",
+    "12": "MOBS_NEU-GLEAM_RSV",
+    "13": "NIH-RSV_Phenomenological",
+    "14": "CEPH-MetaRSV",
+    "15": "JHU_UNC-flepiMoP",
+    "16": "Ensemble_LOP_all",
+    "17": "NIH-RSV_WIN_old",
+    "18": "UNCC-Hierbin"
+  },
+  "color_dict":{
+    "Ensemble_LOP": "rgba(103, 72, 106, 1)",
+    "Ensemble_LOP_untrimmed": "rgba(136, 174, 225, 1)",
+    "Ensemble": "rgba(169, 169, 255, 1)",
+    "UT-ImmunoSEIRS": "rgba(163, 165, 0, 1)",
+    "NotreDame-FRED": "rgba(0, 191, 125, 1)",
+    "USC-SIkJalpha": "rgba(255, 103, 164, 1)",
+    "CU-RSV_SVIRS": "rgba(108, 218, 250, 1)",
+    "UVA-EpiHiperRSV": "rgba(0, 72, 251, 1)",
+    "NIH-RSV_WIN": "rgba(254, 110, 12, 1)",
+    "PSI-PROF": "rgba(226, 50, 7, 1)",
+    "NIH-RSV_MSIRS": "rgba(1, 100, 32, 1)",
+    "MOBS_NEU-GLEAM_RSV": "rgba(175, 128, 255, 1)",
+    "NIH-RSV_Phenomenological": "rgba(252, 209, 7, 1)",
+    "CEPH-MetaRSV":  "rgba(139, 58, 58, 1)",
+    "JHU_UNC-flepiMoP": "rgba(1, 150, 200, 1)",
+    "Ensemble_LOP_all": "rgba(75, 75, 75, 1)",
+    "UNCC-Hierbin": "rgba(170, 51, 106, 1)"
+  },
+    "pathogen_color_dict": {
+    "Combined": "rgba(116, 113, 174, 1)",
+    "Flu": "rgba(200, 166, 02, 1)",
+    "COVID-19": "rgba(102, 204, 238, 1)",
+    "RSV": "rgba(34, 136, 51, 1)"
+  },
+  "location_order": [
+    "Oregon", "Idaho", "Washington", "Alaska", "Hawaii", "Arizona", "California", "Nevada", "Colorado", "Utah",
+    "Wyoming", "South Dakota", "Montana", "North Dakota", "Missouri", "Kansas", "Nebraska", "Iowa", "Louisiana",
+    "Texas", "New Mexico", "Arkansas", "Oklahoma", "Indiana", "Illinois", "Ohio", "Wisconsin", "Michigan",
+    "Minnesota", "Mississippi", "Alabama", "Tennessee", "Kentucky", "Florida", "Georgia", "South Carolina",
+    "North Carolina", "Virginia", "West Virginia", "District of Columbia", "Maryland", "Delaware", "New Jersey",
+    "Pennsylvania", "Connecticut", "Rhode Island", "Massachusetts", "New York", "New Hampshire", "Vermont",
+    "Maine"
+  ]
+}
+
