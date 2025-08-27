@@ -1,23 +1,10 @@
 id: insight-3
 title: Third Insight
-overview: >
+description: >
   Id tempor nulla do officia magna in aliquip consequat nulla.
   Sunt minim tempor dolor ullamco nisi eiusmod pariatur officia
   deserunt nostrud non adipisicing sed.
-details: >
-  # Exercitation
-
-  In duis esse aliquip duis pariatur pariatur amet.
-  
-  ## Ea adipisicing
-
-  - ullamco laborum
-  - non cillum et
-  - laboris aute dolore in ut
-  
-  ## Reprehenderit
-
-  Laborum irure officia occaecat qui sint eiusmod.
-  Dolor officia ut excepteur minim dolor proident esse enim irure nostrud.
 image_url: https://placehold.co/1200x800?text=Visualization+3
 template: default
+created_at: 2025-03-18T22:45:12Z
+updated_at: 2025-03-18T22:45:12Z

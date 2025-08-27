@@ -10,14 +10,16 @@ def load_insights():
       path = os.path.join(DATA_DIR, filename)
       with open(path, 'r') as f:
         insight = yaml.safe_load(f)
+        insight['type'] = 'system'
         insights.append(insight)
   insights.sort(key=lambda x: x.get('title', '').lower())
   return insights
 
 insights = load_insights()
 
-def get_insight(insight_id: str | None):
-  '''Return a single insight by ID, or None if not found.'''
+def get_insight(insight_id: str | None, custom_insights=None):
+  """Return a single insight by ID, or None if not found."""
   if not insight_id:
-    return None
-  return next((x for x in insights if x.get('id') == insight_id), None)
+      return None
+  all_insights = insights + (custom_insights or [])
+  return next((x for x in all_insights if x.get('id') == insight_id), None)

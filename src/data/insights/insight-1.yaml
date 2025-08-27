@@ -1,16 +1,11 @@
 id: insight-1
 title: First Insight
-overview: >
+description: >
   Deserunt eiusmod sit aliquip tempor mollit sed ut aliquip ex ut.
-  Aliquip consequat aliquip ullamco commodo occaecat dolor magna.
-  Minim adipisicing do sint magna adipisicing id mollit minim ad.
-details: >
-  # Magna dolor eu in ea nulla esse culpa fugiat.
-
-  Ea laborum aliquip nisi
-  excepteur dolor sunt cillum et incididunt dolore sint.
-
-  Lorem ipsum dolore labore veniam cupidatat et duis occaecat
-  sed ullamco proident in aute laborum minim in reprehenderit anim.
+  Aliquip consequat aliquip [ullamco](https://example.com/) commodo
+  occaecat dolor magna. Minim adipisicing do sint magna adipisicing.
+  Sed esse ut est qui aute officia esse eu consectetur quis id ad.
 image_url: https://placehold.co/1200x800?text=Visualization+1
 template: default
+created_at: 2025-01-18T22:45:12Z
+updated_at: 2025-01-18T22:45:12Z

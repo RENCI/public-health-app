@@ -1,20 +1,10 @@
 id: insight-2
 title: Second Insight
-overview: >
+description: >
   Sed sed irure est fugiat incididunt ut nulla occaecat cillum et.
   Anim tempor qui enim esse eu mollit consectetur voluptate proident adipisicing.
   Lorem ipsum sunt dolor laborum excepteur amet quis amet excepteur do.
-details: >
-  # Lorem ipsum nisi velit
-
-  ## Esse cillum
-
-  Aliqua et laborum cillum ut
-  Amet culpa voluptate sunt cillum ut aliquip est laboris. Lorem
-  Ipsum ea irure adipisicing laboris magna exercitation nostrud
-  
-  ## Aute veniam
-
-  Aliqua qui mollit. excepteur dolor sunt cillum et.
 image_url: https://placehold.co/1200x800?text=Visualization+2
 template: default
+created_at: 2025-02-18T22:45:12Z
+updated_at: 2025-02-18T22:45:12Z

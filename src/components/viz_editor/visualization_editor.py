@@ -1,10 +1,12 @@
 from dash import callback, dcc, Input, Output, State
 import dash_mantine_components as dmc
 from dash_iconify import DashIconify
-from src.components.controls import (
-  scenarios_select, location_select, target_select,
-  age_group_select, uncertainty_select, ensemble_select
-)
+from .controls.scenarios_select import scenarios_select
+from .controls.location_select import location_select
+from .controls.target_select import target_select
+from .controls.age_group_select import age_group_select
+from .controls.uncertainty_select import uncertainty_select
+from .controls.ensemble_select import ensemble_select
 
 controls_visibility_store = dcc.Store(id='controls-visibility', data=True)  # True = open, False = closed
 
