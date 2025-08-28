@@ -7,6 +7,8 @@ from .controls.target_select import target_select
 from .controls.age_group_select import age_group_select
 from .controls.uncertainty_select import uncertainty_select
 from .controls.ensemble_select import ensemble_select
+from src.components.enums import Target, AgeGroupInput
+from src.components.chart import Chart, ChartControls
 
 controls_visibility_store = dcc.Store(id='controls-visibility', data=True)  # True = open, False = closed
 
@@ -18,6 +20,28 @@ controls_toggle = dmc.Button(
   size='xs',
 )
 
+round_nums = [1, 2]
+pathogens = ["covid-19", "rsv"]
+models = [
+  "Ensemble_LOP_untrimmed",
+  "Ensemble_LOP",
+  "Ensemble",
+  "UT-ImmunoSEIRS",
+  "NotreDame-FRED",
+  "USC-SIkJalpha",
+  "CU-RSV_SVIRS",
+  "UVA-EpiHiperRSV",
+  "NIH-RSV_WIN",
+  "PSI-PROF",
+  "NIH-RSV_MSIRS",
+  "MOBS_NEU-GLEAM_RSV",
+  "NIH-RSV_Phenomenological",
+  "CEPH-MetaRSV",
+  "JHU_UNC-flepiMoP",
+  "Ensemble_LOP_all"
+],
+chart = Chart(ChartControls(1, "covid-19", pathogens[0], models[0], "California", AgeGroupInput.ALL, Target.INCIDENT_HOSPITALIZATION))
+
 def visualization_editor(controls={}):
   init_location = controls.get('location', 'US')
   init_target = controls.get('target', 'Incident Hospitalization')
@@ -25,7 +49,7 @@ def visualization_editor(controls={}):
   return dmc.Grid(
     children=[
       dmc.GridCol(
-        dmc.Image(id='insight-visualization', src='https://placehold.co/1200x800', radius='sm'),
+        dmc.Image(id='insight-visualization', src=chart.fig.to_image(format="png"), radius='sm'),
         id='visualization-column',
         span=8,
       ),

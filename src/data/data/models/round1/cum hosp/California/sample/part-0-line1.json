@@ -1,0 +1,9 @@
+{
+  "scenario_id": 1,
+  "value": 188.8571428571,
+  "type_id": 1,
+  "model_name": 4,
+  "horizon": 1,
+  "target_end_date": "2023-11-18T00:00:00.000Z",
+  "age_group": "0-0.99"
+}

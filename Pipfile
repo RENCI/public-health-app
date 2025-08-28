@@ -12,6 +12,8 @@ gunicorn = "*"
 pandas = "*"
 numpy = "*"
 pyyaml = "*"
+plotly = "*"
+pyarrow = "*"
 
 [dev-packages]
 
