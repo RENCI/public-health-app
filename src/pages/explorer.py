@@ -33,6 +33,7 @@ def insight_editor(insight_id, custom_insights=None):
   insight = get_insight(insight_id, custom_insights) or {}
 
   controls = insight.get('controls') or {}
+  print(controls)
   title = insight.get('title', '')
   description = insight.get('description', '')
 
