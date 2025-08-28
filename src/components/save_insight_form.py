@@ -82,8 +82,9 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   State('custom-insights-store', 'data'),
   State('insight-title-input', 'value'),
   State('insight-description-input', 'value'),
+  State('location-select', 'value'),
 )
-def save_custom_insight(n_clicks, current_store, title, description):
+def save_custom_insight(n_clicks, current_store, title, description, location):
   if not n_clicks:
     raise exceptions.PreventUpdate
 
@@ -107,6 +108,9 @@ def save_custom_insight(n_clicks, current_store, title, description):
     image_url=f'https://placehold.co/400?text=Visualization',
     created_at=now,
     updated_at=now,
+    controls=dict(
+      location=location,
+    )
   )
 
   notification = {

@@ -18,11 +18,13 @@ controls_toggle = dmc.Button(
   size='xs',
 )
 
-def visualization_editor(image_url='https://placehold.co/1200x400'):
+def visualization_editor(controls={}):
+  init_location = controls.get('location', 'US')
+
   return dmc.Grid(
     children=[
       dmc.GridCol(
-        dmc.Image(id='insight-visualization', src=image_url, radius='sm'),
+        dmc.Image(id='insight-visualization', src='https://placehold.co/1200x800', radius='sm'),
         id='visualization-column',
         span=8,
       ),
@@ -31,7 +33,11 @@ def visualization_editor(image_url='https://placehold.co/1200x400'):
           dmc.Grid(
             children=[
               dmc.GridCol(scenarios_select,   style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
-              dmc.GridCol(location_select,    style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
+              dmc.GridCol(
+                location_select(value=init_location),
+                style=dict(padding='var(--mantine-spacing-sm)'),
+                span=dict(base=12),
+              ),
               dmc.GridCol(target_select,      style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
               dmc.GridCol(age_group_select,   style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
               dmc.GridCol(uncertainty_select, style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),

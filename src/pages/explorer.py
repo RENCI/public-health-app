@@ -33,14 +33,15 @@ toolbar = dmc.Flex(
 )
 
 def layout(starter=None, custom_insights=None):
-  item = get_insight(starter, custom_insights) or {}
+  insight = get_insight(starter, custom_insights) or {}
+  controls = insight.get('controls') or {}
   return dmc.Container(
     [
       toolbar,
-      visualization_editor(item.get('image_url', '')),
+      visualization_editor(controls),
       save_insight_form(
-        initial_title=item.get('title', ''),
-        initial_description=item.get('description', ''),
+        initial_title=insight.get('title', ''),
+        initial_description=insight.get('description', ''),
       ),
     ],
     fluid=True,
