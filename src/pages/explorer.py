@@ -12,17 +12,14 @@ register_page(__name__, path_template='/explorer', name='Insight Explorer')
 
 back_button = dmc.Anchor('← Abandon Changes', href='/', id='back-button')
 
-reset_button = dcc.Link(
-  dmc.Button(
-    'Reset to Original',
-    leftSection=DashIconify(icon='feather:refresh-ccw'),
-    variant='outline',
-  ),
+reset_button = dmc.Button(
+  'Reset to Original',
   id='reset-button',
-  href='#',
+  leftSection=DashIconify(icon='feather:refresh-ccw'),
+  variant='outline',
 )
 
-toolbar = dmc.Flex(
+insight_toolbar = dmc.Flex(
   children=[
     back_button,
     dmc.Group([reset_button])
@@ -32,17 +29,23 @@ toolbar = dmc.Flex(
   mb=24,
 )
 
-def layout(starter=None, custom_insights=None):
-  insight = get_insight(starter, custom_insights) or {}
+def insight_editor(insight_id, custom_insights=None):
+  insight = get_insight(insight_id, custom_insights) or {}
+
   controls = insight.get('controls') or {}
+  title = insight.get('title', '')
+  description = insight.get('description', '')
+
+  return html.Div([
+    visualization_editor(controls),
+    save_insight_form(initial_title=title, initial_description=description),
+  ], id='editor-contents')
+
+def layout(starter=None):
   return dmc.Container(
     [
-      toolbar,
-      visualization_editor(controls),
-      save_insight_form(
-        initial_title=insight.get('title', ''),
-        initial_description=insight.get('description', ''),
-      ),
+      insight_toolbar,
+      insight_editor(starter)
     ],
     fluid=True,
     id='explorer-container',
@@ -59,10 +62,12 @@ def update_back_button_href(search):
   return f'/viewer?id={starter}' if starter else '/'
 
 @callback(
-  Output('explorer-container', 'children'),
+  Output('editor-contents', 'children'),
+  Input('reset-button', 'n_clicks'),
   Input('url', 'search'),
   State('custom-insights-store', 'data'),
 )
-def render_explorer(search, custom_insights):
-  starter = get_query_param(search, 'starter')
-  return layout(starter, custom_insights)
+def render_or_reset_explorer(reset_clicks, search, custom_insights):
+  starter_id = get_query_param(search, 'starter')
+
+  return insight_editor(starter_id, custom_insights)
