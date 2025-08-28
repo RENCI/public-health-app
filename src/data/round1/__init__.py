@@ -1,7 +1,7 @@
 import os
 import yaml
 
-DATA_DIR = os.path.dirname(__file__)
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'insights')
 
 def load_insights():
   insights = []

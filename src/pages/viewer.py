@@ -2,7 +2,7 @@ from dash import callback, dcc, html, Input, no_update, Output, register_page, S
 import dash_mantine_components as dmc
 from urllib.parse import parse_qs
 from dash_iconify import DashIconify
-from src.data.insights import get_insight, insights
+from src.data.round1 import get_insight, insights
 from src.util.get_query_param import get_query_param
 
 register_page(__name__, path_template='/viewer', name='Insight Details')

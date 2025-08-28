@@ -9,7 +9,7 @@ import uuid
 from src.util.time_ago import time_ago
 from src.util.format_timestamp import format_timestamp
 
-from ..data.insights import insights
+from ..data.round1 import insights
 
 register_page(__name__, path='/')
 
