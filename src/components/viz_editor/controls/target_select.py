@@ -1,9 +1,10 @@
 import dash_mantine_components as dmc
 
-target_select = dmc.Select(
-  label='Target',
-  placeholder='',
-  id='target-select',
-  value='Incident Hospitalization',
-  data=['Incident Hospitalization', 'Cumulative Hospitalization'],
-)
+def target_select(value='Incident Hospitalization'):
+  return dmc.Select(
+    label='Target',
+    placeholder='',
+    id='target-select',
+    value=value,
+    data=['Incident Hospitalization', 'Cumulative Hospitalization'],
+  )

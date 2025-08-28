@@ -11,4 +11,5 @@ created_at: 2025-01-18T22:45:12Z
 updated_at: 2025-01-18T22:45:12Z
 controls:
   location: 'New York'
+  target: 'Incident Hospitalization'
 

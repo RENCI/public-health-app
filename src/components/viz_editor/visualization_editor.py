@@ -20,6 +20,7 @@ controls_toggle = dmc.Button(
 
 def visualization_editor(controls={}):
   init_location = controls.get('location', 'US')
+  init_target = controls.get('target', 'Incident Hospitalization')
 
   return dmc.Grid(
     children=[
@@ -38,7 +39,11 @@ def visualization_editor(controls={}):
                 style=dict(padding='var(--mantine-spacing-sm)'),
                 span=dict(base=12),
               ),
-              dmc.GridCol(target_select,      style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
+              dmc.GridCol(
+                target_select(value=init_target),
+                style=dict(padding='var(--mantine-spacing-sm)'),
+                span=dict(base=12),
+              ),
               dmc.GridCol(age_group_select,   style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
               dmc.GridCol(uncertainty_select, style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
               dmc.GridCol(ensemble_select,    style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),

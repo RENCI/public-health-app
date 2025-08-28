@@ -83,8 +83,9 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   State('insight-title-input', 'value'),
   State('insight-description-input', 'value'),
   State('location-select', 'value'),
+  State('target-select', 'value'),
 )
-def save_custom_insight(n_clicks, current_store, title, description, location):
+def save_custom_insight(n_clicks, current_store, title, description, location, target):
   if not n_clicks:
     raise exceptions.PreventUpdate
 
@@ -110,6 +111,7 @@ def save_custom_insight(n_clicks, current_store, title, description, location):
     updated_at=now,
     controls=dict(
       location=location,
+      target=target,
     )
   )
 
