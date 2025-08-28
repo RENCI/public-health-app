@@ -18,10 +18,18 @@ controls_toggle = dmc.Button(
   size='xs',
 )
 
-def visualization_editor(controls={}):
-  init_location = controls.get('location') or None
-  init_target = controls.get('target') or None
-  init_age_group = controls.get('age_group') or None
+default_controls = dict(
+  location='US',
+  target='inc_hosp',
+  age_group='All Ages',
+)
+
+def visualization_editor(controls=None):
+  controls = {**default_controls, **(controls or {})}
+
+  init_location = controls['location']
+  init_target = controls['target']
+  init_age_group = controls['age_group']
 
   return dmc.Grid(
     children=[
