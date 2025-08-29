@@ -18,7 +18,7 @@ controls_toggle = dmc.Button(
   size='xs',
 )
 
-default_controls = dict(
+default_control_values = dict(
   location='US',
   target='Incident Hospitalization',
   age_group='All Ages',
@@ -26,8 +26,8 @@ default_controls = dict(
   ensemble='Ensemble',
 )
 
-def visualization_editor(controls=None):
-  controls = {**default_controls, **(controls or {})}
+def visualization_editor(control_values=None):
+  controls = {**default_control_values, **(control_values or {})}
 
   init_location = controls['location']
   init_target = controls['target']
