@@ -49,8 +49,12 @@ models = [
 
 
 def visualization_editor(controls={}):
-  init_location: str = controls.get("location", "California")
-  init_target: str = controls.get("target", "inc hosp")
+  location: str = controls.get("location", "California")
+  target: Target = Target(controls.get("target", "inc hosp").lower())
+  scenario: int = controls.get("scenario", 66)
+  model: int = controls.get("model", 1)
+  type_id: int = controls.get("type_id", 1)
+  age_group: AgeGroup = AgeGroup.from_input_value(controls.get("age_group", "0-130"))
 
   chart = Chart(
     ChartControls(
@@ -58,12 +62,12 @@ def visualization_editor(controls={}):
       y_axis="value",
       round_num=round_nums[0],
       pathogen=pathogens[0],
-      scenario=66,
-      type_id=66,
-      model=1,
-      location=locations[0],
-      age_group=AgeGroup.from_input_value(controls.get("age_group", "0-130")),
-      target=Target(init_target.lower()),
+      scenario=scenario,
+      type_id=type_id,
+      model=model,
+      location=location,
+      age_group=age_group,
+      target=target,
     )
   )
 
@@ -92,12 +96,12 @@ def visualization_editor(controls={}):
                 span=12,
               ),
               dmc.GridCol(
-                location_select(value=init_location),
+                location_select(value=location),
                 style=dict(padding="var(--mantine-spacing-sm)"),
                 span=12,
               ),
               dmc.GridCol(
-                target_select(value=init_target),
+                target_select(value=target.value),
                 style=dict(padding="var(--mantine-spacing-sm)"),
                 span=12,
               ),

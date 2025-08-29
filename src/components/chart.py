@@ -59,22 +59,16 @@ class Chart:
       controls.pathogen, controls.scenario, controls.model, controls.location, controls.age_group
     )
 
-    file_path = (
-      f"{DATA_BASE_PATH}/{controls.pathogen}/round{controls.round_num}/"
-      + f"{controls.target.value}/{controls.location}/"
-      + "sample/part-0.parquet"
-    )
-    self._data = pd.read_parquet(file_path, engine="pyarrow")
+    self.refresh_fig()
+
+  def refresh_fig(self) -> go.Figure:
+    self._data = pd.read_parquet(self._get_file_path(), engine="pyarrow")
     self._data = self._data.set_index(self.controls.x_axis)
     self._data = self._data.query("scenario_id == @self.controls.scenario")
     self._data = self._data.query("type_id == @self.controls.type_id")
     self._data = self._data.query("model_name == @self.controls.model")
     # self._data = self._data.query("age_group == @self.controls.age_group.value")
     self._data = self._data.sort_values(by=self.controls.x_axis)
-    self._fig = px.line(self._data, y="value")
-
-  def refresh(self) -> go.Figure:
-    self._data = pd.read_parquet(self._get_file_path(), engine="pyarrow")
     self._fig = px.line(self._data, y="value")
     return self._fig
 

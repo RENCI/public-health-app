@@ -11,5 +11,6 @@ updated_at: 2025-05-18T22:45:12Z
 controls:
   location: "California"
   target: "inc hosp"
-  scenario: "66"
-  model: "4"
+  scenario: 66
+  model: 1
+  type_id: 1
