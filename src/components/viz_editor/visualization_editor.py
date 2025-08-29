@@ -101,9 +101,6 @@ def update_chart(data):
   if not data:
     return dmc.Image(src='https://placehold.co/1200x400?text=Not found')
   
-  print('update_chart fired, data:', type(data), len(data) if data else None)
-  print(data[0])
-
   # convert list of dicts back to DataFrame for convenience
   df = pd.DataFrame(data)
 
