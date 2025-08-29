@@ -23,6 +23,7 @@ default_controls = dict(
   target='Incident Hospitalization',
   age_group='All Ages',
   uncertainty='None',
+  ensemble='Ensemble',
 )
 
 def visualization_editor(controls=None):
@@ -32,6 +33,7 @@ def visualization_editor(controls=None):
   init_target = controls['target']
   init_age_group = controls['age_group']
   init_uncertainty = controls['uncertainty']
+  init_ensemble = controls['ensemble']
 
   return dmc.Grid(
     children=[
@@ -65,7 +67,11 @@ def visualization_editor(controls=None):
                 style=dict(padding='var(--mantine-spacing-sm)'),
                 span=dict(base=12),
               ),
-              dmc.GridCol(ensemble_select,    style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
+              dmc.GridCol(
+                ensemble_select(value=init_ensemble),
+                style=dict(padding='var(--mantine-spacing-sm)'),
+                span=dict(base=12),
+              ),
             ],
             gutter=0,
           ),
