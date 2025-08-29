@@ -1,13 +1,26 @@
 id: insight-3
 title: Third Insight
 description: >
-  Id tempor nulla do officia magna in aliquip consequat nulla.
-  Sunt minim tempor dolor ullamco nisi eiusmod pariatur officia
-  deserunt nostrud non adipisicing sed.
+  ## Aliquip cupidatat reprehenderit
+
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+  tempor incididunt ut labore et dolore magna aliqua.
+
+  ### Sit amet
+
+  - **Strong item**
+
+  - Regular item
+  
+  - Another item
+
+  #### Subsection
+
+  A small paragraph with a [link example](https://example.com).
 image_url: https://placehold.co/1200x800?text=Visualization+3
 template: default
 created_at: 2025-03-18T22:45:12Z
 updated_at: 2025-03-18T22:45:12Z
 controls:
   location: 'Colorado'
-  target: 'Cumulative Hospitalization'
+  target: 'cumulative_hospitalization'

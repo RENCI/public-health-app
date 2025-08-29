@@ -4,6 +4,7 @@ from urllib.parse import parse_qs
 from dash_iconify import DashIconify
 from src.data.round1 import get_insight, insights
 from src.util.get_query_param import get_query_param
+from src.components.viz_editor import visualization_editor
 
 register_page(__name__, path_template='/viewer', name='Insight Details')
 
@@ -43,7 +44,7 @@ toolbar = dmc.Flex(
 layout = dmc.Container(
   [
     toolbar,
-    dmc.Image(id='insight-view-image', radius='sm', style=dict(width='100%', height='auto', objectFit='cover')),
+    html.Div(id='insight-view-figure-container'),
     dmc.Divider(my=24),
     dmc.Title(id='insight-view-title', order=1),
     dcc.Markdown(id='insight-view-description'),
@@ -52,22 +53,20 @@ layout = dmc.Container(
 )
 
 @callback(
-  Output('insight-view-image', 'src'),
+  Output('insight-view-figure-container', 'children'),
   Output('insight-view-title', 'children'),
   Output('insight-view-description', 'children'),
   Input('url', 'search'),
-  State('custom-insights-store', 'data'),
+  Input('custom-insights-store', 'data'),
 )
 def show_details(search, custom_insights):
   insight_id = get_query_param(search, 'id')
-  item = get_insight(insight_id, custom_insights=custom_insights or [])
-  if not item:
-    return (
-      'https://placehold.co/1200x400?text=Not found',
-      'Insight not Found',
-      '...',
-    )
-  return item['image_url'], item['title'], item['description']
+  insight = get_insight(insight_id, custom_insights=custom_insights or [])
+  if not insight:
+    return '', 'Insight not Found', ''
+
+  controls = insight.get('controls')
+  return visualization_editor(control_values=controls, show_controls=False), insight['title'], insight['description']
 
 @callback(
   Output('explorer-button', 'href'),

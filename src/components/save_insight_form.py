@@ -87,6 +87,7 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   State('age-group-select', 'value'),
   State('uncertainty-select', 'value'),
   State('ensemble-select', 'value'),
+  suppress_callback_exceptions=True,
 )
 def save_custom_insight(n_clicks, current_store, title, description, location, target, age_group, uncertainty, ensemble):
   if not n_clicks:
@@ -134,6 +135,6 @@ def save_custom_insight(n_clicks, current_store, title, description, location, t
     None,
     None,
     [notification],
-    "/viewer",              # 👈 path
-    f"?id={new_id}",        # 👈 query
+    '/viewer',
+    f'?id={new_id}',
   )

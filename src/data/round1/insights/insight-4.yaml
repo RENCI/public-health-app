@@ -1,14 +1,28 @@
 id: insight-4
 title: Fourth Insight
 description: >
-  Sed labore velit qui ut dolore in id sint aliqua nulla
-  officia ad _exercitation_ dolore sit officia in.
-  Ad mollit dolore consectetur irure reprehenderit officia
-  occaecat dolor excepteur irure id cillum proident nostrud consequat.
+  ## Fugiat pariatur anim
+
+  In quis aute cillum pariatur ut ex est commodo.
+  Dolor incididunt voluptate laborum ut veniam dolore
+  culpa nulla laboris.
+
+  ### Tempor aliqua do
+
+  - One
+
+  - Two
+
+  - Three
+
+  ### Ut qui minim
+
+  Nulla tempor anim non sunt esse cillum.
+  **Bold statement here.**
 image_url: https://placehold.co/1200x800?text=Visualization+4
 template: default
 created_at: 2025-04-18T22:45:12Z
 updated_at: 2025-04-18T22:45:12Z
 controls:
   location: 'US'
-  target: 'Incident Hospitalization'
+  target: 'incident_hospitalization'

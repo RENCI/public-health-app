@@ -37,7 +37,7 @@ def insight_editor(insight_id, custom_insights=None):
   description = insight.get('description', '')
 
   return html.Div([
-    visualization_editor(controls),
+    visualization_editor(control_values=controls, show_controls=True),
     save_insight_form(initial_title=title, initial_description=description),
   ], id='editor-contents')
 
