@@ -1,7 +1,7 @@
 # ============
 # 📦 AUTOPHONY
 # Auto-detect targets with help comments
-PHONY_TARGETS := $(shell awk -F':.*?##' '/^[a-zA-Z0-9_.-]+:.*##/ {print $$1}' $(MAKEFILE_LIST))
+# PHONY_TARGETS := $(shell awk -F':.*?##' '/^[a-zA-Z0-9_.-]+:.*##/ {print $$1}' $(MAKEFILE_LIST))
 .PHONY: help $(PHONY_TARGETS)
 # ============
 
@@ -25,17 +25,21 @@ help: ## 📖 Show help
 
 ##@ General Commands
 
-requirements: ## 🔐 Generate requirements.txt from Pipfile.lock (with Pipenv)
-	@command -v pipenv >/dev/null 2>&1 || { echo >&2 "pipenv not installed."; exit 1; }
-	pipenv requirements > requirements.txt
-
 ##@ Docker Commands
 
-build: requirements ## 🛠️  Build Docker image
-	docker build -t $(IMAGE_NAME) .
+build: ## 🛠️  Build Docker image
+	docker build \
+		-t $(IMAGE_NAME) \
+		--platform linux/amd64 \
+		.
 
 run: ## ▶️  Run Docker container
-	docker run --rm --name $(APP_NAME) -it -p $(PORT):8050 $(IMAGE_NAME)
+	docker run \
+		--rm \
+		--name $(APP_NAME) \
+		-it \
+		-p $(PORT):8050 \
+		$(IMAGE_NAME)
 
 stop: ## 🛑 Stop the running container
 	@echo "🛑 Stopping Docker container '$(APP_NAME)' if running"
