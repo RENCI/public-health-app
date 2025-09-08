@@ -25,17 +25,28 @@ help: ## 📖 Show help
 
 ##@ General Commands
 
+lint: ## 🔐 Lint the code
+	ruff check .
+
+format: ## 🔐 Format the code
+	ruff format .
+
+test: ## 🔐 Test the code
+	uv run pytest .
+
 ##@ Docker Commands
 
 build: ## 🛠️  Build Docker image
 	docker build \
 		-t $(IMAGE_NAME) \
 		--platform linux/amd64 \
+		--progress=plain \
 		.
 
 run: ## ▶️  Run Docker container
 	docker run \
 		--rm \
+		--platform linux/amd64 \
 		--name $(APP_NAME) \
 		-it \
 		-p $(PORT):8050 \

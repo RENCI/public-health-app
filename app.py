@@ -1,4 +1,3 @@
-import dash
 from dash import Dash, _dash_renderer, dcc
 import dash_mantine_components as dmc
 from src.theme import DEFAULT_THEME
