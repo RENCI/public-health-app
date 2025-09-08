@@ -16,6 +16,8 @@ class ChartTitle:
     self.model = model
     self.location = location
     self.age_group = age_group
+    if not age_group:
+      self.age_group = AgeGroup.ALL
 
   def __str__(self):
     return (
@@ -67,7 +69,10 @@ class Chart:
     self._data = self._data.query("scenario_id == @self.controls.scenario")
     self._data = self._data.query("type_id == @self.controls.type_id")
     self._data = self._data.query("model_name == @self.controls.model")
-    # self._data = self._data.query("age_group == @self.controls.age_group.value")
+    if self.controls.age_group:
+      self._data = self._data.query("age_group == @self.controls.age_group.value")
+    else:
+      self._data = self._data.query("age_group == '0-130'")  # default to all ages
     self._data = self._data.sort_values(by=self.controls.x_axis)
     self._fig = px.line(self._data, y="value")
     return self._fig
