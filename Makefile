@@ -26,13 +26,15 @@ help: ## 📖 Show help
 ##@ General Commands
 
 lint: ## 🔐 Lint the code
-	ruff check .
+	@uv run ruff check .
 
 format: ## 🔐 Format the code
-	ruff format .
+	@uv run ruff format .
+
+ruff: lint format ## 🔐 Run Ruff
 
 test: ## 🔐 Test the code
-	uv run pytest .
+	@uv run pytest .
 
 ##@ Docker Commands
 

@@ -1,17 +1,27 @@
-from dash import callback, ctx, dcc, exceptions, html, Input, no_update, Output, register_page, State
-from dash import ALL, MATCH
-import dash_mantine_components as dmc
-from dash_iconify import DashIconify
-
-import json
 import uuid
 
-from src.util.time_ago import time_ago
+import dash_mantine_components as dmc
+from dash import (
+  ALL,
+  Input,
+  Output,
+  State,
+  callback,
+  ctx,
+  dcc,
+  exceptions,
+  no_update,
+  register_page,
+)
+from dash_iconify import DashIconify
+
 from src.util.format_timestamp import format_timestamp
+from src.util.time_ago import time_ago
 
 from ..data.insights import insights
 
 register_page(__name__, path='/')
+
 
 def tipped_text(text, tooltip=None, size='md'):
   return dmc.Tooltip(
@@ -21,11 +31,10 @@ def tipped_text(text, tooltip=None, size='md'):
     children=dmc.Text(text, size=size, c='gray'),
   )
 
+
 def insight_button(item):
   graphic = dmc.Image(
-    src=item['image_url'],
-    radius='sm',
-    style=dict(width='125px', height='125px', objectFit='cover')
+    src=item['image_url'], radius='sm', style=dict(width='125px', height='125px', objectFit='cover')
   )
 
   title = dmc.Text(item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left'))
@@ -42,9 +51,9 @@ def insight_button(item):
         justifyContent='center',
         alignItems='center',
         minHeight='100%',
-      )
+      ),
     ),
-    href=f'/viewer?id={item['id']}',
+    href=f'/viewer?id={item["id"]}',
     underline=False,
   )
 
@@ -60,24 +69,23 @@ def insight_button(item):
     ],
     variant='soft',
     style=dict(
-      display='flex', 
-      gap='1rem', 
-      justifyContent='flex-start', 
-      alignItems='stretch', 
+      display='flex',
+      gap='1rem',
+      justifyContent='flex-start',
+      alignItems='stretch',
       minHeight='150px',
       padding='1rem',
       flexDirection='row',
     ),
   )
 
+
 def custom_insight_button(item):
   created_at = item.get('created_at', None)
   updated_at = item.get('updated_at', None)
 
   graphic = dmc.Image(
-    src=item['image_url'],
-    radius='sm',
-    style=dict(width='125px', height='125px', objectFit='cover')
+    src=item['image_url'], radius='sm', style=dict(width='125px', height='125px', objectFit='cover')
   )
 
   title = dmc.Text(item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left'))
@@ -93,9 +101,9 @@ def custom_insight_button(item):
         display='flex',
         justifyContent='center',
         alignItems='center',
-      )
+      ),
     ),
-    href=f'/viewer?id={item['id']}',
+    href=f'/viewer?id={item["id"]}',
     underline=False,
   )
 
@@ -109,7 +117,7 @@ def custom_insight_button(item):
       display='flex',
       justifyContent='center',
       alignItems='center',
-    )
+    ),
   )
 
   return dmc.Card(
@@ -119,19 +127,30 @@ def custom_insight_button(item):
         [
           title,
           description,
-          dmc.Flex([
-            dmc.Group([
-              tipped_text(f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'),
-              tipped_text(f'Last updated: {format_timestamp(updated_at)}', time_ago(updated_at), size='xs'),
-            ]),
-            dmc.Group([
-              delete_button,
-              view_button,
-            ], align='flex-end')
-          ],
-          justify='space-between',
-          align='flex-end',
-          style=dict(width='100%')),
+          dmc.Flex(
+            [
+              dmc.Group(
+                [
+                  tipped_text(
+                    f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'
+                  ),
+                  tipped_text(
+                    f'Last updated: {format_timestamp(updated_at)}', time_ago(updated_at), size='xs'
+                  ),
+                ]
+              ),
+              dmc.Group(
+                [
+                  delete_button,
+                  view_button,
+                ],
+                align='flex-end',
+              ),
+            ],
+            justify='space-between',
+            align='flex-end',
+            style=dict(width='100%'),
+          ),
         ],
         align='flex-start',
         style=dict(flex=1),
@@ -139,15 +158,16 @@ def custom_insight_button(item):
     ],
     variant='soft',
     style=dict(
-      display='flex', 
-      gap='1rem', 
-      justifyContent='flex-start', 
-      alignItems='stretch', 
+      display='flex',
+      gap='1rem',
+      justifyContent='flex-start',
+      alignItems='stretch',
       minHeight='150px',
       padding='1rem',
       flexDirection='row',
     ),
   )
+
 
 insight_buttons = [insight_button(item) for item in insights]
 
@@ -158,8 +178,10 @@ no_insights_message = dmc.Card(
     dmc.Center(
       dmc.Stack(
         [
-          dmc.Text('It looks like you haven\'t created any custom insights yet.'),
-          dmc.Text(['Head over to the ', dmc.Anchor('Explorer', href='/explorer'), ' to build one!']),
+          dmc.Text("It looks like you haven't created any custom insights yet."),
+          dmc.Text(
+            ['Head over to the ', dmc.Anchor('Explorer', href='/explorer'), ' to build one!']
+          ),
         ],
         ta='center',
         gap=24,
@@ -184,7 +206,7 @@ delete_modal = dmc.Modal(
       mt='md',
     ),
   ],
-  opened=False,   # 🔑 Start closed
+  opened=False,  # 🔑 Start closed
   centered=True,
 )
 
@@ -200,7 +222,7 @@ layout = dmc.Container(
         ),
         dmc.TabsPanel(
           dmc.Stack(
-            insight_buttons, 
+            insight_buttons,
             id='insights-list',
             gap='md',
             my=24,
@@ -225,6 +247,7 @@ layout = dmc.Container(
   ],
 )
 
+
 @callback(
   Output('custom-insights-list', 'children'),
   Input('custom-insights-store', 'data'),
@@ -234,6 +257,7 @@ def update_insights_list(custom_data):
   if not custom_data or len(custom_data) == 0:
     return [no_insights_message]
   return [custom_insight_button(item) for item in custom_data]
+
 
 @callback(
   Output('delete-confirmation-modal', 'opened', allow_duplicate=True),
@@ -251,11 +275,11 @@ def handle_delete(delete_clicks, cancel_click, confirm_click, modal_data, custom
   triggered = ctx.triggered_id
 
   # defaults
-  opened, data, updated_store, notifications = False, no_update, no_update, no_update
+  # opened, data, updated_store, notifications = False, no_update, no_update, no_update
 
   # Case 1: delete button clicked → open modal
   if isinstance(triggered, dict) and triggered.get('type') == 'delete-insight':
-    if not any(delete_clicks):  
+    if not any(delete_clicks):
       raise exceptions.PreventUpdate
     return True, triggered['id'], no_update, no_update
 
@@ -275,7 +299,7 @@ def handle_delete(delete_clicks, cancel_click, confirm_click, modal_data, custom
     notification = {
       'action': 'show',
       'id': f'delete-success-{uuid.uuid4()}',
-      'message': f'Insight "{deleted['title'].strip()}" deleted successfully!'
+      'message': f'Insight "{deleted["title"].strip()}" deleted successfully!'
       if deleted
       else 'Insight deleted.',
       'color': 'green',
