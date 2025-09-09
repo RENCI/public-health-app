@@ -1,9 +1,11 @@
 import dash_mantine_components as dmc
 
-uncertainty_select = dmc.Select(
-  label='Uncertainty',
-  placeholder='',
-  id='uncertainty-select',
-  value='Multi',
-  data=['None', '50%', '95%', 'Multi'],
-)
+
+def uncertainty_select(value='None'):
+  return dmc.Select(
+    label='Uncertainty',
+    placeholder='',
+    id='uncertainty-select',
+    value=value,
+    data=['None', '50%', '95%', 'Multi'],
+  )

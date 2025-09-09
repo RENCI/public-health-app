@@ -18,7 +18,7 @@ from dash_iconify import DashIconify
 from src.util.format_timestamp import format_timestamp
 from src.util.time_ago import time_ago
 
-from ..data.insights import insights
+from ..data.round1 import insights
 
 register_page(__name__, path='/')
 
@@ -63,7 +63,7 @@ def insight_button(item):
       dmc.Stack(
         [title, description],
         align='flex-start',
-        style=dict(flex=1),
+        style=dict(flex=1, overflow='hidden'),
       ),
       view_button,
     ],
@@ -74,6 +74,7 @@ def insight_button(item):
       justifyContent='flex-start',
       alignItems='stretch',
       minHeight='150px',
+      maxHeight='150px',
       padding='1rem',
       flexDirection='row',
     ),
@@ -90,7 +91,7 @@ def custom_insight_button(item):
 
   title = dmc.Text(item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left'))
 
-  description = dcc.Markdown(item['description'], style=dict(fontSize='75%'))
+  description = dcc.Markdown(item['description'], style=dict(fontSize='75%', overflow='hidden'))
 
   view_button = dmc.Anchor(
     dmc.Button(
@@ -163,6 +164,7 @@ def custom_insight_button(item):
       justifyContent='flex-start',
       alignItems='stretch',
       minHeight='150px',
+      maxHeight='200px',
       padding='1rem',
       flexDirection='row',
     ),
