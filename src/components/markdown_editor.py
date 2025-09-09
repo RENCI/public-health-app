@@ -1,7 +1,8 @@
-from dash import callback, dcc, html, Input, Output, State
-from dash.dependencies import MATCH
 import dash_mantine_components as dmc
+from dash import Input, Output, callback, dcc
+from dash.dependencies import MATCH
 from dash_iconify import DashIconify
+
 
 def markdown_editor(
   editor_id='content-editor',
@@ -14,18 +15,25 @@ def markdown_editor(
     dmc.TabsTab('Preview', value='preview', leftSection=DashIconify(icon='feather:eye')),
   ]
 
-  if (label != ''):
+  if label != '':
     tabs.insert(0, dmc.Text(label, c='var(--mantine-color-blue-text)', size='lg', mr=24))
 
   return dmc.Tabs(
     [
       dmc.TabsList(tabs, mb=8),
       dmc.TabsPanel(
-        dcc.Textarea(value=initial_value, id={'type': 'editor', 'id': editor_id}, placeholder='Write markdown here...', className='content-editor'),
+        dcc.Textarea(
+          value=initial_value,
+          id={'type': 'editor', 'id': editor_id},
+          placeholder='Write markdown here...',
+          className='content-editor',
+        ),
         value='edit',
       ),
       dmc.TabsPanel(
-        dcc.Markdown(initial_value, id={'type': 'preview', 'id': editor_id}, className='content-preview'),
+        dcc.Markdown(
+          initial_value, id={'type': 'preview', 'id': editor_id}, className='content-preview'
+        ),
         value='preview',
       ),
     ],
@@ -33,6 +41,7 @@ def markdown_editor(
     radius='sm',
     value='edit',
   )
+
 
 @callback(
   Output({'type': 'preview', 'id': MATCH}, 'children'),

@@ -1,8 +1,10 @@
-from dash import callback, dcc, html, Input, no_update, Output, register_page, State
-import dash_mantine_components as dmc
 from urllib.parse import parse_qs
+
+import dash_mantine_components as dmc
+from dash import Input, Output, State, callback, dcc, register_page
 from dash_iconify import DashIconify
-from src.data.insights import get_insight, insights
+
+from src.data.insights import get_insight
 from src.util.get_query_param import get_query_param
 
 register_page(__name__, path_template='/viewer', name='Insight Details')
@@ -31,10 +33,7 @@ download_button = dcc.Link(
 )
 
 toolbar = dmc.Flex(
-  children=[
-    back_button,
-    dmc.Group([download_button, explorer_button])
-  ],
+  children=[back_button, dmc.Group([download_button, explorer_button])],
   justify='space-between',
   align='center',
   mb=24,
@@ -43,13 +42,18 @@ toolbar = dmc.Flex(
 layout = dmc.Container(
   [
     toolbar,
-    dmc.Image(id='insight-view-image', radius='sm', style=dict(width='100%', height='auto', objectFit='cover')),
+    dmc.Image(
+      id='insight-view-image',
+      radius='sm',
+      style=dict(width='100%', height='auto', objectFit='cover'),
+    ),
     dmc.Divider(my=24),
     dmc.Title(id='insight-view-title', order=1),
     dcc.Markdown(id='insight-view-description'),
   ],
-  fluid=True
+  fluid=True,
 )
+
 
 @callback(
   Output('insight-view-image', 'src'),
@@ -69,9 +73,10 @@ def show_details(search, custom_insights):
     )
   return item['image_url'], item['title'], item['description']
 
+
 @callback(
   Output('explorer-button', 'href'),
-  Input('url', 'search')
+  Input('url', 'search'),
 )
 def add_back_link_href(search):
   query = parse_qs(search.lstrip('?'))

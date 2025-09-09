@@ -3,6 +3,7 @@ import yaml
 
 DATA_DIR = os.path.dirname(__file__)
 
+
 def load_templates():
   templates = []
   for filename in sorted(os.listdir(DATA_DIR)):
@@ -13,5 +14,6 @@ def load_templates():
         templates.append(template)
   templates.sort(key=lambda x: x.get('title', '').lower())
   return templates
+
 
 templates = load_templates()

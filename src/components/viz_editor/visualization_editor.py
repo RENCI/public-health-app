@@ -116,7 +116,9 @@ def visualization_editor(controls={}):
                 span=12,
               ),
               dmc.GridCol(
-                ensemble_select, style=dict(padding="var(--mantine-spacing-sm)"), span=12
+                ensemble_select,
+                style=dict(padding="var(--mantine-spacing-sm)"),
+                span=12,
               ),
             ],
             gutter=0,

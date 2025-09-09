@@ -1,5 +1,3 @@
-from urllib.parse import parse_qs
-
 import dash_mantine_components as dmc
 from dash import (
   Input,
