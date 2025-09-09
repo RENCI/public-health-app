@@ -79,21 +79,6 @@ def visualization_editor(control_values=None, show_controls=True):
                 span=12,
               ),
               dmc.GridCol(
-                age_group_select,
-                style=dict(padding='var(--mantine-spacing-sm)'),
-                span=12,
-              ),
-              dmc.GridCol(
-                uncertainty_select,
-                style=dict(padding='var(--mantine-spacing-sm)'),
-                span=12,
-              ),
-              dmc.GridCol(
-                ensemble_select,
-                style=dict(padding='var(--mantine-spacing-sm)'),
-                span=12,
-              ),
-              dmc.GridCol(
                 age_group_select(value=init_age_group),
                 style=dict(padding='var(--mantine-spacing-sm)'),
                 span=dict(base=12),
