@@ -3,12 +3,14 @@
 ## 🚧 Development
 
 1. clone this repo & move into project dir
-2. start virtual environment, `pipenv shell` ([Pipenv](https://pipenv.pypa.io/en/latest/) or other virtualenv management tool)
-3. install deps, `pipenv install`
-4. start dev server, `python app.py`
+2. install uv [here](https://docs.astral.sh/uv/getting-started/installation/) (I recommend the standalone install script)
+3. create virtual environment and install deps, `uv sync`
+4. start dev server, `uv run python app.py`
+
+You might need to manually reselect the python interpreter in your IDE. The python executable will be at `./.venv/bin/python` by default.
 
 ```bash
-$ python app.py
+$ uv run python app.py
 Dash is running on http://127.0.0.1:8050/
 
  * Serving Flask app 'app'
@@ -16,31 +18,49 @@ Dash is running on http://127.0.0.1:8050/
 ```
 
 5. `Ctrl/⌘ + D` exits the virtual environment
+6. If using VSCode you can install the Ruff extension [here](https://marketplace.cursorapi.com/items/?itemName=charliermarsh.ruff). You can then set the following settings in VSCode to use it: 
+```json
+"[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff"
+    "editor.codeActionsOnSave": { 
+        "source.organizeImports": "explicit"
+    }
+},
+```
+
+If not using VSCode, you can use the ruff linter and formatter with the following commands
+```bash
+ruff check      # linting
+ruff format .   # formatting
+```
+As a convenience, you can use the make target `make ruff` to do both simultaneously.
 
 ## 📦 Production
 
 A Makefile exists to make building for production and deployment simpler.
 Use `make help` to see a list of available targets.
 
-```bash
+```
 $ make help
 
 Help Commands
-• help                 📖 Show help
+• help                  📖 Show help
 
 General Commands
-• requirements         🔐 Generate requirements.txt from Pipfile.lock (with Pipenv)
+• lint                  🤔 Run linter
+• format                ℹ︎ Run formatter
+• ruff                  🔀 Run linter and formatter
+• test                  🧪 Run tests
 
 Docker Commands
-• build                🛠️  Build Docker image
-• run                  ▶️  Run Docker container
-• stop                 🛑 Stop the running container
-• push                 📤 Push the Docker image
-• publish              📤 Build and push the Docker image
+• build                 🛠️ Build Docker image
+• run                   ▶️ Run Docker container
+• stop                  🛑 Stop the running container
+• push                  📤 Push the Docker image
+• publish               📤 Build and push the Docker image
 
 Helm Commands
-• pod-up               🚀 Install or upgrade Helm release
-• pod-down             💣 Uninstall Helm release
+• pod-up                🚀 Install or upgrade Helm release
+• pod-down              💣 Uninstall Helm release
 ```
-
-A few notes about building Docker images: The image build uses pip (not Pipenv), which relies on a `requirements.txt` file, so the first step to build an image is to create that. Our Make target `make requirements` leverages Pipenv to create that file. If you are not using Pipenv, use the analogoous command for your local setup.

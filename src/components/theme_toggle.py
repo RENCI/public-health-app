@@ -1,5 +1,5 @@
-from dash import ctx, Dash, dcc, Input, Output, State, callback, _dash_renderer
 import dash_mantine_components as dmc
+from dash import Input, Output, callback, ctx, dcc
 from dash_iconify import DashIconify
 
 # persist in local storage
@@ -19,6 +19,7 @@ theme_toggle = dmc.ActionIcon(
   id='color-scheme-toggle',
   size='lg',
 )
+
 
 @callback(
   Output('mantine-provider', 'forceColorScheme'),

@@ -1,11 +1,9 @@
-from dash import callback, dcc, exceptions, html, Input, Output, State
-import dash_mantine_components as dmc
-from dash_iconify import DashIconify
-
-from urllib.parse import parse_qs
-import uuid
-import json
 import datetime
+import uuid
+
+import dash_mantine_components as dmc
+from dash import Input, Output, State, callback, exceptions, no_update
+from dash_iconify import DashIconify
 
 form_toggle_button = dmc.Button(
   'Save as New Insight',
@@ -14,52 +12,59 @@ form_toggle_button = dmc.Button(
   style=dict(alignSelf='center'),
 )
 
+
 def save_insight_form(initial_title='', initial_description=''):
-  return dmc.Stack([
-    form_toggle_button,
-    dmc.Collapse(
-      id='save-form-container',
-      opened=False,
-      children=[
-        dmc.Card(
-          children=[
-            dmc.Stack([
-              dmc.TextInput(
-                id='insight-title-input', 
-                value=initial_title,
-                label='Title', 
+  return dmc.Stack(
+    [
+      form_toggle_button,
+      dmc.Collapse(
+        id='save-form-container',
+        opened=False,
+        children=[
+          dmc.Card(
+            children=[
+              dmc.Stack(
+                [
+                  dmc.TextInput(
+                    id='insight-title-input',
+                    value=initial_title,
+                    label='Title',
+                  ),
+                  dmc.Textarea(
+                    id='insight-description-input',
+                    value=initial_description,
+                    label='Description',
+                    autosize=True,
+                    minRows=5,
+                  ),
+                ],
+                gap=24,
               ),
-              dmc.Textarea(
-                id='insight-description-input',
-                value=initial_description,
-                label='Description',
-                autosize=True,
-                minRows=5,
+              dmc.Divider(my=24),
+              dmc.Group(
+                [
+                  dmc.Button(
+                    'Cancel',
+                    leftSection=DashIconify(icon='feather:x'),
+                    color='crimson',
+                    variant='outline',
+                    id='hide-form-button',
+                  ),
+                  dmc.Button(
+                    'Save',
+                    leftSection=DashIconify(icon='feather:check'),
+                    id='save-button',
+                  ),
+                ],
+                justify='flex-end',
               ),
-            ], gap=24),
-            dmc.Divider(my=24),
-            dmc.Group(
-              [
-                dmc.Button(
-                  'Cancel',
-                  leftSection=DashIconify(icon='feather:x'),
-                  color='crimson',
-                  variant='outline',
-                  id='hide-form-button',
-                ),
-                dmc.Button(
-                  'Save',
-                  leftSection=DashIconify(icon='feather:check'),
-                  id='save-button',
-                ),
-              ],
-              justify='flex-end',
-            ),
-          ]
-        )
-      ],
-    ),
-  ])
+            ]
+          )
+        ],
+      ),
+    ]
+  )
+
 
 @callback(
   Output('save-form-container', 'opened'),
@@ -71,13 +76,14 @@ def save_insight_form(initial_title='', initial_description=''):
 def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   return not is_visible
 
+
 @callback(
   Output('custom-insights-store', 'data'),
   Output('insight-title-input', 'error'),
   Output('insight-description-input', 'error'),
   Output('notification-container', 'sendNotifications'),
   Output('_pages_location', 'pathname'),  # update path
-  Output('_pages_location', 'search'),    # add ?id=insight_id
+  Output('_pages_location', 'search'),  # add ?id=insight_id
   Input('save-button', 'n_clicks'),
   State('custom-insights-store', 'data'),
   State('insight-title-input', 'value'),
@@ -110,7 +116,7 @@ def save_custom_insight(n_clicks, current_store, title, description, location, t
     id=new_id,
     title=title.strip(),
     description=description.strip(),
-    image_url=f'https://placehold.co/400?text=Visualization',
+    image_url='https://placehold.co/400?text=Visualization',
     created_at=now,
     updated_at=now,
     controls=dict(

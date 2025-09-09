@@ -1,6 +1,5 @@
-from dash import callback, ctx, dcc, exceptions, html, Input, no_update, Output, register_page, State
+from dash import html, Input, Output, State, callback, dcc, exceptions, register_page
 import dash_mantine_components as dmc
-from urllib.parse import parse_qs
 from dash_iconify import DashIconify
 from src.data.round1 import get_insight
 from src.data.templates import templates
@@ -51,6 +50,7 @@ def layout(starter=None):
     id='explorer-container',
   )
 
+
 @callback(
   Output('back-button', 'href'),
   Input('url', 'search'),
@@ -60,6 +60,7 @@ def update_back_button_href(search):
   if not starter:
     raise exceptions.PreventUpdate
   return f'/viewer?id={starter}' if starter else '/'
+
 
 @callback(
   Output('editor-contents', 'children'),
