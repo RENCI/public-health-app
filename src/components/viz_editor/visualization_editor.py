@@ -71,12 +71,27 @@ def visualization_editor(control_values=None, show_controls=True):
               dmc.GridCol(
                 location_select(value=init_location),
                 style=dict(padding='var(--mantine-spacing-sm)'),
-                span=dict(base=12),
+                span=12,
               ),
               dmc.GridCol(
                 target_select(value=init_target),
                 style=dict(padding='var(--mantine-spacing-sm)'),
-                span=dict(base=12),
+                span=12,
+              ),
+              dmc.GridCol(
+                age_group_select,
+                style=dict(padding='var(--mantine-spacing-sm)'),
+                span=12,
+              ),
+              dmc.GridCol(
+                uncertainty_select,
+                style=dict(padding='var(--mantine-spacing-sm)'),
+                span=12,
+              ),
+              dmc.GridCol(
+                ensemble_select,
+                style=dict(padding='var(--mantine-spacing-sm)'),
+                span=12,
               ),
               dmc.GridCol(
                 age_group_select(value=init_age_group),

@@ -4,6 +4,7 @@ import yaml
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'insights')
 
 
+
 def load_insights():
   insights = []
   for filename in sorted(os.listdir(DATA_DIR)):
