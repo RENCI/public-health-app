@@ -1,7 +1,7 @@
 from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, dcc, register_page
+from dash import html, Input, Output, State, callback, dcc, register_page
 from dash_iconify import DashIconify
 from src.data.round1 import get_insight, insights
 from src.util.get_query_param import get_query_param
