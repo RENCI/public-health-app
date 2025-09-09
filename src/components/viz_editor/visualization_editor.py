@@ -20,6 +20,7 @@ default_control_values = dict(
   ensemble='Ensemble',
 )
 
+
 def visualization_editor(control_values=None, show_controls=True):
   controls = {**default_control_values, **(control_values or {})}
 
@@ -30,9 +31,7 @@ def visualization_editor(control_values=None, show_controls=True):
   init_ensemble = controls['ensemble']
 
   if not show_controls:
-    init_data = collect_data(
-      build_dataset_path(location=init_location, target=init_target)
-    )
+    init_data = collect_data(build_dataset_path(location=init_location, target=init_target))
     current_data_store = dcc.Store(id='current-data-store', data=init_data)
   else:
     current_data_store = dcc.Store(id='current-data-store', data=[])
@@ -43,10 +42,12 @@ def visualization_editor(control_values=None, show_controls=True):
   )
 
   if not show_controls:
-    return dmc.Container([
-      current_data_store,
-      figure_container,
-    ])
+    return dmc.Container(
+      [
+        current_data_store,
+        figure_container,
+      ]
+    )
 
   return dmc.Grid(
     children=[
@@ -62,12 +63,36 @@ def visualization_editor(control_values=None, show_controls=True):
         dmc.Card(
           dmc.Grid(
             children=[
-              dmc.GridCol(scenarios_select, style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
-              dmc.GridCol(location_select(value=init_location), style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
-              dmc.GridCol(target_select(value=init_target), style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
-              dmc.GridCol(age_group_select(value=init_age_group), style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
-              dmc.GridCol(uncertainty_select(value=init_uncertainty), style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
-              dmc.GridCol(ensemble_select(value=init_ensemble), style=dict(padding='var(--mantine-spacing-sm)'), span=dict(base=12)),
+              dmc.GridCol(
+                scenarios_select,
+                style=dict(padding='var(--mantine-spacing-sm)'),
+                span=dict(base=12),
+              ),
+              dmc.GridCol(
+                location_select(value=init_location),
+                style=dict(padding='var(--mantine-spacing-sm)'),
+                span=dict(base=12),
+              ),
+              dmc.GridCol(
+                target_select(value=init_target),
+                style=dict(padding='var(--mantine-spacing-sm)'),
+                span=dict(base=12),
+              ),
+              dmc.GridCol(
+                age_group_select(value=init_age_group),
+                style=dict(padding='var(--mantine-spacing-sm)'),
+                span=dict(base=12),
+              ),
+              dmc.GridCol(
+                uncertainty_select(value=init_uncertainty),
+                style=dict(padding='var(--mantine-spacing-sm)'),
+                span=dict(base=12),
+              ),
+              dmc.GridCol(
+                ensemble_select(value=init_ensemble),
+                style=dict(padding='var(--mantine-spacing-sm)'),
+                span=dict(base=12),
+              ),
             ],
             gutter=0,
           ),
@@ -93,6 +118,7 @@ def get_data(location, target):
   path = build_dataset_path(location=location, target=target)
   return collect_data(path)
 
+
 # fires in both explorer and viewer "modes"
 @callback(
   Output('insight-visualization-figure', 'children'),
@@ -101,15 +127,11 @@ def get_data(location, target):
 def update_chart(data):
   if not data:
     return dmc.Image(src='https://placehold.co/1200x400?text=Not found')
-  
+
   # convert list of dicts back to DataFrame for convenience
   df = pd.DataFrame(data)
 
   fig = px.line(
-    df,
-    x='target_end_date',
-    y='value',
-    color='scenario_id',
-    title='Forecast values over time'
+    df, x='target_end_date', y='value', color='scenario_id', title='Forecast values over time'
   )
   return dcc.Graph(figure=fig)

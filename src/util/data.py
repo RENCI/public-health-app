@@ -3,6 +3,7 @@ import pandas as pd
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 def build_dataset_path(
   *,
   pathogen: str = 'flu',
@@ -16,8 +17,17 @@ def build_dataset_path(
   location = str(location or 'US')
   target = str(target or 'incident_hospitalization')
   part = str(part or 0)
-  path = BASE_DIR / 'data' / f'round{round_number}' / target / location / 'sample' / f'part-{part}.parquet'
+  path = (
+    BASE_DIR
+    / 'data'
+    / f'round{round_number}'
+    / target
+    / location
+    / 'sample'
+    / f'part-{part}.parquet'
+  )
   return path
+
 
 def collect_data(path):
   path = Path(path)

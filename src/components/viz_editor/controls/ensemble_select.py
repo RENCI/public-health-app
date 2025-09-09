@@ -1,5 +1,6 @@
 import dash_mantine_components as dmc
 
+
 def ensemble_select(value='Ensemble'):
   return dmc.Select(
     label='Ensemble',

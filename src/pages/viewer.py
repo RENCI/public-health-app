@@ -65,7 +65,11 @@ def show_details(search, custom_insights):
     return '', 'Insight not Found', ''
 
   controls = insight.get('controls')
-  return visualization_editor(control_values=controls, show_controls=False), insight['title'], insight['description']
+  return (
+    visualization_editor(control_values=controls, show_controls=False),
+    insight['title'],
+    insight['description'],
+  )
 
 
 @callback(

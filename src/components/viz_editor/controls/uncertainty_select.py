@@ -1,5 +1,6 @@
 import dash_mantine_components as dmc
 
+
 def uncertainty_select(value='None'):
   return dmc.Select(
     label='Uncertainty',

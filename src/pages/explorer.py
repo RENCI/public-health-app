@@ -19,14 +19,12 @@ reset_button = dmc.Button(
 )
 
 insight_toolbar = dmc.Flex(
-  children=[
-    back_button,
-    dmc.Group([reset_button])
-  ],
+  children=[back_button, dmc.Group([reset_button])],
   justify='space-between',
   align='center',
   mb=24,
 )
+
 
 def insight_editor(insight_id, custom_insights=None):
   insight = get_insight(insight_id, custom_insights) or {}
@@ -35,17 +33,18 @@ def insight_editor(insight_id, custom_insights=None):
   title = insight.get('title', '')
   description = insight.get('description', '')
 
-  return html.Div([
-    visualization_editor(control_values=controls, show_controls=True),
-    save_insight_form(initial_title=title, initial_description=description),
-  ], id='editor-contents')
+  return html.Div(
+    [
+      visualization_editor(control_values=controls, show_controls=True),
+      save_insight_form(initial_title=title, initial_description=description),
+    ],
+    id='editor-contents',
+  )
+
 
 def layout(starter=None):
   return dmc.Container(
-    [
-      insight_toolbar,
-      insight_editor(starter)
-    ],
+    [insight_toolbar, insight_editor(starter)],
     fluid=True,
     id='explorer-container',
   )
