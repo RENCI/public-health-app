@@ -17,8 +17,8 @@ venv.bak/
 vv
 
 # IDE
-.idea/*
-.vscode/*
+.idea
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

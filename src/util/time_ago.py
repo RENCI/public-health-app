@@ -1,5 +1,6 @@
 import datetime
 
+
 def time_ago(ts):
   # normalize input to a datetime
   if isinstance(ts, str):

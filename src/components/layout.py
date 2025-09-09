@@ -1,6 +1,7 @@
 import dash
-from dash import callback, ctx, dcc, Input, Output, State
 import dash_mantine_components as dmc
+from dash import dcc
+
 from src.components.header import header
 from src.components.notifications import notifications
 

@@ -1,0 +1,5 @@
+.venv
+.vscode
+.gitignore
+README.md
+k8s

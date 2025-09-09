@@ -1,0 +1,29 @@
+[project]
+name = "public-health-app"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dash>=3.2.0",
+    "dash-ag-grid>=32.3.1",
+    "dash-iconify>=0.1.2",
+    "dash-mantine-components>=2.2.1",
+    "gunicorn>=23.0.0",
+    "numpy>=2.3.2",
+    "pandas>=2.3.2",
+    "pyyaml>=6.0.2",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.12",
+]
+
+[tool.ruff]
+line-length = 100
+indent-width = 2
+
+[tool.ruff.format]
+# Prefer single quotes over double quotes.
+quote-style = "single"
