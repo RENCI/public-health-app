@@ -12,6 +12,7 @@ TAG := 0.6.0-dev
 IMAGE_NAME := containers.renci.org/comms/$(APP_NAME):$(TAG)
 PORT := 80
 RELEASE_NAME ?= $(APP_NAME)
+NAMESPACE ?= comms
 # ============
 
 ##@ Help Commands
@@ -25,15 +26,15 @@ help: ## 📖 Show help
 
 ##@ General Commands
 
-lint: ## 🔐 Lint the code
+lint: ## 🤔 Run linter
 	@uv run ruff check .
 
-format: ## 🔐 Format the code
+format: ## ℹ︎ Run formatter
 	@uv run ruff format .
 
-ruff: lint format ## 🔐 Run Ruff
+ruff: lint format ## 🔀 Run linter and formatter
 
-test: ## 🔐 Test the code
+test: ## 🧪 Run tests
 	@uv run pytest .
 
 ##@ Docker Commands
@@ -42,7 +43,6 @@ build: ## 🛠️  Build Docker image
 	docker build \
 		-t $(IMAGE_NAME) \
 		--platform linux/amd64 \
-		--progress=plain \
 		.
 
 run: ## ▶️  Run Docker container
@@ -70,7 +70,7 @@ pod-up: ## 🚀 Install or upgrade Helm release
 	@echo "📦 Using Helm values file: $(VALUES_FILE)"
 	@if [ -f $(VALUES_FILE) ]; then \
 		echo "🔄 Installing or upgrading Helm release '$(RELEASE_NAME)'"; \
-		helm upgrade --install $(RELEASE_NAME) k8s/chart -n comms; \
+		helm upgrade --install $(RELEASE_NAME) k8s/chart -n $(NAMESPACE); \
 	else \
 		echo "❌ Error: Values file not found: $(VALUES_FILE)"; \
 		exit 1; \
@@ -78,4 +78,12 @@ pod-up: ## 🚀 Install or upgrade Helm release
 
 pod-down: ## 💣 Uninstall Helm release
 	@echo "🗑️  Uninstalling Helm release '$(RELEASE_NAME)'"
-	-helm uninstall $(RELEASE_NAME) -n comms || true
+	-helm uninstall $(RELEASE_NAME) -n $(NAMESPACE:="comms") || true
+
+pod-logs: ## 📄 View Helm release logs
+	@echo "📄 Viewing Helm release '$(RELEASE_NAME)' logs"
+	kubectl logs -n $(NAMESPACE) $(RELEASE_NAME)
+
+pod-logs-follow: ## 📄 Follow Helm release logs
+	@echo "📄 Following Helm release '$(RELEASE_NAME)' logs"
+	kubectl logs -n $(NAMESPACE) $(RELEASE_NAME) -f
