@@ -72,7 +72,6 @@ def show_details(search, custom_insights):
   )
 
 
-
 @callback(
   Output('explorer-button', 'href'),
   Input('url', 'search'),
