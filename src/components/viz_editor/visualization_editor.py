@@ -1,7 +1,5 @@
-from dash import callback, dcc, html, Input, Output, State
+from dash import callback, dcc, html, Input, Output
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, dcc
-from dash_iconify import DashIconify
 import pandas as pd
 import plotly.express as px
 from .controls.scenarios_select import scenarios_select
