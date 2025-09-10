@@ -9,9 +9,11 @@ dependencies = [
     "dash-ag-grid>=32.3.1",
     "dash-iconify>=0.1.2",
     "dash-mantine-components>=2.2.1",
+    "fastparquet>=2024.11.0",
     "gunicorn>=23.0.0",
     "numpy>=2.3.2",
     "pandas>=2.3.2",
+    "pyarrow>=21.0.0",
     "pyyaml>=6.0.2",
 ]
 

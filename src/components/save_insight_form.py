@@ -88,10 +88,26 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   State('custom-insights-store', 'data'),
   State('insight-title-input', 'value'),
   State('insight-description-input', 'value'),
+  State('scenarios-select', 'value'),
   State('location-select', 'value'),
   State('target-select', 'value'),
+  State('age-group-select', 'value'),
+  State('uncertainty-select', 'value'),
+  State('ensemble-select', 'value'),
+  suppress_callback_exceptions=True,
 )
-def save_custom_insight(n_clicks, current_store, title, description, location, target):
+def save_custom_insight(
+  n_clicks,
+  current_store,
+  title,
+  description,
+  scenarios,
+  location,
+  target,
+  age_group,
+  uncertainty,
+  ensemble,
+):
   if not n_clicks:
     raise exceptions.PreventUpdate
 
@@ -116,8 +132,12 @@ def save_custom_insight(n_clicks, current_store, title, description, location, t
     created_at=now,
     updated_at=now,
     controls=dict(
+      scenarios=scenarios,
       location=location,
       target=target,
+      age_group=age_group,
+      uncertainty=uncertainty,
+      ensemble=ensemble,
     ),
   )
 
@@ -134,6 +154,6 @@ def save_custom_insight(n_clicks, current_store, title, description, location, t
     None,
     None,
     [notification],
-    '/viewer',  # 👈 path
-    f'?id={new_id}',  # 👈 query
+    '/viewer',
+    f'?id={new_id}',
   )
