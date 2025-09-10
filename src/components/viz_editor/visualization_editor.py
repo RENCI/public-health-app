@@ -13,6 +13,7 @@ from .controls.ensemble_select import ensemble_select
 from src.util.data import build_dataset_path, collect_data
 
 default_control_values = dict(
+  scenarios=['A', 'B'],
   location='US',
   target='incident_hospitalization',
   age_group='All Ages',
@@ -24,6 +25,7 @@ default_control_values = dict(
 def visualization_editor(control_values=None, show_controls=True):
   controls = {**default_control_values, **(control_values or {})}
 
+  init_scenarios = controls['scenarios']
   init_location = controls['location']
   init_target = controls['target']
   init_age_group = controls['age_group']
@@ -64,7 +66,7 @@ def visualization_editor(control_values=None, show_controls=True):
           dmc.Grid(
             children=[
               dmc.GridCol(
-                scenarios_select,
+                scenarios_select(value=init_scenarios),
                 style=dict(padding='var(--mantine-spacing-sm)'),
                 span=dict(base=12),
               ),

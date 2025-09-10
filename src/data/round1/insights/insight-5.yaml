@@ -31,3 +31,4 @@ updated_at: 2025-05-18T22:45:12Z
 controls:
   location: 'California'
   target: 'incident_hospitalization'
+  scenarios: ['A', 'B', 'D']
