@@ -7,7 +7,7 @@ from .theme_toggle import theme_toggle
 
 logo = dcc.Link(
   dmc.Image(src='/assets/images/covid19-smh-logo.png', alt='SMH Logo'),
-  style=dict(width='225px'),
+  style=dict(width='275px'),
   href='/',
 )
 
@@ -16,9 +16,9 @@ header = dmc.Flex(
     dmc.Group(
       [
         logo,
-        dmc.Anchor('Viewer', href='/', id='nav-viewer'),
-        dmc.Anchor('Explorer', href='/explorer', id='nav-explorer'),
-      ]
+        dmc.Anchor('Viewer', href='/', id='nav-viewer', style=dict(paddingTop='1rem')),
+        dmc.Anchor('Explorer', href='/explorer', id='nav-explorer', style=dict(paddingTop='1rem')),
+      ],
     ),
     dmc.Group(
       [
@@ -26,11 +26,12 @@ header = dmc.Flex(
       ]
     ),
   ],
-  align='center',
+  align='stretch',
   justify='space-between',
   style={'flex': 1},
   h='100%',
   px='md',
+  py=0,
 )
 
 
