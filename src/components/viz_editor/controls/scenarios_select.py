@@ -1,10 +1,10 @@
 import dash_mantine_components as dmc
 
-values = ['A', 'B', 'C', 'D', 'E']
-options = [{'value': c, 'label': c} for c in values]
+scenarios = ['1', '2', '3', '4', '5']
+options = [{'value': c, 'label': c} for c in scenarios]
 
 
-def scenarios_select(value=values):
+def scenarios_select(value=scenarios):
   return dmc.MultiSelect(
     label='Scenarios',
     placeholder='',

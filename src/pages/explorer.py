@@ -28,9 +28,9 @@ insight_toolbar = dmc.Flex(
 def insight_editor(insight_id, custom_insights=None):
   insight = get_insight(insight_id, custom_insights) or {}
 
-  controls = insight.get('controls') or {}
   title = insight.get('title', '')
   description = insight.get('description', '')
+  controls = insight.get('controls') or {}
 
   return html.Div(
     [
@@ -58,7 +58,6 @@ def update_back_button_href(search):
   if not starter:
     raise exceptions.PreventUpdate
   return f'/viewer?id={starter}' if starter else '/'
-
 
 @callback(
   Output('editor-contents', 'children'),

@@ -25,4 +25,5 @@ controls:
   location: 'US'
   target: 'incident_hospitalization'
   age_group: '0 - 1'
+  models: ['1']
 

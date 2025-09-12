@@ -31,4 +31,13 @@ updated_at: 2025-05-18T22:45:12Z
 controls:
   location: 'California'
   target: 'incident_hospitalization'
-  scenarios: ['A', 'B', 'D']
+  models: ['1', '2', '3', '4']
+  scenarios: ['1', '2', '4']
+  uncertainty: '95%'
+  annotations:
+    - value: 5_000
+      label: "Max with no intervention"
+      color: "#886622"
+    - value: 4_000
+      label: "Some important value"
+      color: "#663399"

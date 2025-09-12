@@ -1,5 +1,7 @@
 import dash_mantine_components as dmc
 
+uncertainty_values = ['None', '50%', '95%', 'Multi']
+options = [{'value': v, 'label': v} for v in uncertainty_values]
 
 def uncertainty_select(value='None'):
   return dmc.Select(
@@ -7,5 +9,5 @@ def uncertainty_select(value='None'):
     placeholder='',
     id='uncertainty-select',
     value=value,
-    data=['None', '50%', '95%', 'Multi'],
+    data=options,
   )

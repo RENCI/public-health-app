@@ -24,3 +24,4 @@ updated_at: 2025-03-18T22:45:12Z
 controls:
   location: 'Colorado'
   target: 'cumulative_hospitalization'
+  models: ['1']

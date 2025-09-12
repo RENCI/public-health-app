@@ -47,7 +47,7 @@ layout = dmc.Container(
     dmc.Title(id='insight-view-title', order=1),
     dcc.Markdown(id='insight-view-description'),
   ],
-  fluid=True,
+  size=1200,
 )
 
 

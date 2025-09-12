@@ -23,8 +23,8 @@ def build_dataset_path(
     / f'round{round_number}'
     / target
     / location
-    / 'sample'
-    / f'part-{part}.parquet'
+    / 'quantile'
+    / f'part-{part}.csv'
   )
   return path
 
@@ -37,7 +37,7 @@ def collect_data(path):
     return None
 
   try:
-    df = pd.read_parquet(path)
+    df = pd.read_csv(path)
     return df.to_dict('records')
   except Exception as e:
     print(f'Error reading file "{path}": {e}')

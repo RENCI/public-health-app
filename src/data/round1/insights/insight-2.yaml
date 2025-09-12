@@ -30,3 +30,4 @@ updated_at: 2025-02-18T22:45:12Z
 controls:
   location: 'US'
   target: 'incident_hospitalization'
+  models: ['1']
