@@ -5,7 +5,11 @@ from dash import Input, Output, callback, dcc
 
 from .theme_toggle import theme_toggle
 
-logo = dcc.Link(dmc.Text('[ 📈 ACCIDDA ]', c='blue'), href='/', style=dict(textDecoration='none'))
+logo = dcc.Link(
+  dmc.Image(src='/assets/images/covid19-smh-logo.png', alt='SMH Logo'),
+  style=dict(width='225px'),
+  href='/',
+)
 
 header = dmc.Flex(
   children=[
