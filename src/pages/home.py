@@ -191,7 +191,7 @@ no_insights_message = dmc.Card(
       h=300,
     ),
   ],
-  my=24,
+  my=16,
 )
 
 delete_modal = dmc.Modal(
@@ -208,19 +208,42 @@ delete_modal = dmc.Modal(
       mt='md',
     ),
   ],
-  opened=False,  # 🔑 Start closed
+  opened=False,
   centered=True,
 )
 
-layout = dmc.Container(
+previous_entire_layout = dmc.Container(
   [
-    dmc.Title('Insights', order=1, my=24, style=dict(textAlign='center')),
+    dmc.Title('Round 3', order=3, ta='center'),
     dmc.Tabs(
       [
         dmc.TabsList(
-          [dmc.TabsTab('System', value='system'), dmc.TabsTab('Custom', value='custom')],
+          [
+            dmc.TabsTab('Round Details', value='round-details'),
+            dmc.TabsTab('Round Insights', value='round-insights'),
+            dmc.TabsTab('Custom Insights', value='custom-insights'),
+          ],
           justify='center',
           grow=False,
+        ),
+        dmc.TabsPanel(
+          dmc.Container(
+            dcc.Markdown(f'''
+              ## Est minim do in veniam ut dolor ea et incididunt ut ut tempor aute duis in mollit labore ut.
+              Reprehenderit labore labore magna esse in voluptate sit et aute exercitation veniam officia in tempor officia labore tempor.
+              Lorem ipsum consectetur adipisicing do ullamco eiusmod ea consequat eu tempor ut non sit.
+              ## Excepteur velit cillum voluptate do et dolor amet cupidatat.
+              Do eu pariatur deserunt eiusmod dolor deserunt cillum sunt laboris ex ullamco culpa aute dolor deserunt.
+              Incididunt voluptate duis sunt tempor dolor consequat in in labore.
+              ### Fugiat in officia do fugiat est aliquip consectetur est ut irure ex adipisicing deserunt velit anim.
+              Mollit voluptate eiusmod commodo quis ex magna proident excepteur elit esse dolor fugiat est consequat consequat eiusmod.
+              ### Occaecat quis magna dolor aute proident occaecat culpa commodo culpa dolor minim.
+              Irure est non ullamco magna et cillum consequat id minim commodo laboris qui amet exercitation consequat dolore id ut.
+              Ut sit non dolor fugiat et anim enim ea quis sed duis ut aliqua consequat dolor ullamco ut.
+            '''),
+            id='insights-details',
+          ),
+          value='round-details',
         ),
         dmc.TabsPanel(
           dmc.Stack(
@@ -230,21 +253,45 @@ layout = dmc.Container(
             my=24,
             style=dict(width='100%'),
           ),
-          value='system',
+          value='round-insights',
         ),
         dmc.TabsPanel(
           dmc.Stack(
             children=[no_insights_message],
             id='custom-insights-list',
             gap='md',
-            my=24,
+            p=24,
             style=dict(width='100%'),
           ),
-          value='custom',
+          value='custom-insights',
         ),
       ],
-      value='system',
+      value='round-details',
+      variant='pills'
     ),
+  ],
+)
+
+layout = dmc.Container(
+  [
+    dmc.Title('Projection Rounds', order=1, my=24, style=dict(textAlign='center')),
+    dmc.Text(f'''
+      Select a round to see available insights.
+      In dolor quis culpa elit fugiat dolor reprehenderit magna ad nostrud id aliqua quis voluptate dolore commodo minim.
+      Enim id elit eiusmod in sint dolore commodo magna enim officia dolor tempor eiusmod irure velit deserunt ad consequat.
+      Duis excepteur irure esse anim irure in elit dolore sed exercitation ullamco cillum eu ex ea aute.
+      Ullamco ut cillum aliqua eiusmod aute dolor adipisicing nisi ullamco occaecat fugiat irure amet exercitation anim quis labore non.
+    ''', my=48),
+    dmc.Tabs([
+      dmc.TabsList([
+        dmc.TabsTab(value='3', children='Round 3', py='lg', px='xl'),
+        dmc.TabsTab(value='2', children='Round 2', py='lg', px='xl'),
+        dmc.TabsTab(value='1', children='Round 1', py='lg', px='xl'),
+      ]),
+      dmc.TabsPanel(value='3', children=previous_entire_layout),
+      dmc.TabsPanel(value='2', children='round 2 insights'),
+      dmc.TabsPanel(value='1', children='round 1 insights'),
+    ], value='3', orientation='vertical', variant='outline'),
     delete_modal,
   ],
 )
