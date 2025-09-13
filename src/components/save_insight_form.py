@@ -89,6 +89,7 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   State('insight-title-input', 'value'),
   State('insight-description-input', 'value'),
   State('scenarios-select', 'value'),
+  State('models-select', 'value'),
   State('location-select', 'value'),
   State('target-select', 'value'),
   State('age-group-select', 'value'),
@@ -103,6 +104,7 @@ def save_custom_insight(
   title,
   description,
   scenarios,
+  models,
   location,
   target,
   age_group,
@@ -135,6 +137,7 @@ def save_custom_insight(
     updated_at=now,
     controls=dict(
       scenarios=scenarios,
+      models=models,
       location=location,
       target=target,
       age_group=age_group,
