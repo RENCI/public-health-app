@@ -14,7 +14,7 @@ def chart(control_values={}):
   uncertainty = control_values.get('uncertainty', 'None')
   annotations = control_values.get('annotations', {})
 
-  path = build_dataset_path(location=location, target=target)
+  path = build_dataset_path(round_number=19, location=location, target=target)
   df = pd.DataFrame(collect_data(path))
 
   # filter by scenario, model, age_group
@@ -26,7 +26,7 @@ def chart(control_values={}):
     df = df[df['age_group'] == age_group]
 
   # load gold standard data
-  gold_std_path = 'src/data/round1/gold_standard.csv'  # path to cleaned CSV
+  gold_std_path = 'src/data/round19/gold_standard/covid_nhsn_hosp_inc.csv'  # path to cleaned CSV
   gold_std_df = pd.read_csv(gold_std_path, parse_dates=['date'])
 
   # filter gold standard to align with controls
