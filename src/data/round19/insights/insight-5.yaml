@@ -1,0 +1,43 @@
+id: insight-5
+title: Incident Hospitalization, California
+description: >
+  ## Anim adipisicing ullamco
+
+  Non in aliqua dolore tempor aute ea excepteur sint ut dolore pariatur
+  dolore elit laboris officia in consequat in. Lorem ipsum in minim ut
+  quis ut ut ea ex tempor irure ut non pariatur.
+
+  ## Nostrud quis ullamco veniam
+
+  Amet esse pariatur sit enim labore ad sed tempor exercitation
+  exercitation mollit pariatur minim consectetur.
+
+  - In
+
+  - fugiat
+
+  - aliqua
+  
+  - officia
+
+  ## aute voluptate
+
+  sed laborum nulla esse exercitation sint ut anim consectetur.
+  Aute et duis ut ut ea fugiat ea culpa quis aliqua excepteur.
+image_url: assets/images/insight-preview/insight-5.png
+template: default
+created_at: 2025-05-18T22:45:12Z
+updated_at: 2025-05-18T22:45:12Z
+controls:
+  location: 'California'
+  target: 'incident_hospitalization'
+  models: ['15', '31', '32']
+  scenarios: ['77', '78', '80']
+  uncertainty: '95%'
+  annotations:
+    - value: 5_000
+      label: "Max with no intervention"
+      color: "#886622"
+    - value: 4_000
+      label: "Some important value"
+      color: "#663399"

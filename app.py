@@ -6,8 +6,13 @@ from src.components.layout import layout
 _dash_renderer._set_react_version('18.2.0')
 insight_store = dcc.Store(id='selected_insight', storage_type='local')
 
+external_stylesheets = [
+  dmc.styles.ALL,
+  'https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap',
+]
+
 app = Dash(
-  external_stylesheets=dmc.styles.ALL,
+  external_stylesheets=external_stylesheets,
   use_pages=True,
   pages_folder='src/pages',
 )

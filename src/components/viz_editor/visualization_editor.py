@@ -10,11 +10,11 @@ from .controls.models_select import models_select
 from .controls.annotations_input import annotations_input
 from src.components.chart import chart
 
-available_rounds = [1, 2, 3]
-current_round = 1
+available_rounds = [19]
+current_round = 19
 
 default_control_values = dict(
-  scenarios=['1', '2', '3', '4', '5'],
+  scenarios=['77', '78', '79', '80', '81'],
   models=['18'],
   location='US',
   target='incident_hospitalization',
