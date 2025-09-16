@@ -3,6 +3,7 @@ import re
 import dash_mantine_components as dmc
 from dash import Input, Output, callback, dcc
 
+from .round_select import round_select
 from .theme_toggle import theme_toggle
 
 logo = dcc.Link(
@@ -22,6 +23,7 @@ header = dmc.Flex(
     ),
     dmc.Group(
       [
+        round_select(),
         theme_toggle,
       ]
     ),
