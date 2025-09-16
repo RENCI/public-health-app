@@ -12,3 +12,5 @@ def round_select(value='19'):
     data=options,
     size='xs',
   )
+
+round_store = dcc.Store(id='selected-round-store', data='19')
