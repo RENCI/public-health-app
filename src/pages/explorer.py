@@ -37,9 +37,9 @@ insight_toolbar = dmc.Flex(
 def insight_editor(insight_id, custom_insights=None):
   insight = get_insight(insight_id, custom_insights) or {}
 
-  controls = insight.get("controls") or {}
   title = insight.get("title", "")
   description = insight.get("description", "")
+  controls = insight.get("controls") or {}
 
   return html.Div(
     [
