@@ -1,19 +1,58 @@
+from pathlib import Path
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
 from src.components.enums import AgeGroup, Target
+from src.constants import get_location_data, get_model_color, get_model_name, get_scenario_name
 
 DATA_BASE_PATH = "src/data/data"
 
 
+class Scenario:
+  def __init__(self, scenario_id: int):
+    self.id = scenario_id
+    self.name = get_scenario_name(scenario_id)
+    self.variables = [""]  # TODO: add variables
+
+  def __str__(self):
+    return f"{self.name}"
+
+
+class Model:
+  def __init__(self, model_id: int):
+    self.id = model_id
+    self.name = get_model_name(model_id)
+    self.color = get_model_color(model_id)
+
+  def __str__(self):
+    return f"{self.name}"
+
+
+class Location:
+  def __init__(self, location: str):
+    self.name = location.lower().capitalize()
+    location_data = get_location_data(self.name)
+    self.short_code = location_data[0]
+    self.index = location_data[1]
+    self.population = location_data[2]
+
+  def __str__(self):
+    return f"{self.name}"
+
+
 class ChartTitle:
   def __init__(
-    self, pathogen: str, scenario: int, model: int, location: str, age_group: AgeGroup | None
+    self,
+    pathogen: str,
+    scenario: Scenario,
+    models: list[Model],
+    location: Location,
+    age_group: AgeGroup | None,
   ):
     self.pathogen = pathogen
     self.scenario = scenario
-    self.model = model
     self.location = location
     self.age_group = age_group
     if not age_group:
@@ -21,8 +60,8 @@ class ChartTitle:
 
   def __str__(self):
     return (
-      f"{self.pathogen} Scenario {self.scenario} using {self.model} model, "
-      + f"{(self.age_group.display_value + ' ') if self.age_group else ''}in {self.location}"
+      f"{self.pathogen} Scenario {self.scenario}"
+      + f"{(self.age_group.display_value + ' ') if self.age_group else ''} in {self.location}"
     )
 
 
@@ -33,32 +72,35 @@ class ChartControls:
     y_axis: str,
     round_num: int,
     pathogen: str,
-    scenario: int,
+    scenario_id: int,
     type_id: int,
-    model: int,
-    location: str,
-    age_group: AgeGroup,
-    target: Target,
+    model_ids: list[int],
+    location_name: str,
+    age_group: str,
+    target: str,
   ):
     self.x_axis = x_axis
     self.y_axis = y_axis
     self.round_num = round_num
     self.pathogen = pathogen
-    self.scenario = scenario
+    self.scenario = Scenario(scenario_id)
     self.type_id = type_id
-    self.model = model
-    self.location = location
-    self.age_group = age_group
-    self.target = target
+    self.models = [Model(model_id) for model_id in model_ids]
+    self.location = Location(location_name)
+    self.age_group = AgeGroup.from_input_value(age_group)
+    self.target = Target(target)
 
 
 class Chart:
   def __init__(self, controls: ChartControls):
     self.controls = controls
-    self.controls.location = controls.location.lower().capitalize()
 
     self.title = ChartTitle(
-      controls.pathogen, controls.scenario, controls.model, controls.location, controls.age_group
+      controls.pathogen,
+      controls.scenario,
+      controls.models,
+      controls.location,
+      controls.age_group,
     )
 
     self.refresh_fig()
@@ -66,9 +108,9 @@ class Chart:
   def refresh_fig(self) -> go.Figure:
     self._data = pd.read_parquet(self._get_file_path(), engine="pyarrow")
     self._data = self._data.set_index(self.controls.x_axis)
-    self._data = self._data.query("scenario_id == @self.controls.scenario")
+    self._data = self._data.query("scenario_id == @self.controls.scenario.id")
     self._data = self._data.query("type_id == @self.controls.type_id")
-    self._data = self._data.query("model_name == @self.controls.model")
+    self._data = self._data.query("model_name.isin([model.name for model in self.controls.models])")
     if self.controls.age_group:
       self._data = self._data.query("age_group == @self.controls.age_group.value")
     else:
@@ -87,8 +129,15 @@ class Chart:
     return self._data
 
   def _get_file_path(self) -> str:
-    return (
+    filename = (
       f"{DATA_BASE_PATH}/{self.controls.pathogen}/round{self.controls.round_num}/"
       + f"{self.controls.target.value}/{self.controls.location}/"
       + "sample/part-0.parquet"
     )
+    if not Path(filename).exists():
+      filename = (
+        f"{DATA_BASE_PATH}/{self.controls.pathogen}/round{self.controls.round_num}/"
+        + f"{self.controls.target.value}/{self.controls.location}/"
+        + "quartile/part-0.csv"
+      )
+    return filename

@@ -1,21 +1,42 @@
-from dash import Dash, _dash_renderer, dcc
 import dash_mantine_components as dmc
-from src.theme import DEFAULT_THEME
-from src.components.layout import layout
+from dash import Dash, _dash_renderer, dcc
 
-_dash_renderer._set_react_version('18.2.0')
-insight_store = dcc.Store(id='selected_insight', storage_type='local')
+from src.components.layout import layout
+from src.constants import load_constants, set_constants
+from src.theme import DEFAULT_THEME
+
+
+# ONE-TIME STARTUP DATA LOADING
+def initialize_app_data():
+  """Load and initialize all application data at startup."""
+  # Load constants from JSON file
+  constants = load_constants()
+
+  # Store constants in the constants module for global access
+  set_constants(constants)
+
+  return constants
+
+
+# Load startup data once at application startup
+CONSTANTS = initialize_app_data()
+
+_dash_renderer._set_react_version("18.2.0")
+insight_store = dcc.Store(id="selected_insight", storage_type="local")
 
 app = Dash(
   external_stylesheets=dmc.styles.ALL,
   use_pages=True,
-  pages_folder='src/pages',
+  pages_folder="src/pages",
 )
 
-app.title = 'ACCIDDA'
+# Store constants in app state for use in callbacks
+app.constants = CONSTANTS
+
+app.title = "ACCIDDA"
 app.layout = dmc.MantineProvider(
   theme=DEFAULT_THEME,
-  id='mantine-provider',
+  id="mantine-provider",
   children=[
     layout,
     insight_store,
@@ -24,5 +45,5 @@ app.layout = dmc.MantineProvider(
 
 server = app.server
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   app.run(debug=True)

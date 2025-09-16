@@ -1,11 +1,12 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
-class Target(Enum):
+
+class Target(StrEnum):
   INCIDENT_HOSPITALIZATION = "inc hosp"
   CUMULATIVE_HOSPITALIZATION = "cum hosp"
 
-class AgeGroup(Enum):
 
+class AgeGroup(Enum):
   ALL = ("0-130", "all ages")
   UNDER_ONE_YEAR_OLD = ("0-0.99", "ages 0-1")
   ONE_TO_FOUR_YEARS_OLD = ("1-4", "ages 1-4")
