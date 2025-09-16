@@ -174,23 +174,19 @@ def custom_insight_button(item):
 insight_buttons = [insight_button(item) for item in insights]
 
 no_insights_message = dmc.Card(
-  [
-    dmc.Title('Custom Insights', order=2, ta='center'),
-    dmc.Divider(my=12),
-    dmc.Center(
-      dmc.Stack(
-        [
-          dmc.Text("It looks like you haven't created any custom insights yet."),
-          dmc.Text(
-            ['Head over to the ', dmc.Anchor('Explorer', href='/explorer'), ' to build one!']
-          ),
-        ],
-        ta='center',
-        gap=24,
-      ),
-      h=300,
+  dmc.Center(
+    dmc.Stack(
+      [
+        dmc.Text("It looks like you haven't created any custom insights yet."),
+        dmc.Text(
+          ['Head over to the ', dmc.Anchor('Explorer', href='/explorer'), ' to build one!']
+        ),
+      ],
+      ta='center',
+      gap=24,
     ),
-  ],
+    h=300,
+  ),
   my=16,
 )
 
@@ -212,65 +208,80 @@ delete_modal = dmc.Modal(
   centered=True,
 )
 
-previous_entire_layout = dmc.Container(
-  [
-    dmc.Title('Round 3', order=3, ta='center'),
-    dmc.Tabs(
-      [
-        dmc.TabsList(
-          [
-            dmc.TabsTab('Round Details', value='round-details'),
-            dmc.TabsTab('Round Insights', value='round-insights'),
-            dmc.TabsTab('Custom Insights', value='custom-insights'),
-          ],
-          justify='center',
-          grow=False,
-        ),
-        dmc.TabsPanel(
-          dmc.Container(
-            dcc.Markdown(f'''
-              ## Est minim do in veniam ut dolor ea et incididunt ut ut tempor aute duis in mollit labore ut.
-              Reprehenderit labore labore magna esse in voluptate sit et aute exercitation veniam officia in tempor officia labore tempor.
-              Lorem ipsum consectetur adipisicing do ullamco eiusmod ea consequat eu tempor ut non sit.
-              ## Excepteur velit cillum voluptate do et dolor amet cupidatat.
-              Do eu pariatur deserunt eiusmod dolor deserunt cillum sunt laboris ex ullamco culpa aute dolor deserunt.
-              Incididunt voluptate duis sunt tempor dolor consequat in in labore.
-              ### Fugiat in officia do fugiat est aliquip consectetur est ut irure ex adipisicing deserunt velit anim.
-              Mollit voluptate eiusmod commodo quis ex magna proident excepteur elit esse dolor fugiat est consequat consequat eiusmod.
-              ### Occaecat quis magna dolor aute proident occaecat culpa commodo culpa dolor minim.
-              Irure est non ullamco magna et cillum consequat id minim commodo laboris qui amet exercitation consequat dolore id ut.
-              Ut sit non dolor fugiat et anim enim ea quis sed duis ut aliqua consequat dolor ullamco ut.
-            '''),
-            id='insights-details',
+def round_layout(round_number: int):
+  return dmc.Container(
+    [
+      dmc.Tabs(
+        [
+          dmc.Flex([
+            dmc.Title(f'Round {round_number}', order=2, ta='center'),
+            dmc.TabsList(
+              [
+                dmc.TabsTab('Round Details', value='round-details', p=8, color='gray'),
+                dmc.TabsTab('Round Insights', value='round-insights', p=8, color='gray'),
+                dmc.TabsTab('Custom Insights', value='custom-insights', p=8, color='gray'),
+              ],
+              grow=False,
+            )],
+            justify='space-between',
+            align='center',
+            px=16,
+            py=8,
           ),
-          value='round-details',
-        ),
-        dmc.TabsPanel(
-          dmc.Stack(
-            insight_buttons,
-            id='insights-list',
-            gap='md',
-            my=24,
-            style=dict(width='100%'),
+          dmc.TabsPanel(
+            dmc.Container(
+              dcc.Markdown(f'''
+                ### Est minim do in veniam ut dolor ea et incididunt ut ut tempor aute duis in mollit labore ut.
+                Reprehenderit labore labore magna esse in voluptate sit et aute exercitation veniam officia in tempor officia labore tempor.
+                Lorem ipsum consectetur adipisicing do ullamco eiusmod ea consequat eu tempor ut non sit.
+                ### Excepteur velit cillum voluptate do et dolor amet cupidatat.
+                Do eu pariatur deserunt eiusmod dolor deserunt cillum sunt laboris ex ullamco culpa aute dolor deserunt.
+                Incididunt voluptate duis sunt tempor dolor consequat in in labore.
+                #### Fugiat in officia do fugiat est aliquip consectetur est ut irure ex adipisicing deserunt velit anim.
+                Mollit voluptate eiusmod commodo quis ex magna proident excepteur elit esse dolor fugiat est consequat consequat eiusmod.
+                #### Occaecat quis magna dolor aute proident occaecat culpa commodo culpa dolor minim.
+                Irure est non ullamco magna et cillum consequat id minim commodo laboris qui amet exercitation consequat dolore id ut.
+                Ut sit non dolor fugiat et anim enim ea quis sed duis ut aliqua consequat dolor ullamco ut.
+              '''),
+            ),
+            value='round-details',
           ),
-          value='round-insights',
-        ),
-        dmc.TabsPanel(
-          dmc.Stack(
-            children=[no_insights_message],
-            id='custom-insights-list',
-            gap='md',
-            p=24,
-            style=dict(width='100%'),
+          dmc.TabsPanel(
+            dmc.Stack(
+              insight_buttons,
+              id='insights-list',
+              gap='md',
+              my=24,
+              style=dict(width='100%'),
+            ),
+            value='round-insights',
           ),
-          value='custom-insights',
-        ),
-      ],
-      value='round-details',
-      variant='pills'
-    ),
-  ],
-)
+          dmc.TabsPanel(
+            dmc.Stack(
+              children=[no_insights_message],
+              id='custom-insights-list',
+              gap='md',
+              p=24,
+              style=dict(width='100%'),
+            ),
+            value='custom-insights',
+          ),
+        ],
+        value='round-details',
+        variant='pills',
+        autoContrast=True,
+      ),
+    ],
+  )
+
+def round_tab(value: int, name: str, detail: str):
+  return dmc.TabsTab(
+    value=value,
+    children=dmc.Stack([
+      dmc.Text(name, size='md', fw=700),
+      dmc.Text(detail, size='xs', c='gray'),
+    ], gap='xs'),
+  )
 
 layout = dmc.Container(
   [
@@ -284,14 +295,14 @@ layout = dmc.Container(
     ''', my=48),
     dmc.Tabs([
       dmc.TabsList([
-        dmc.TabsTab(value='3', children='Round 3', py='lg', px='xl'),
-        dmc.TabsTab(value='2', children='Round 2', py='lg', px='xl'),
-        dmc.TabsTab(value='1', children='Round 1', py='lg', px='xl'),
+        round_tab(value='3', name='Round 3', detail='2023-07-01 — 2024-06-30'),
+        round_tab(value='2', name='Round 2', detail='2022-07-01 — 2023-06-30'),
+        round_tab(value='1', name='Round 1', detail='2021-07-01 — 2022-06-30'),
       ]),
-      dmc.TabsPanel(value='3', children=previous_entire_layout),
-      dmc.TabsPanel(value='2', children='round 2 insights'),
-      dmc.TabsPanel(value='1', children='round 1 insights'),
-    ], value='3', orientation='vertical', variant='outline'),
+      dmc.TabsPanel(value='3', children=round_layout(3)),
+      dmc.TabsPanel(value='2', children=round_layout(2)),
+      dmc.TabsPanel(value='1', children=round_layout(1)),
+    ], value='3', orientation='vertical', color='blue'),
     delete_modal,
   ],
 )
