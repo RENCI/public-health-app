@@ -27,13 +27,12 @@ def chart(control_values={}):
 
   # load gold standard data
   gold_std_path = 'src/data/round19/gold_standard/covid_nhsn_hosp_inc.csv'  # path to cleaned CSV
-  gold_std_df = pd.read_csv(gold_std_path, parse_dates=['date'])
+  gold_std_df = pd.read_csv(gold_std_path, parse_dates=['time_value'])
 
   # filter gold standard to align with controls
   gold_std_df = gold_std_df[
     (gold_std_df['age_group'] == age_group) &
-    (gold_std_df['location'] == location) &
-    (gold_std_df['target'] == 'inc hosp')
+    (gold_std_df['geo_value_fullname'] == location)
   ]
 
   # mapping confidence interval value to quantile bounds
@@ -55,7 +54,7 @@ def chart(control_values={}):
     rows=num_rows,
     cols=1,
     vertical_spacing=0.1,
-    subplot_titles=[f"Scenario {s}" for s in scenarios],
+    subplot_titles=[f'Scenario {s}' for s in scenarios],
   )
   fig.update_xaxes(matches='x')
   fig.update_yaxes(matches='y')
@@ -105,8 +104,8 @@ def chart(control_values={}):
     # gold standard line
     fig.add_trace(
       go.Scatter(
-        x=gold_std_df['date'],
-        y=gold_std_df['value_numeric'],
+        x=gold_std_df['time_value'],
+        y=gold_std_df['value'],
         mode='lines+markers',
         name='Gold standard',
         line=dict(color='rebeccapurple', dash='dot'),

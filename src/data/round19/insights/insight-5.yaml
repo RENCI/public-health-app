@@ -31,8 +31,8 @@ updated_at: 2025-05-18T22:45:12Z
 controls:
   location: 'California'
   target: 'incident_hospitalization'
-  models: ['1', '2', '3', '4']
-  scenarios: ['1', '2', '4']
+  models: ['15', '31', '32']
+  scenarios: ['77', '78', '80']
   uncertainty: '95%'
   annotations:
     - value: 5_000
