@@ -33,19 +33,3 @@ header = dmc.Flex(
   px='md',
   py=0,
 )
-
-
-@callback(
-  Output('nav-viewer', 'aria-current'),
-  Output('nav-explorer', 'aria-current'),
-  Input('url', 'pathname'),
-)
-def update_active_link(pathname):
-  def active_if(pattern):
-    if isinstance(pattern, (list, tuple)):
-      return 'page' if any(re.fullmatch(p, pathname) for p in pattern) else ''
-    return 'page' if re.fullmatch(pattern, pathname) else ''
-
-  return active_if(['/', r'^/viewer$', r'^/viewer/.*$']), active_if(
-    [r'^/explorer$', r'^/explorer/.*$']
-  )
