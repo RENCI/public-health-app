@@ -15,6 +15,8 @@ from dash import (
 )
 from dash_iconify import DashIconify
 
+from src.components.insight_report import insight_report
+
 from src.util.format_timestamp import format_timestamp
 from src.util.time_ago import time_ago
 
@@ -205,6 +207,14 @@ delete_modal = dmc.Modal(
   centered=True,
 )
 
+disclaimer = dcc.Markdown(f'''
+    The US COVID-19 Scenario Modeling Hub aims to produce robust projections to provide real-time actionable modeling
+    evidence to support ongoing public health needs and decision-making. For Round 19, eight teams contributed both national
+    and state-specific projections of the trajectory of COVID-19 during April 27, 2025 to April 25, 2026. Detailed scenario
+    descriptions and setting assumptions are provided on the SMH GitHub site. See covid19scenariomodelinghub.org for more
+    results and details.
+  ''', style=dict(color='gray'))
+
 layout = dmc.Container(
   [
     dmc.Tabs(
@@ -223,19 +233,7 @@ layout = dmc.Container(
           align='center',
         ),
         dmc.TabsPanel(
-          dcc.Markdown(f'''
-            ### Est minim do in veniam ut dolor ea et incididunt ut ut tempor aute duis in mollit labore ut.
-            Reprehenderit labore labore magna esse in voluptate sit et aute exercitation veniam officia in tempor officia labore tempor.
-            Lorem ipsum consectetur adipisicing do ullamco eiusmod ea consequat eu tempor ut non sit.
-            ### Excepteur velit cillum voluptate do et dolor amet cupidatat.
-            Do eu pariatur deserunt eiusmod dolor deserunt cillum sunt laboris ex ullamco culpa aute dolor deserunt.
-            Incididunt voluptate duis sunt tempor dolor consequat in in labore.
-            #### Fugiat in officia do fugiat est aliquip consectetur est ut irure ex adipisicing deserunt velit anim.
-            Mollit voluptate eiusmod commodo quis ex magna proident excepteur elit esse dolor fugiat est consequat consequat eiusmod.
-            #### Occaecat quis magna dolor aute proident occaecat culpa commodo culpa dolor minim.
-            Irure est non ullamco magna et cillum consequat id minim commodo laboris qui amet exercitation consequat dolore id ut.
-            Ut sit non dolor fugiat et anim enim ea quis sed duis ut aliqua consequat dolor ullamco ut.
-          '''),
+          insight_report,
           value='round-details',
         ),
         dmc.TabsPanel(
@@ -263,6 +261,8 @@ layout = dmc.Container(
       variant='pills',
       autoContrast=True,
     ),
+    dmc.Divider(my=48),
+    disclaimer,
     delete_modal,
   ],
 )

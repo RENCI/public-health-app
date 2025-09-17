@@ -1,0 +1,21 @@
+id: vaccination-impact
+title: All vaccination strategies are projected to significantly reduce disease burden. The greatest benefits will be seen if vaccines are offered to all ages.
+description: >
+  - **Both vaccination strategies are projected to significantly reduce disease burden compared to no vaccination.**
+  - **Compared to no vaccination, vaccination of high-risk groups reduces hospitalizations by 13% (8-17%) and deaths by 16% (11-23%)**, over the full time period. Vaccinating high-risk groups would result in 90,000 (53,000-126,000) fewer hospitalizations and 7,000 (4,000-9,000) fewer deaths nationally over the projection period, compared to no vaccination.
+  - **Vaccination for all age groups increases these reductions to 116,000 (69,000-163,000) hospitalizations and 9,000 (5,000-12,000) deaths averted.**
+    As compared to vaccinating only 65+ and high-risk individuals, vaccinating all ages would prevent an extra 26,000 hospitalizations and 1,000 deaths.
+image_url: assets/images/insight-preview/insight-5.png
+template: default
+created_at: 2025-05-18T22:45:12Z
+updated_at: 2025-05-18T22:45:12Z
+controls:
+  location: 'US'
+  target: 'incident_hospitalization'
+  models: []
+  scenarios: ['77', '78', '80']
+  uncertainty: '95%'
+  annotations:
+    - value: 19_000
+      label: "Some important value"
+      color: "#886622"

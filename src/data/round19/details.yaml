@@ -1,15 +1,13 @@
-name: "Round One"
-description: >
-  # Lorem ipsum sit non sunt
-  
-  Est nostrud laborum do non id dolore velit et anim sed elit in aliqua proident.
-  Ea consequat laborum cupidatat ut ut et sed pariatur.
+round_number: 19
+name: "Round 19"
+report: >
+  ## Executive Summary Report
+  _Round completed: June 4, 2025_
 
-  ## Sint in
-
-  Dolor ea proident dolore irure esse laboris id labore aliquip nulla adipisicing veniam exercitation quis tempor labore minim.
-
-  ## Velit labore consequat anim
-
-  In est in veniam occaecat ad eiusmod amet irure eiusmod non ut culpa.
-  Irure proident cillum irure pariatur eiusmod minim ut anim ad qui aliqua elit eiusmod cillum non aliqua.
+  In the 19th Round of COVID-19 scenario projections, the US COVID-19 Scenario
+  Modeling Hub aimed to estimate the impact of three vaccine recommendation
+  levels for the 2025-26 season: i) no recommendation, resulting in minimal
+  vaccine coverage; ii) high-risk group recommendation, including individuals
+  over 65 years and those under 65 years with high-risk conditions; and iii)
+  universal recommendation for all eligible age groups, each with uptake
+  corresponding to 2024-25 coverage levels.
