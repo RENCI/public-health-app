@@ -17,13 +17,11 @@ header = dmc.Flex(
     dmc.Group(
       [
         logo,
-        dmc.Anchor('Viewer', href='/', id='nav-viewer', style=dict(paddingTop='1rem')),
-        dmc.Anchor('Explorer', href='/explorer', id='nav-explorer', style=dict(paddingTop='1rem')),
+        round_select(),
       ],
     ),
     dmc.Group(
       [
-        round_select(),
         theme_toggle,
       ]
     ),
