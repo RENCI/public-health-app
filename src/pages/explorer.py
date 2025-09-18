@@ -12,7 +12,7 @@ from dash_iconify import DashIconify
 
 from src.components.save_insight_form import save_insight_form
 from src.components.viz_editor import visualization_editor
-from src.data.round1 import get_insight
+from src.data.round19 import get_insight
 from src.util.get_query_param import get_query_param
 
 register_page(__name__, path_template="/explorer", name="Insight Explorer")

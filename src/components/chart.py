@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import plotly.express as px
@@ -42,6 +43,13 @@ class Location:
     return f"{self.name}"
 
 
+class Annotation:
+  def __init__(self, value: float, label: str, color: str):
+    self.value = value
+    self.label = label
+    self.color = color
+
+
 class ChartTitle:
   def __init__(
     self,
@@ -76,8 +84,10 @@ class ChartControls:
     type_id: int,
     model_ids: list[int],
     location_name: str,
-    age_group: str,
     target: str,
+    age_group: str | None = None,
+    annotations: list[dict[str, Any]] | None = None,
+    uncertainty: str | None = None,
   ):
     self.x_axis = x_axis
     self.y_axis = y_axis
@@ -87,8 +97,12 @@ class ChartControls:
     self.type_id = type_id
     self.models = [Model(model_id) for model_id in model_ids]
     self.location = Location(location_name)
-    self.age_group = AgeGroup.from_input_value(age_group)
     self.target = Target(target)
+    self.age_group = AgeGroup.from_input_value(age_group) if age_group else None
+    self.annotations = (
+      [Annotation(**annotation) for annotation in annotations] if annotations else []
+    )
+    self.uncertainty = int(uncertainty.strip("%")) if uncertainty else None
 
 
 class Chart:
@@ -117,6 +131,15 @@ class Chart:
       self._data = self._data.query("age_group == '0-130'")  # default to all ages
     self._data = self._data.sort_values(by=self.controls.x_axis)
     self._fig = px.line(self._data, y="value")
+    if self.controls.annotations:
+      for annotation in self.controls.annotations:
+        self._fig.add_annotation(
+          x=annotation.value,
+          y=annotation.value,
+          text=annotation.label,
+          showarrow=False,
+          font=dict(color=annotation.color),
+        )
     return self._fig
 
   def get_controls(self) -> ChartControls:
@@ -129,15 +152,13 @@ class Chart:
     return self._data
 
   def _get_file_path(self) -> str:
-    filename = (
-      f"{DATA_BASE_PATH}/{self.controls.pathogen}/round{self.controls.round_num}/"
-      + f"{self.controls.target.value}/{self.controls.location}/"
-      + "sample/part-0.parquet"
+    base_filename = (
+      f"{DATA_BASE_PATH}/round{self.controls.round_num}/"
+      + f"{self.controls.target.value}/{self.controls.location.name}"
     )
+    filename = base_filename + "/sample/part-0.parquet"
     if not Path(filename).exists():
-      filename = (
-        f"{DATA_BASE_PATH}/{self.controls.pathogen}/round{self.controls.round_num}/"
-        + f"{self.controls.target.value}/{self.controls.location}/"
-        + "quartile/part-0.csv"
-      )
+      filename = base_filename + "/quartile/part-0.csv"
+    if not Path(filename).exists():
+      raise FileNotFoundError(f"File not found for chart: {self.controls}")
     return filename

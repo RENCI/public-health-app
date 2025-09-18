@@ -78,23 +78,24 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
 
 
 @callback(
-  Output("custom-insights-store", "data"),
-  Output("insight-title-input", "error"),
-  Output("insight-description-input", "error"),
-  Output("notification-container", "sendNotifications"),
-  Output("_pages_location", "pathname"),  # update path
-  Output("_pages_location", "search"),  # add ?id=insight_id
-  Input("save-button", "n_clicks"),
-  State("custom-insights-store", "data"),
-  State("insight-title-input", "value"),
-  State("insight-description-input", "value"),
-  State("scenarios-select", "value"),
-  State("location-select", "value"),
-  State("target-select", "value"),
-  State("age-group-select", "value"),
-  State("uncertainty-select", "value"),
-  State("ensemble-select", "value"),
-  State("annotations-store", "data"),
+  Output('custom-insights-store', 'data'),
+  Output('insight-title-input', 'error'),
+  Output('insight-description-input', 'error'),
+  Output('notification-container', 'sendNotifications'),
+  Output('_pages_location', 'pathname'),  # update path
+  Output('_pages_location', 'search'),  # add ?id=insight_id
+  Input('save-button', 'n_clicks'),
+  State('custom-insights-store', 'data'),
+  State('insight-title-input', 'value'),
+  State('insight-description-input', 'value'),
+  State('scenarios-select', 'value'),
+  State('models-select', 'value'),
+  State('location-select', 'value'),
+  State('target-select', 'value'),
+  State('age-group-select', 'value'),
+  State('uncertainty-select', 'value'),
+  State('ensemble-select', 'value'),
+  State('annotations-store', 'data'),
   suppress_callback_exceptions=True,
 )
 def save_custom_insight(
@@ -103,6 +104,7 @@ def save_custom_insight(
   title,
   description,
   scenarios,
+  models,
   location,
   target,
   age_group,
@@ -135,6 +137,7 @@ def save_custom_insight(
     updated_at=now,
     controls=dict(
       scenarios=scenarios,
+      models=models,
       location=location,
       target=target,
       age_group=age_group,

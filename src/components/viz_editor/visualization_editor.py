@@ -16,8 +16,8 @@ from .controls import (
   uncertainty_select,
 )
 
-available_rounds = [1, 2, 3]
-current_round = 1
+available_rounds = [19]
+current_round = 19
 
 default_control_values = dict(
   scenarios=["1", "2", "3", "4", "5"],
