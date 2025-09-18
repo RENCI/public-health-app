@@ -8,11 +8,6 @@ from src.components.disclaimer import disclaimer
 from src.components.round_report import round_report
 
 
-from ..util.data import load_rounds
-
-rounds = load_rounds()
-print(rounds)
-
 register_page(__name__, path='/')
 
 layout = dmc.Container(

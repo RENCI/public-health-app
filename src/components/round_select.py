@@ -1,8 +1,13 @@
 import dash_mantine_components as dmc
+from ..util.data import load_rounds
 
-round_numbers = ['19']
+rounds = load_rounds()
 
-options = [dict(value=n, label=f'Round {n}', detail='X insights') for n in round_numbers]
+options = [dict(
+  value=n,
+  label=f'Round {rounds[n]['round_number']}',
+  detail='X insights',
+) for n in rounds.keys()]
 
 def round_select(value='19'):
   return dmc.Select(

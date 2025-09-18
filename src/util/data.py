@@ -5,7 +5,7 @@ import pandas as pd
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent # src
-DATA_DIR = os.path.join(BASE_DIR, 'data', 'rounds')
+ROUNDS_DIR = os.path.join(BASE_DIR, 'data', 'rounds')
 
 def build_dataset_path(
   *,
@@ -47,28 +47,71 @@ def collect_data(path):
     print(f'Error reading file "{path}": {e}')
     return None
 
+def load_insights(path):
+  '''Load all YAML insight files from a given path.'''
+  insights = []
+  if not os.path.exists(path):
+    return insights
+
+  for filename in sorted(os.listdir(path)):
+    if filename.endswith('.yaml'):
+      filepath = os.path.join(path, filename)
+      with open(filepath, 'r') as f:
+        insight = yaml.safe_load(f)
+        insight['type'] = 'system'
+        insights.append(insight)
+
+  insights.sort(key=lambda x: x.get('title', '').lower())
+  return insights
 
 def load_rounds():
   '''Return dict of rounds, with its details and insights'''
   rounds = {}
-  for round_dir in sorted(os.listdir(DATA_DIR)):
-    full_path = os.path.join(DATA_DIR, round_dir)
-    if not os.path.isdir(full_path) or not round_dir.lower().startswith('round'):
+
+  for dirname in sorted(os.listdir(ROUNDS_DIR)):
+    if not dirname.startswith('round'):
       continue
 
-    # reduce key to just the number
-    round_num = round_dir.lower().replace('round', '')
+    round_number = dirname.replace('round', '')
+    round_path = os.path.join(ROUNDS_DIR, dirname)
+    details_path = os.path.join(round_path, 'details.yaml')
+    insights_path = os.path.join(round_path, 'insights')
 
-    insights = []
-    for filename in sorted(os.listdir(full_path)):
-      if filename.endswith('.yaml'):
-        path = os.path.join(full_path, filename)
-        with open(path, 'r') as f:
-          insight = yaml.safe_load(f)
-          insight['type'] = 'system'
-          insights.append(insight)
+    details = {}
+    if os.path.exists(details_path):
+      with open(details_path, 'r') as f:
+        details = yaml.safe_load(f) or {}
 
-    insights.sort(key=lambda x: x.get('title', '').lower())
-    rounds[round_num] = insights
+    insights = load_insights(insights_path)  
+
+    rounds[round_number] = dict(
+      round_number=int(round_number),
+      name=f'Round {round_number}',
+      report=details.get('report', ''),
+      insights=insights,
+    )
 
   return rounds
+
+  # rounds = {}
+  # for round_dir in sorted(os.listdir(ROUNDS_DIR)):
+  #   full_path = os.path.join(ROUNDS_DIR, round_dir)
+  #   if not os.path.isdir(full_path) or not round_dir.lower().startswith('round'):
+  #     continue
+
+  #   # reduce key to just the number
+  #   round_num = round_dir.lower().replace('round', '')
+
+  #   insights = []
+  #   for filename in sorted(os.listdir(full_path)):
+  #     if filename.endswith('.yaml'):
+  #       path = os.path.join(full_path, filename)
+  #       with open(path, 'r') as f:
+  #         insight = yaml.safe_load(f)
+  #         insight['type'] = 'system'
+  #         insights.append(insight)
+
+  #   insights.sort(key=lambda x: x.get('title', '').lower())
+  #   rounds[round_num] = insights
+
+  # return rounds
