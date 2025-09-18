@@ -20,7 +20,7 @@ def chart(control_values={}):
 
   # load gold standard data
   gold_std_path = "src/data/round19/gold_standard/covid_nhsn_hosp_inc.csv"  # path to cleaned CSV
-  gold_std_df = pd.read_csv(gold_std_path, parse_dates=["date"])
+  gold_std_df = pd.read_csv(gold_std_path, parse_dates=["time_value"])
 
   # filter by scenario, model, age_group
   if scenarios:
@@ -29,10 +29,6 @@ def chart(control_values={}):
     df = df[df["model_name"].isin(models)]
   if age_group:
     df = df[df["age_group"] == age_group]
-
-  # load gold standard data
-  gold_std_path = "src/data/round1/gold_standard.csv"  # path to cleaned CSV
-  gold_std_df = pd.read_csv(gold_std_path, parse_dates=["date"])
 
   # filter gold standard to align with controls
   gold_std_df = gold_std_df[
@@ -112,7 +108,7 @@ def chart(control_values={}):
     # gold standard line
     fig.add_trace(
       go.Scatter(
-        x=gold_std_df["date"],
+        x=gold_std_df["time_value"],
         y=gold_std_df["value_numeric"],
         mode="lines+markers",
         name="Gold standard",
