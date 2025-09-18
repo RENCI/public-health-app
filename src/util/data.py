@@ -1,8 +1,11 @@
+import os
+import yaml
 from pathlib import Path
 import pandas as pd
 
-BASE_DIR = Path(__file__).resolve().parent.parent
 
+BASE_DIR = Path(__file__).resolve().parent.parent # src
+DATA_DIR = os.path.join(BASE_DIR, 'data', 'rounds')
 
 def build_dataset_path(
   *,
@@ -43,3 +46,29 @@ def collect_data(path):
   except Exception as e:
     print(f'Error reading file "{path}": {e}')
     return None
+
+
+def load_rounds():
+  '''Return dict of rounds, with its details and insights'''
+  rounds = {}
+  for round_dir in sorted(os.listdir(DATA_DIR)):
+    full_path = os.path.join(DATA_DIR, round_dir)
+    if not os.path.isdir(full_path) or not round_dir.lower().startswith('round'):
+      continue
+
+    # reduce key to just the number
+    round_num = round_dir.lower().replace('round', '')
+
+    insights = []
+    for filename in sorted(os.listdir(full_path)):
+      if filename.endswith('.yaml'):
+        path = os.path.join(full_path, filename)
+        with open(path, 'r') as f:
+          insight = yaml.safe_load(f)
+          insight['type'] = 'system'
+          insights.append(insight)
+
+    insights.sort(key=lambda x: x.get('title', '').lower())
+    rounds[round_num] = insights
+
+  return rounds

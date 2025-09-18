@@ -1,10 +1,8 @@
 from dash import dcc
-import dash_mantine_components as dmc
-
-from ..data.rounds.round19 import insights
 
 
-insight_report = dcc.Markdown(f'''
+
+insight_report = dcc.Markdown('''
   ## Executive Summary Report
   _Round completed: June 4, 2025_
 

@@ -1,7 +1,6 @@
-import re
 
 import dash_mantine_components as dmc
-from dash import Input, Output, callback, dcc
+from dash import dcc
 
 from .round_select import round_select
 from .theme_toggle import theme_toggle

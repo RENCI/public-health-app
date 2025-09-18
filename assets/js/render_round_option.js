@@ -6,16 +6,11 @@
   const iconify = window.dash_iconify;
 
   dmcFunctions.renderRoundOption = function ({ option, checked }) {
-    const checkedIcon = React.createElement(iconify.DashIconify, {
-      icon: 'feather:check',
-      width: 16,
-    });
-
     return React.createElement(
       dmc.Flex,
-      { gap: 'xs', class: 'round-option' },
-      React.createElement('div', { class: 'round-number' }, `Round ${ option.value }`),
-      React.createElement('div', { class: 'round-details' }, option.detail),
+      { gap: 'xs', className: `round-option ${ checked ? 'selected' : 'unselected' }` },
+      React.createElement('div', { className: 'round-number' }, `Round ${ option.value }`),
+      React.createElement('div', { className: 'round-overview' }, option.detail),
     );
   };
 })();
