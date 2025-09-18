@@ -1,8 +1,8 @@
 import dash_mantine_components as dmc
 from dash import Input, Output, callback, html
 
-from src.components.chart_functions import chart
 from src.components.chart import Chart, ChartControls, ChartTitle
+from src.components.chart_functions import chart
 
 from .controls import (
   age_group_select,
@@ -20,7 +20,7 @@ available_rounds = [19]
 current_round = 19
 
 default_control_values = dict(
-  scenarios=["1", "2", "3", "4", "5"],
+  scenarios=["77", "78", "79", "80", "81"],
   models=["18"],
   location="US",
   target="incident_hospitalization",
