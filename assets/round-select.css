@@ -1,0 +1,22 @@
+.round-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+  border-radius: 4px;
+}
+
+.round-number {
+  flex: 0 0 80px;
+  border-radius: 4px;
+  padding: 4px 8px;
+  background-color: var(--mantine-color-default-hover);
+  display: grid;
+  place-content: center;
+  color: var(--mantine-color-default-color);
+  font-weight: bold;
+}
+
+.round-details {
+  flex: 1;
+}

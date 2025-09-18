@@ -26,7 +26,7 @@ def chart(control_values={}):
     df = df[df['age_group'] == age_group]
 
   # load gold standard data
-  gold_std_path = 'src/data/round19/gold_standard/covid_nhsn_hosp_inc.csv'  # path to cleaned CSV
+  gold_std_path = 'src/data/rounds/round19/gold_standard/covid_nhsn_hosp_inc.csv'  # path to cleaned CSV
   gold_std_df = pd.read_csv(gold_std_path, parse_dates=['time_value'])
 
   # filter gold standard to align with controls

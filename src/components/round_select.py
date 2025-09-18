@@ -3,7 +3,7 @@ import dash_mantine_components as dmc
 
 round_numbers = ['19']
 
-options = [{'value': n, 'label': f'Round {n}'} for n in round_numbers]
+options = [dict(value=n, label=f'Round {n}', detail=f'X insights') for n in round_numbers]
 
 def round_select(value='19'):
   return dmc.Select(
@@ -13,7 +13,8 @@ def round_select(value='19'):
     data=options,
     size='xs',
     allowDeselect=False,
-    renderOption={'function': 'renderRoundOption'}
+    renderOption={'function': 'renderRoundOption'},
+    style=dict(width='300px'),
   )
 
 round_store = dcc.Store(id='selected-round-store', data='19')
