@@ -15,15 +15,6 @@ print(rounds)
 
 register_page(__name__, path='/')
 
-
-def tipped_text(text, tooltip=None, size='md'):
-  return dmc.Tooltip(
-    label=tooltip if tooltip else text,
-    position='top',
-    withArrow=True,
-    children=dmc.Text(text, size=size, c='gray'),
-  )
-
 layout = dmc.Container(
   [
     round_report(19),
