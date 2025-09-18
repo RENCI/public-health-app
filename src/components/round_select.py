@@ -1,4 +1,3 @@
-from dash import dcc
 import dash_mantine_components as dmc
 
 round_numbers = ['19']

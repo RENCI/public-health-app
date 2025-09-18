@@ -26,9 +26,3 @@ def get_insight(insight_id: str | None, custom_insights=None):
     return None
   all_insights = insights + (custom_insights or [])
   return next((x for x in all_insights if x.get('id') == insight_id), None)
-
-def get_round(round_number: int):
-  """Return a round, with its details and insights"""
-  if not round_number:
-    return None
-  return next((r for r in all_rounds if r.get('round_number') == round_number), None)
