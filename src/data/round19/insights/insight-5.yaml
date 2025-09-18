@@ -1,4 +1,5 @@
 id: insight-5
+round: 19
 title: Incident Hospitalization, California
 description: >
   ## Anim adipisicing ullamco
@@ -17,7 +18,7 @@ description: >
   - fugiat
 
   - aliqua
-  
+
   - officia
 
   ## aute voluptate
@@ -29,13 +30,11 @@ template: default
 created_at: 2025-05-18T22:45:12Z
 updated_at: 2025-05-18T22:45:12Z
 controls:
-  location: 'California'
-  target: 'incident_hospitalization'
-<<<<<<< HEAD
-=======
-  models: ['1', '2', '3', '4']
-  scenarios: ['1', '2', '4']
-  uncertainty: '95%'
+  location: "California"
+  target: "incident_hospitalization"
+  models: ["1", "2", "3", "4"]
+  scenarios: ["4"]
+  uncertainty: "95%"
   annotations:
     - value: 5_000
       label: "Max with no intervention"
@@ -43,4 +42,3 @@ controls:
     - value: 4_000
       label: "Some important value"
       color: "#663399"
->>>>>>> c5016bd5669c94b39da84e23880649394df6e83f

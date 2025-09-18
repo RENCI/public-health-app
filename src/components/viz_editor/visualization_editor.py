@@ -43,17 +43,19 @@ def visualization_editor(control_values=None, show_controls=True):
   init_ensemble = controls["ensemble"]
   init_annotations = controls["annotations"]
 
-  figure_control_values = dict(
-    scenarios=init_scenarios,
-    models=init_models,
-    location=init_location,
-    target=init_target,
+  figure_control_values = ChartControls(
+    x_axis="date",
+    y_axis="value",
+    round_num=19,
+    pathogen="covid",
+    scenario_id=init_scenarios[0],
+    type_id=0,
+    model_ids=init_models,
+    location_name=init_location,
     age_group=init_age_group,
-    uncertainty=init_uncertainty,
-    ensemble=init_ensemble,
-    annotations=init_annotations,
+    target=init_target,
   )
-  chart = Chart(ChartControls(figure_control_values))
+  chart = Chart(figure_control_values)
 
   figure_container = html.Div(
     id="insight-visualization-figure",
