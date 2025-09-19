@@ -42,12 +42,8 @@ def chart(control_values={}):
     'Multi': [(0.025, 0.975), (0.05, 0.95), (0.1, 0.9), (0.25, 0.75)]
   }
 
-  conf_int_colors = {
-    (0.025, 0.975): 'rgba(200,200,255,0.2)',   # lightest
-    (0.05, 0.95): 'rgba(150,150,255,0.3)',
-    (0.1, 0.9): 'rgba(100,100,255,0.4)',
-    (0.25, 0.75): 'rgba(50,50,255,0.6)'        # darkest
-  }
+  # use same color with opacity for all confidence intervals
+  conf_int_color = 'rgba(100,100,255,0.25)'
 
   num_rows = len(scenarios)
   fig = make_subplots(
@@ -61,6 +57,29 @@ def chart(control_values={}):
 
   for i, scenario in enumerate(scenarios, start=1):
     scenario_df = df[df['scenario_id'] == scenario]
+    
+    # add uncertainty intervals
+    if uncertainty in conf_int_map:
+      for lower_q, upper_q in conf_int_map[uncertainty]:
+        lower = scenario_df[scenario_df['type_id'] == lower_q]
+        upper = scenario_df[scenario_df['type_id'] == upper_q]
+
+        for model in lower['model_name'].unique():
+          lower_model = lower[lower['model_name'] == model]
+          upper_model = upper[upper['model_name'] == model]
+
+          fig.add_trace(
+            go.Scatter(
+              x=pd.concat([lower_model['target_end_date'], upper_model['target_end_date'][::-1]]),
+              y=pd.concat([lower_model['value'], upper_model['value'][::-1]]),
+              fill='toself',
+              fillcolor=conf_int_color,
+              line=dict(color='rgba(0,0,0,0)'),
+              hoverinfo='skip',
+              showlegend=False
+            ),
+            row=i, col=1
+          )
 
     # main line for median (0.5 quantile)
     median_df = scenario_df[scenario_df['type_id'] == 0.5]
@@ -77,29 +96,6 @@ def chart(control_values={}):
         ),
         row=i, col=1
       )
-
-    # add uncertainty intervals
-    if uncertainty in conf_int_map:
-      for lower_q, upper_q in conf_int_map[uncertainty]:
-        lower = scenario_df[scenario_df['type_id'] == lower_q]
-        upper = scenario_df[scenario_df['type_id'] == upper_q]
-
-        for model in lower['model_name'].unique():
-          lower_model = lower[lower['model_name'] == model]
-          upper_model = upper[upper['model_name'] == model]
-
-          fig.add_trace(
-            go.Scatter(
-              x=pd.concat([lower_model['target_end_date'], upper_model['target_end_date'][::-1]]),
-              y=pd.concat([lower_model['value'], upper_model['value'][::-1]]),
-              fill='toself',
-              fillcolor=conf_int_colors[(lower_q, upper_q)],
-              line=dict(color='rgba(0,0,0,0)'),
-              hoverinfo='skip',
-              showlegend=False
-            ),
-            row=i, col=1
-          )
 
     # gold standard line
     fig.add_trace(
