@@ -200,7 +200,7 @@ delete_modal = dmc.Modal(
   centered=True,
 )
 
-def round_report(round_number):
+def round_summary(round_number):
   return dmc.Tabs(
     [
       dmc.Flex([
