@@ -1,3 +1,4 @@
+from dash import callback, Input, Output
 import dash_mantine_components as dmc
 from ..util.data import load_rounds
 
@@ -20,3 +21,10 @@ def round_select(value='19'):
     renderOption={'function': 'renderRoundOption'},
     style=dict(width='300px'),
   )
+
+@callback(
+  Output('selected-round-store', 'data'),
+  Input('round-select', 'value'),
+)
+def update_selected_round_store(selected_round):
+  return selected_round

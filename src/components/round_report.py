@@ -13,6 +13,7 @@ from dash import (
 from dash_iconify import DashIconify
 import uuid
 from src.util.time_ago import time_ago
+from ..util.data import load_rounds
 
 from src.components.insight_report import insight_report
 from src.util.format_timestamp import format_timestamp
@@ -222,7 +223,7 @@ def round_report(round_number):
       ),
       dmc.TabsPanel(
         dmc.Stack(
-          [insight_button(item) for item in insights],
+          '...',
           id='insights-list',
           gap='md',
           my=24,
@@ -247,11 +248,22 @@ def round_report(round_number):
   )
 
 @callback(
+  Output('insights-list', 'children'),
+  Input('selected-round-store', 'data'),
+  prevent_initial_call=False,
+)
+def update_insights_list(round_number):
+  rounds = load_rounds()
+  r = rounds[round_number]
+  insights = r.get('insights') or []
+  return [insight_button(item) for item in insights]
+
+@callback(
   Output('custom-insights-list', 'children'),
   Input('custom-insights-store', 'data'),
   prevent_initial_call=False,
 )
-def update_insights_list(custom_data):
+def update_custom_insights_list(custom_data):
   if not custom_data or len(custom_data) == 0:
     return [no_insights_message]
   return [custom_insight_button(item) for item in custom_data]

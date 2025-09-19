@@ -6,14 +6,10 @@ from src.components.header import header
 from src.components.notifications import notifications
 
 custom_insights_store = dcc.Store(id='custom-insights-store', data=[], storage_type='local')
-rounds_store = dcc.Store(id='rounds-store', data='19')
-selected_round_store = dcc.Store(id='selected-round-store', data='19')
 
 layout = dmc.AppShell(
   [
     custom_insights_store,
-    rounds_store,
-    selected_round_store,
     dcc.Location(id='url', refresh=False),
     dmc.AppShellHeader(header),
     dmc.AppShellMain(dash.page_container, id='page-content'),
