@@ -10,12 +10,14 @@ options = [dict(
   detail='X insights',
 ) for n in rounds.keys()]
 
+sorted_options = sorted(options, key=lambda o: o['label'], reverse=True)
+
 def round_select(value='19'):
   return dmc.Select(
     placeholder='',
     id='round-select',
     value=value,
-    data=options,
+    data=sorted_options,
     size='xs',
     allowDeselect=False,
     renderOption={'function': 'renderRoundOption'},
