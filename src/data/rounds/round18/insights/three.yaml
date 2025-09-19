@@ -1,0 +1,26 @@
+id: vaccination-impact-copy
+title: Irure minim mollit minim dolore voluptate tempor pariatur officia nulla ad sunt aute.
+description: >
+  - **Fugiat consequat in laboris deserunt labore nulla velit est minim cillum cillum enim.**
+  - **Quis incididunt quis pariatur culpa elit mollit ullamco anim sunt minim.n.
+  - **Sint sit do dolore fugiat velit cupidatat qui eu.**
+
+  Culpa aute in dolore sint amet et aliqua eiusmod.
+  
+  Eu ut deserunt enim ut ea mollit aliqua veniam et mollit.
+  Sint labore id commodo ut proident dolore exercitation incididunt id excepteur culpa.
+  Ut sit do nostrud tempor ex nulla anim occaecat voluptate eu in in ut esse eu culpa in.
+image_url: assets/images/insight-preview/insight-5.png
+template: default
+created_at: 2025-05-18T22:45:12Z
+updated_at: 2025-05-18T22:45:12Z
+controls:
+  location: 'US'
+  target: 'incident_hospitalization'
+  models: []
+  scenarios: ['77', '78', '80']
+  uncertainty: '95%'
+  annotations:
+    - value: 19_000
+      label: "Some important value"
+      color: "#886622"
