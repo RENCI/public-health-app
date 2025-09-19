@@ -218,13 +218,14 @@ def round_report(round_number):
         align='center',
       ),
       dmc.TabsPanel(
-        insight_report,
+        children=[dmc.Skeleton(h=200)],
+        id='round-overview',
         value='round-overview',
       ),
       dmc.TabsPanel(
         dmc.Stack(
-          '...',
           id='insights-list',
+          children=[dmc.Skeleton(h=150)],
           gap='md',
           my=24,
           style=dict(width='100%'),
@@ -233,8 +234,8 @@ def round_report(round_number):
       ),
       dmc.TabsPanel(
         dmc.Stack(
-          [no_insights_message],
           id='custom-insights-list',
+          children=[no_insights_message],
           gap='md',
           p=24,
           style=dict(width='100%'),
@@ -248,15 +249,17 @@ def round_report(round_number):
   )
 
 @callback(
+  Output('round-overview', 'children'),
   Output('insights-list', 'children'),
   Input('selected-round-store', 'data'),
-  prevent_initial_call=False,
+  prevent_initial_call=True,
 )
 def update_insights_list(round_number):
   rounds = load_rounds()
   r = rounds[round_number]
+  report = r.get('report') or '...'
   insights = r.get('insights') or []
-  return [insight_button(item) for item in insights]
+  return dcc.Markdown(report), [insight_button(item) for item in insights]
 
 @callback(
   Output('custom-insights-list', 'children'),
