@@ -10,18 +10,8 @@ register_page(__name__, path='/')
 
 layout = dmc.Container(
   [
-    dmc.Container(id='round-summary-container', children=round_summary(19)),
+    round_summary(),
     dmc.Divider(my=48),
     disclaimer,
   ],
 )
-
-@callback(
-  Output('round-summary-container', 'children'),
-  Input('selected-round-store', 'data'),
-)
-def update_round_summary(selected_round):
-  try:
-    return round_summary(int(selected_round))
-  except Exception:
-    return dmc.Text('No round selected or invalid round.', color='red')

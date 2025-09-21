@@ -32,7 +32,7 @@ no_insights_message = dmc.Card(
   dmc.Center(
     dmc.Stack(
       [
-        dmc.Text("It looks like you haven't created any custom insights yet."),
+        dmc.Text("It looks like you haven't created any custom insights with this round of data."),
         dmc.Text(
           ['Head over to the ', dmc.Anchor('Explorer', href='/explorer'), ' to build one!']
         ),
@@ -200,12 +200,12 @@ delete_modal = dmc.Modal(
   centered=True,
 )
 
-def round_summary(round_number):
+def round_summary():
   return dmc.Tabs(
     [
       dmc.Flex([
         delete_modal,
-        dmc.Title(f'Round {round_number}', order=1, my=24, style=dict(textAlign='center')),
+        dmc.Title(id='round-title', order=1, my=24, style=dict(textAlign='center')),
         dmc.TabsList(
           [
             dmc.TabsTab('Round Overview', value='round-overview', p=8, color='gray'),
@@ -218,14 +218,13 @@ def round_summary(round_number):
         align='center',
       ),
       dmc.TabsPanel(
-        children=[dmc.Skeleton(h=200)],
+        [],
         id='round-overview',
         value='round-overview',
       ),
       dmc.TabsPanel(
         dmc.Stack(
           id='insights-list',
-          children=[dmc.Skeleton(h=150)],
           gap='md',
           my=24,
           style=dict(width='100%'),
@@ -249,27 +248,38 @@ def round_summary(round_number):
   )
 
 @callback(
+  Output('round-title', 'children'),
   Output('round-overview', 'children'),
   Output('insights-list', 'children'),
   Input('selected-round-store', 'data'),
-  prevent_initial_call=True,
 )
-def update_insights_list(round_number):
+def update_round_summary(round_number):
+  if not round_number:
+    return 'No round selected', '...', []
   rounds = load_rounds()
-  r = rounds[round_number]
-  report = r.get('report') or '...'
-  insights = r.get('insights') or []
-  return dcc.Markdown(report), [insight_button(item) for item in insights]
+  this_round = rounds.get(round_number)
+  if not this_round:
+    return f'Round {round_number}', 'No data.', []
+
+  report = this_round.get('report') or '...'
+  insights = this_round.get('insights') or []
+  return f"Round {round_number}", dcc.Markdown(report), [insight_button(i) for i in insights]
+
 
 @callback(
   Output('custom-insights-list', 'children'),
   Input('custom-insights-store', 'data'),
-  prevent_initial_call=False,
+  Input('selected-round-store', 'data'),
 )
-def update_custom_insights_list(custom_data):
-  if not custom_data or len(custom_data) == 0:
+def update_custom_insights_list(custom_insights, round_number):
+  if not custom_insights or not round_number:
     return [no_insights_message]
-  return [custom_insight_button(item) for item in custom_data]
+
+  filtered = [
+    insight for insight in custom_insights
+    if str(insight.get('controls', {}).get('round')) == str(round_number)
+  ]
+  return [custom_insight_button(i) for i in filtered] or [no_insights_message]
 
 @callback(
   Output('delete-confirmation-modal', 'opened', allow_duplicate=True),
