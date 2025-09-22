@@ -163,6 +163,6 @@ def save_custom_insight(
     None,
     None,
     [notification],
-    '/viewer',
+    '/insight',
     f'?id={new_id}',
   )

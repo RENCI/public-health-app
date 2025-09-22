@@ -66,7 +66,7 @@ def insight_button(item):
         minHeight='100%',
       ),
     ),
-    href=f'/viewer?id={item["id"]}',
+    href=f'/insight?id={item["id"]}',
     underline=False,
   )
 
@@ -116,7 +116,7 @@ def custom_insight_button(item):
         alignItems='center',
       ),
     ),
-    href=f'/viewer?id={item["id"]}',
+    href=f'/insight?id={item["id"]}',
     underline=False,
   )
 

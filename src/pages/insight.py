@@ -7,10 +7,10 @@ from src.data.rounds.round19 import get_insight
 from src.util.get_query_param import get_query_param
 from src.components.viz_editor import visualization_editor
 
-register_page(__name__, path_template='/viewer', name='Insight Details')
+register_page(__name__, path_template='/insight', name='Insight Details')
 
 back_button = dmc.Anchor(
-  '← Back to Insights',
+  '← Back to Round Overview',
   id='back-to-insights-button',
   href='/',
 )
