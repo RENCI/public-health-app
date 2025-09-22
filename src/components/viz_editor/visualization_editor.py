@@ -1,7 +1,7 @@
 import dash_mantine_components as dmc
 from dash import Input, Output, callback, html
 
-from src.components.chart import Chart, ChartControls, ChartTitle
+from src.components.chart import Chart, ChartControls, ChartType
 from src.components.chart_functions import chart
 
 from .controls import (
@@ -20,13 +20,13 @@ available_rounds = [19]
 current_round = 19
 
 default_control_values = dict(
-  scenarios=["77", "78", "79", "80", "81"],
-  models=["18"],
-  location="US",
-  target="incident_hospitalization",
-  age_group="0-130",
-  uncertainty="None",
-  ensemble="Ensemble",
+  scenarios=['77', '78', '79', '80', '81'],
+  models=['18'],
+  location='US',
+  target='incident_hospitalization',
+  age_group='0-130',
+  uncertainty='None',
+  ensemble='Ensemble',
   annotations={},
 )
 
@@ -34,20 +34,20 @@ default_control_values = dict(
 def visualization_editor(control_values=None, show_controls=True):
   controls = {**default_control_values, **(control_values or {})}
 
-  init_scenarios = controls["scenarios"]
-  init_models = controls["models"]
-  init_location = controls["location"]
-  init_target = controls["target"]
-  init_age_group = controls["age_group"]
-  init_uncertainty = controls["uncertainty"]
-  init_ensemble = controls["ensemble"]
-  init_annotations = controls["annotations"]
+  init_scenarios = controls['scenarios']
+  init_models = controls['models']
+  init_location = controls['location']
+  init_target = controls['target']
+  init_age_group = controls['age_group']
+  init_uncertainty = controls['uncertainty']
+  init_ensemble = controls['ensemble']
+  init_annotations = controls['annotations']
 
   figure_control_values = ChartControls(
-    x_axis="date",
-    y_axis="value",
+    x_axis='date',
+    y_axis='value',
     round_num=19,
-    pathogen="covid",
+    pathogen='covid',
     scenario_id=init_scenarios[0],
     type_id=0,
     model_ids=init_models,
@@ -58,7 +58,7 @@ def visualization_editor(control_values=None, show_controls=True):
   chart = Chart(figure_control_values)
 
   figure_container = html.Div(
-    id="insight-visualization-figure",
+    id='insight-visualization-figure',
     children=chart.get_fig(),
   )
 
@@ -69,7 +69,7 @@ def visualization_editor(control_values=None, show_controls=True):
     children=[
       dmc.GridCol(
         figure_container,
-        id="visualization-column",
+        id='visualization-column',
         span=7,
       ),
       dmc.GridCol(
@@ -89,7 +89,7 @@ def visualization_editor(control_values=None, show_controls=True):
                 ],
                 gutter=0,
               ),
-              variant="soft",
+              variant='soft',
             ),
             dmc.Card(
               dmc.Grid(
@@ -98,12 +98,12 @@ def visualization_editor(control_values=None, show_controls=True):
                 ],
                 gutter=0,
               ),
-              variant="soft",
+              variant='soft',
             ),
           ],
-          gap="md",
+          gap='md',
         ),
-        id="controls-column",
+        id='controls-column',
         span=5,
       ),
     ],
@@ -112,24 +112,39 @@ def visualization_editor(control_values=None, show_controls=True):
 
 
 @callback(
-  Output("insight-visualization-figure", "children"),
-  Input("scenarios-select", "value"),
-  Input("models-select", "value"),
-  Input("location-select", "value"),
-  Input("target-select", "value"),
-  Input("age-group-select", "value"),
-  Input("uncertainty-select", "value"),
-  Input("annotations-store", "data"),
+  Output('insight-visualization-figure', 'children'),
+  Input('chart-type-select', 'value'),
+  Input('scenarios-select', 'value'),
+  Input('models-select', 'value'),
+  Input('location-select', 'value'),
+  Input('target-select', 'value'),
+  Input('age-group-select', 'value'),
+  Input('uncertainty-select', 'value'),
+  Input('annotations-store', 'data'),
   # prevent_initial_call=True,
 )
-def update_chart(scenarios, models, location, target, age_group, uncertainty, annotations):
-  control_values = dict(
-    scenarios=scenarios,
-    models=models,
-    location=location,
+def update_chart(
+  chart_type: str,
+  scenario_id: int,
+  models,
+  location,
+  target,
+  age_group,
+  uncertainty,
+  annotations,
+):
+  chart_controls = ChartControls(
+    x_axis='date',
+    y_axis='value',
+    round_num=19,
+    pathogen='covid',
+    scenario_id=scenario_id,
+    type_id=0,
+    model_ids=models,
+    location_name=location,
     target=target,
     age_group=age_group,
     uncertainty=uncertainty,
     annotations=annotations,
   )
-  return chart(control_values=control_values)
+  return Chart(ChartType(chart_type), chart_controls)

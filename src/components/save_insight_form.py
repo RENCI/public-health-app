@@ -6,19 +6,19 @@ from dash import Input, Output, State, callback, exceptions, no_update
 from dash_iconify import DashIconify
 
 form_toggle_button = dmc.Button(
-  "Save as New Insight",
-  leftSection=DashIconify(icon="feather:save"),
-  id="reveal-form-button",
-  style=dict(alignSelf="center"),
+  'Save as New Insight',
+  leftSection=DashIconify(icon='feather:save'),
+  id='reveal-form-button',
+  style=dict(alignSelf='center'),
 )
 
 
-def save_insight_form(initial_title="", initial_description=""):
+def save_insight_form(initial_title='', initial_description=''):
   return dmc.Stack(
     [
       form_toggle_button,
       dmc.Collapse(
-        id="save-form-container",
+        id='save-form-container',
         opened=False,
         children=[
           dmc.Card(
@@ -26,14 +26,14 @@ def save_insight_form(initial_title="", initial_description=""):
               dmc.Stack(
                 [
                   dmc.TextInput(
-                    id="insight-title-input",
+                    id='insight-title-input',
                     value=initial_title,
-                    label="Title",
+                    label='Title',
                   ),
                   dmc.Textarea(
-                    id="insight-description-input",
+                    id='insight-description-input',
                     value=initial_description,
-                    label="Description",
+                    label='Description',
                     autosize=True,
                     minRows=5,
                   ),
@@ -44,19 +44,19 @@ def save_insight_form(initial_title="", initial_description=""):
               dmc.Group(
                 [
                   dmc.Button(
-                    "Cancel",
-                    leftSection=DashIconify(icon="feather:x"),
-                    color="crimson",
-                    variant="outline",
-                    id="hide-form-button",
+                    'Cancel',
+                    leftSection=DashIconify(icon='feather:x'),
+                    color='crimson',
+                    variant='outline',
+                    id='hide-form-button',
                   ),
                   dmc.Button(
-                    "Save",
-                    leftSection=DashIconify(icon="feather:check"),
-                    id="save-button",
+                    'Save',
+                    leftSection=DashIconify(icon='feather:check'),
+                    id='save-button',
                   ),
                 ],
-                justify="flex-end",
+                justify='flex-end',
               ),
             ]
           )
@@ -67,10 +67,10 @@ def save_insight_form(initial_title="", initial_description=""):
 
 
 @callback(
-  Output("save-form-container", "opened"),
-  Input("reveal-form-button", "n_clicks"),
-  Input("hide-form-button", "n_clicks"),
-  State("save-form-container", "opened"),
+  Output('save-form-container', 'opened'),
+  Input('reveal-form-button', 'n_clicks'),
+  Input('hide-form-button', 'n_clicks'),
+  State('save-form-container', 'opened'),
   prevent_initial_call=True,
 )
 def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
@@ -119,20 +119,20 @@ def save_custom_insight(
   title_error = None
   desc_error = None
   if not title or not title.strip():
-    title_error = "Title is required."
+    title_error = 'Title is required.'
   if not description or not description.strip():
-    desc_error = "Description is required."
+    desc_error = 'Description is required.'
 
   if title_error or desc_error:
     return no_update, title_error, desc_error, no_update, no_update, no_update
 
   now = datetime.datetime.utcnow().isoformat()
-  new_id = f"custom-{uuid.uuid4()}"
+  new_id = f'custom-{uuid.uuid4()}'
   new_item = dict(
     id=new_id,
     title=title.strip(),
     description=description.strip(),
-    image_url="https://placehold.co/400?text=Visualization",
+    image_url='https://placehold.co/400?text=Visualization',
     created_at=now,
     updated_at=now,
     controls=dict(
@@ -148,10 +148,10 @@ def save_custom_insight(
   )
 
   notification = {
-    "action": "show",
-    "id": f"save-success-{uuid.uuid4()}",
-    "message": f'Insight "{title.strip()}" saved successfully!',
-    "color": "limegreen",
+    'action': 'show',
+    'id': f'save-success-{uuid.uuid4()}',
+    'message': f'Insight "{title.strip()}" saved successfully!',
+    'color': 'limegreen',
   }
 
   current_store = current_store or []
@@ -160,6 +160,6 @@ def save_custom_insight(
     None,
     None,
     [notification],
-    "/viewer",
-    f"?id={new_id}",
+    '/viewer',
+    f'?id={new_id}',
   )

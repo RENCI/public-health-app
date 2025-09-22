@@ -21,8 +21,8 @@ def initialize_app_data():
 # Load startup data once at application startup
 CONSTANTS = initialize_app_data()
 
-_dash_renderer._set_react_version("18.2.0")
-insight_store = dcc.Store(id="selected_insight", storage_type="local")
+_dash_renderer._set_react_version('18.2.0')
+insight_store = dcc.Store(id='selected_insight', storage_type='local')
 
 external_stylesheets = [
   dmc.styles.ALL,
@@ -32,16 +32,16 @@ external_stylesheets = [
 app = Dash(
   external_stylesheets=external_stylesheets,
   use_pages=True,
-  pages_folder="src/pages",
+  pages_folder='src/pages',
 )
 
 # Store constants in app state for use in callbacks
 app.constants = CONSTANTS
 
-app.title = "ACCIDDA"
+app.title = 'ACCIDDA'
 app.layout = dmc.MantineProvider(
   theme=DEFAULT_THEME,
-  id="mantine-provider",
+  id='mantine-provider',
   children=[
     layout,
     insight_store,
@@ -50,5 +50,5 @@ app.layout = dmc.MantineProvider(
 
 server = app.server
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   app.run(debug=True)

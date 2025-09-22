@@ -12,15 +12,15 @@ from .target_select import target_select
 from .uncertainty_select import uncertainty_select
 
 __all__ = [
-  "age_group_select",
-  "annotations_input",
-  "create_selector_grid_column",
-  "ensemble_select",
-  "location_select",
-  "models_select",
-  "scenarios_select",
-  "target_select",
-  "uncertainty_select",
+  'age_group_select',
+  'annotations_input',
+  'create_selector_grid_column',
+  'ensemble_select',
+  'location_select',
+  'models_select',
+  'scenarios_select',
+  'target_select',
+  'uncertainty_select',
 ]
 
 
@@ -30,7 +30,7 @@ def create_selector_grid_column(
   return (
     dmc.GridCol(
       selector(value=initial_values),
-      style=dict(padding="var(--mantine-spacing-sm)"),
+      style=dict(padding='var(--mantine-spacing-sm)'),
       span=dict(base=span),
     ),
   )

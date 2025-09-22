@@ -1,2 +1,5 @@
 line-length = 100
 indent-width = 2
+
+[format]
+quote-style = "single"
