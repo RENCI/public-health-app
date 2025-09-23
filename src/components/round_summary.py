@@ -30,17 +30,58 @@ no_insights_message = dmc.Card(
   dmc.Center(
     dmc.Stack(
       [
-        dmc.Text("It looks like you haven't created any custom insights with this round of data."),
-        dmc.Text(
-          ['Head over to the ', dmc.Anchor('Explorer', href='/explorer'), ' to build one!']
+        dmc.Text('You haven\'t added any insights for this round yet.'),
+        dmc.Text('Start exploring the data and build your first custom insight!'),
+        dmc.Anchor(
+          dmc.Button(
+            ['Build a custom insight', dmc.Space(w=8), DashIconify(icon='feather:arrow-right', width=20)],
+            variant='gradient',
+            gradient={'from': 'lime', 'to': 'teal', 'deg': 120},
+            style=dict(
+              textDecoration='none',
+              display='flex',
+              justifyContent='center',
+              alignItems='center',
+              minHeight='100%',
+            ),
+          ),
+          href='/explorer',
+          size='lg',
+          underline=False,
         ),
       ],
       ta='center',
-      gap=24,
+      gap=8,
+      align='center',
     ),
-    h=300,
+    h=150,
   ),
-  my=16,
+  p=0,
+)
+
+new_insight_prompt = dmc.Card(
+  dmc.Center(
+    [
+      dmc.Anchor(
+        dmc.Button(
+          ['Build a new custom insight', dmc.Space(w=8), DashIconify(icon='feather:arrow-right', width=20)],
+          variant='gradient',
+          gradient={'from': 'lime', 'to': 'teal', 'deg': 120},
+          style=dict(
+            textDecoration='none',
+            display='flex',
+            justifyContent='center',
+            alignItems='center',
+            minHeight='100%',
+          ),
+        ),
+        href='/explorer',
+        size='lg',
+        underline=False,
+      ),
+    ],
+    h=150,
+  ),
 )
 
 def insight_button(item):
@@ -78,7 +119,7 @@ def insight_button(item):
       ),
       view_button,
     ],
-    variant='soft',
+    withBorder=True,
     style=dict(
       display='flex',
       gap='1rem',
@@ -101,8 +142,6 @@ def custom_insight_button(item):
 
   title = dmc.Text(item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left'))
 
-  description = dcc.Markdown(item['description'], style=dict(fontSize='75%', overflow='hidden'))
-
   view_button = dmc.Anchor(
     dmc.Button(
       ['View', dmc.Space(w=8), DashIconify(icon='feather:arrow-right', width=20)],
@@ -122,7 +161,7 @@ def custom_insight_button(item):
     [DashIconify(icon='feather:trash-2', width=20)],
     id={'type': 'delete-insight', 'id': item['id']},
     variant='light',
-    c='red',
+    color='red',
     style=dict(
       textDecoration='none',
       display='flex',
@@ -131,17 +170,25 @@ def custom_insight_button(item):
     ),
   )
 
+  custom_insights_badge = dmc.Badge(
+    'Custom',
+    variant='gradient',
+    gradient={'from': 'lime', 'to': 'teal', 'deg': 120},
+    size='md',
+    radius='md',
+  )
+
   return dmc.Card(
     [
       graphic,
       dmc.Stack(
         [
           title,
-          description,
           dmc.Flex(
             [
               dmc.Group(
                 [
+                  custom_insights_badge,
                   tipped_text(
                     f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'
                   ),
@@ -163,11 +210,11 @@ def custom_insight_button(item):
             style=dict(width='100%'),
           ),
         ],
-        align='flex-start',
+        justify='space-between',
         style=dict(flex=1),
+        gap=8,
       ),
     ],
-    variant='soft',
     style=dict(
       display='flex',
       gap='1rem',
@@ -204,9 +251,10 @@ def round_summary():
     dmc.Title(id='round-title', order=1, my=24, style=dict(textAlign='center')),
     dmc.Divider(),
     dmc.Box(id='round-overview'),
-    dmc.Title('Insights', order=2),
-    dmc.Stack(id='insights-list', gap='md', my=24)
-  ])
+    dmc.Title('Insights', order=2, my=16),
+    dmc.Stack(id='insights-list', gap='md'),
+    dmc.Stack(id='custom-insights-list', gap='md'),
+  ], gap='md')
 
 @callback(
   Output('round-title', 'children'),
@@ -242,7 +290,7 @@ def update_custom_insights_list(custom_insights, round_number):
     insight for insight in custom_insights
     if str(insight.get('controls', {}).get('round')) == str(round_number)
   ]
-  return [custom_insight_button(i) for i in filtered] or [no_insights_message]
+  return [custom_insight_button(i) for i in filtered] + [new_insight_prompt] or [no_insights_message]
 
 @callback(
   Output('delete-confirmation-modal', 'opened', allow_duplicate=True),

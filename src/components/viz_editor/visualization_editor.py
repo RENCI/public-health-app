@@ -15,9 +15,9 @@ current_round = 19
 
 default_control_values = dict(
   scenarios=['77', '78', '79', '80', '81'],
-  models=['18'],
+  models=[],
   location='US',
-  target='incident_hospitalization',
+  target='cumulative_hospitalization',
   age_group='0-130',
   uncertainty='None',
   ensemble='Ensemble',
