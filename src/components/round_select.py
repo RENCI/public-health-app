@@ -4,8 +4,8 @@ import dash_mantine_components as dmc
 from ..util.data import load_rounds
 
 rounds = load_rounds()
-print(rounds)
 
+# temp, for round option blurbs
 lorem_ispum = [
   'Aliquip ex dolor aliqua sed est ea minim aute in dolor.',
   'Officia incididunt cillum eu minim excepteur proident.',

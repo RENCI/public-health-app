@@ -199,60 +199,14 @@ delete_modal = dmc.Modal(
 )
 
 def round_summary():
-  return dmc.Tabs(
-    [
-      dmc.Flex([
-        delete_modal,
-        dmc.Title(id='round-title', order=1, my=24, style=dict(textAlign='center')),
-        dmc.TabsList(
-          [
-            dmc.TabsTab('Round Overview', value='round-overview', p=8, color='gray'),
-            dmc.TabsTab('Round Insights', value='round-insights', p=8, color='gray'),
-            dmc.TabsTab('Custom Insights', value='custom-insights', p=8, color='gray'),
-          ],
-          grow=False,
-        )],
-        justify='space-between',
-        align='center',
-      ),
-      dmc.TabsPanel(
-        [],
-        id='round-overview',
-        value='round-overview',
-      ),
-      dmc.TabsPanel(
-        dmc.Stack(
-          id='insights-list',
-          gap='md',
-          my=24,
-          style=dict(width='100%'),
-        ),
-        value='round-insights',
-      ),
-      dmc.TabsPanel(
-        dmc.Stack(
-          id='custom-insights-list',
-          children=[no_insights_message],
-          gap='md',
-          p=24,
-          style=dict(width='100%'),
-        ),
-        value='custom-insights',
-      ),
-    ],
-    id='round-summary-tabs',
-    value='round-overview',
-    variant='pills',
-    autoContrast=True,
-  )
-
-@callback(
-  Output('round-summary-tabs', 'value'), # start back at overview
-  Input('selected-round-store', 'data'),
-  Input('url', 'pathname'),
-)
-def init_round_overview_tabs(round_number, pathname):
-  return 'round-overview'
+  return dmc.Stack([
+    delete_modal,
+    dmc.Title(id='round-title', order=1, my=24, style=dict(textAlign='center')),
+    dmc.Divider(),
+    dmc.Box(id='round-overview'),
+    dmc.Title('Insights', order=2),
+    dmc.Stack(id='insights-list', gap='md', my=24)
+  ])
 
 @callback(
   Output('round-title', 'children'),
