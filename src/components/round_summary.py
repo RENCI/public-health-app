@@ -15,10 +15,8 @@ import uuid
 from src.util.time_ago import time_ago
 from ..util.data import load_rounds
 
-from src.components.insight_report import insight_report
 from src.util.format_timestamp import format_timestamp
 
-from ..data.rounds.round19 import insights
 
 def tipped_text(text, tooltip=None, size='md'):
   return dmc.Tooltip(
@@ -250,23 +248,31 @@ def round_summary():
 
 @callback(
   Output('round-summary-tabs', 'value'), # start back at overview
+  Input('selected-round-store', 'data'),
+  Input('url', 'pathname'),
+)
+def init_round_overview_tabs(round_number, pathname):
+  return 'round-overview'
+
+@callback(
   Output('round-title', 'children'),
   Output('round-overview', 'children'),
   Output('insights-list', 'children'),
   Input('selected-round-store', 'data'),
-  prevent_initial_call=True,
+  Input('url', 'pathname'),
 )
-def update_round_summary(round_number):
+def update_round_summary(round_number, pathname):
+  print(dict(round_number=round_number, pathname=pathname))
   if not round_number:
-    return 'round-overview', 'No round selected', '...', []
+    return 'No round selected', '...', []
   rounds = load_rounds()
   this_round = rounds.get(round_number)
   if not this_round:
-    return 'round-overview', f'Round {round_number}', 'No data.', []
+    return f'Round {round_number}', 'No data.', []
 
   report = this_round.get('report') or '...'
   insights = this_round.get('insights') or []
-  return 'round-overview', f"Round {round_number}", dcc.Markdown(report), [insight_button(i) for i in insights]
+  return f'Round {round_number}', dcc.Markdown(report), [insight_button(i) for i in insights]
 
 
 @callback(

@@ -1,4 +1,4 @@
-from dash import register_page, callback, Input, Output, html, dcc
+from dash import register_page
 import dash_mantine_components as dmc
 
 from src.components.disclaimer import disclaimer
