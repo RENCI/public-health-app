@@ -242,28 +242,31 @@ def round_summary():
         value='custom-insights',
       ),
     ],
+    id='round-summary-tabs',
     value='round-overview',
     variant='pills',
     autoContrast=True,
   )
 
 @callback(
+  Output('round-summary-tabs', 'value'), # start back at overview
   Output('round-title', 'children'),
   Output('round-overview', 'children'),
   Output('insights-list', 'children'),
   Input('selected-round-store', 'data'),
+  prevent_initial_call=True,
 )
 def update_round_summary(round_number):
   if not round_number:
-    return 'No round selected', '...', []
+    return 'round-overview', 'No round selected', '...', []
   rounds = load_rounds()
   this_round = rounds.get(round_number)
   if not this_round:
-    return f'Round {round_number}', 'No data.', []
+    return 'round-overview', f'Round {round_number}', 'No data.', []
 
   report = this_round.get('report') or '...'
   insights = this_round.get('insights') or []
-  return f"Round {round_number}", dcc.Markdown(report), [insight_button(i) for i in insights]
+  return 'round-overview', f"Round {round_number}", dcc.Markdown(report), [insight_button(i) for i in insights]
 
 
 @callback(

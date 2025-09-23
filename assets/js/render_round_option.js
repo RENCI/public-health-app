@@ -7,10 +7,13 @@
 
   dmcFunctions.renderRoundOption = function ({ option, checked }) {
     return React.createElement(
-      dmc.Flex,
-      { gap: 'xs', className: `round-option ${ checked ? 'selected' : 'unselected' }` },
-      React.createElement('div', { className: 'round-number' }, `Round ${ option.value }`),
-      React.createElement('div', { className: 'round-overview' }, option.detail),
+      dmc.Stack,
+      { className: `round-option ${ checked ? 'selected' : 'unselected' }` },
+      React.createElement(dmc.Group, { justify: 'space-between' }, [
+        React.createElement(dmc.Text, { size: 'md', className: 'round-option-label' }, option.label),
+        React.createElement(dmc.Text, { size: 'xs' }, `${ option.insights_count } insights`)
+      ]),
+      React.createElement(dmc.Text, { size: 'sm' }, option.snippet),
     );
   };
 })();
