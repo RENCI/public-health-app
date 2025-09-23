@@ -1,6 +1,6 @@
 import dash_mantine_components as dmc
 
-scenarios = ['77', '78', '79', '80', '81']
+scenarios = ['1', '2']
 options = [{'value': c, 'label': c} for c in scenarios]
 
 

@@ -1,8 +1,7 @@
 import dash_mantine_components as dmc
 from dash import Input, Output, callback, html
 
-from src.components.chart import Chart, ChartControls, ChartType
-from src.components.chart_functions import chart
+from src.components.chart import Chart, ChartControls, PlotType
 
 from .controls import (
   age_group_select,
@@ -20,8 +19,8 @@ available_rounds = [19]
 current_round = 19
 
 default_control_values = dict(
-  scenarios=['77', '78', '79', '80', '81'],
-  models=['18'],
+  scenarios=['1', '2'],
+  models=['1', '2', '3'],
   location='US',
   target='incident_hospitalization',
   age_group='0-130',
@@ -48,14 +47,13 @@ def visualization_editor(control_values=None, show_controls=True):
     y_axis='value',
     round_num=19,
     pathogen='covid',
-    scenario_id=init_scenarios[0],
-    type_id=0,
+    scenario_ids=init_scenarios,
     model_ids=init_models,
     location_name=init_location,
     age_group=init_age_group,
     target=init_target,
   )
-  chart = Chart(figure_control_values)
+  chart = Chart(PlotType.LINE, figure_control_values)
 
   figure_container = html.Div(
     id='insight-visualization-figure',
@@ -125,7 +123,7 @@ def visualization_editor(control_values=None, show_controls=True):
 )
 def update_chart(
   chart_type: str,
-  scenario_id: int,
+  scenario_ids: list[int],
   models,
   location,
   target,
@@ -138,13 +136,12 @@ def update_chart(
     y_axis='value',
     round_num=19,
     pathogen='covid',
-    scenario_id=scenario_id,
-    type_id=0,
+    scenario_ids=scenario_ids,
     model_ids=models,
     location_name=location,
     target=target,
     age_group=age_group,
-    uncertainty=uncertainty,
+    certainty_percent=uncertainty,
     annotations=annotations,
   )
-  return Chart(ChartType(chart_type), chart_controls)
+  return Chart(PlotType(chart_type), chart_controls)

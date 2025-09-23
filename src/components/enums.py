@@ -40,7 +40,7 @@ class AgeGroup(Enum):
 
 class DataType(Enum):
   SAMPLE = ('sample', 'parquet')
-  QUARTILE = ('quartile', 'csv')
+  QUANTILE = ('quantile', 'csv')
 
   def __init__(self, path_value: str, file_extension: str):
     self.path_value = path_value

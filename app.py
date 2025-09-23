@@ -2,23 +2,20 @@ import dash_mantine_components as dmc
 from dash import Dash, _dash_renderer, dcc
 
 from src.components.layout import layout
-from src.constants import load_constants, set_constants
+from src.constants import get_constants
 from src.theme import DEFAULT_THEME
 
 
-# ONE-TIME STARTUP DATA LOADING
+# One-time loading of startup data
 def initialize_app_data():
   """Load and initialize all application data at startup."""
   # Load constants from JSON file
-  constants = load_constants()
-
-  # Store constants in the constants module for global access
-  set_constants(constants)
+  constants = get_constants()
 
   return constants
 
 
-# Load startup data once at application startup
+# Load and return constants once at application startup
 CONSTANTS = initialize_app_data()
 
 _dash_renderer._set_react_version('18.2.0')
