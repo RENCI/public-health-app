@@ -15,14 +15,15 @@ current_round = 19
 
 default_control_values = dict(
   scenarios=['77', '78', '79', '80', '81'],
-  models=['18'],
+  models=[],
   location='US',
-  target='incident_hospitalization',
+  target='cumulative_hospitalization',
   age_group='0-130',
   uncertainty='None',
   ensemble='Ensemble',
   annotations={},
 )
+
 
 def visualization_editor(control_values=None, show_controls=True):
   controls = {**default_control_values, **(control_values or {})}
@@ -63,70 +64,74 @@ def visualization_editor(control_values=None, show_controls=True):
         span=7,
       ),
       dmc.GridCol(
-        dmc.Stack([
-          dmc.Card(
-            dmc.Grid(
-              children=[
-                dmc.GridCol(
-                  scenarios_select(value=init_scenarios),
-                  style=dict(padding='var(--mantine-spacing-sm)'),
-                  span=dict(base=12),
-                ),
-                dmc.GridCol(
-                  models_select(value=init_models),
-                  style=dict(padding='var(--mantine-spacing-sm)'),
-                  span=dict(base=12),
-                ),
-                dmc.GridCol(
-                  location_select(value=init_location),
-                  style=dict(padding='var(--mantine-spacing-sm)'),
-                  span=12,
-                ),
-                dmc.GridCol(
-                  target_select(value=init_target),
-                  style=dict(padding='var(--mantine-spacing-sm)'),
-                  span=12,
-                ),
-                dmc.GridCol(
-                  age_group_select(value=init_age_group),
-                  style=dict(padding='var(--mantine-spacing-sm)'),
-                  span=dict(base=12),
-                ),
-                dmc.GridCol(
-                  uncertainty_select(value=init_uncertainty),
-                  style=dict(padding='var(--mantine-spacing-sm)'),
-                  span=dict(base=12),
-                ),
-                dmc.GridCol(
-                  ensemble_select(value=init_ensemble),
-                  style=dict(padding='var(--mantine-spacing-sm)'),
-                  span=dict(base=12),
-                ),
-              ],
-              gutter=0,
+        dmc.Stack(
+          [
+            dmc.Card(
+              dmc.Grid(
+                children=[
+                  dmc.GridCol(
+                    scenarios_select(value=init_scenarios),
+                    style=dict(padding='var(--mantine-spacing-sm)'),
+                    span=dict(base=12),
+                  ),
+                  dmc.GridCol(
+                    models_select(value=init_models),
+                    style=dict(padding='var(--mantine-spacing-sm)'),
+                    span=dict(base=12),
+                  ),
+                  dmc.GridCol(
+                    location_select(value=init_location),
+                    style=dict(padding='var(--mantine-spacing-sm)'),
+                    span=12,
+                  ),
+                  dmc.GridCol(
+                    target_select(value=init_target),
+                    style=dict(padding='var(--mantine-spacing-sm)'),
+                    span=12,
+                  ),
+                  dmc.GridCol(
+                    age_group_select(value=init_age_group),
+                    style=dict(padding='var(--mantine-spacing-sm)'),
+                    span=dict(base=12),
+                  ),
+                  dmc.GridCol(
+                    uncertainty_select(value=init_uncertainty),
+                    style=dict(padding='var(--mantine-spacing-sm)'),
+                    span=dict(base=12),
+                  ),
+                  dmc.GridCol(
+                    ensemble_select(value=init_ensemble),
+                    style=dict(padding='var(--mantine-spacing-sm)'),
+                    span=dict(base=12),
+                  ),
+                ],
+                gutter=0,
+              ),
+              variant='soft',
             ),
-            variant='soft',
-          ),
-          dmc.Card(
-            dmc.Grid(
-              children=[
-                dmc.GridCol(
-                  annotations_input(value=init_annotations),
-                  style=dict(padding='var(--mantine-spacing-sm)'),
-                  span=dict(base=12),
-                ),
-              ],
-              gutter=0,
+            dmc.Card(
+              dmc.Grid(
+                children=[
+                  dmc.GridCol(
+                    annotations_input(value=init_annotations),
+                    style=dict(padding='var(--mantine-spacing-sm)'),
+                    span=dict(base=12),
+                  ),
+                ],
+                gutter=0,
+              ),
+              variant='soft',
             ),
-            variant='soft',
-          ),
-        ], gap='md'),
+          ],
+          gap='md',
+        ),
         id='controls-column',
         span=5,
       ),
     ],
     mb=12,
   )
+
 
 @callback(
   Output('insight-visualization-figure', 'children'),

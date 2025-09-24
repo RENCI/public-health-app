@@ -1,0 +1,39 @@
+.mantine-Select-dropdown {
+  height: min-content;
+}
+
+.mantine-Select-option:has(.round-option) {
+  padding: 0;
+}
+
+.round-option {
+  width: 100%;
+  display: flex;
+  align-items: space-between;
+  padding: 1rem;
+  border-radius: 4px;
+  position: relative;
+  .round-option-label {
+    font-weight: bold;
+  }
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: calc(100%);
+    width: 5px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    background-color: var(--mantine-color-gray-filled);
+  }
+  &.selected {
+    background-color: color-mix(in hsl, var(--mantine-primary-color-filled) 5%, transparent);
+    .round-option-label {
+      color: var(--mantine-primary-color-filled);
+    }
+  }
+  &.selected::before {
+    background-color: var(--mantine-primary-color-filled);
+  }
+}

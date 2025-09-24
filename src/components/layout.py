@@ -10,6 +10,7 @@ custom_insights_store = dcc.Store(id='custom-insights-store', data=[], storage_t
 layout = dmc.AppShell(
   [
     custom_insights_store,
+    dcc.Store(id='selected-round-store', data='19'),
     dcc.Location(id='url', refresh=False),
     dmc.AppShellHeader(header),
     dmc.AppShellMain(dash.page_container, id='page-content'),

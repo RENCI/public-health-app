@@ -88,6 +88,7 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   State('custom-insights-store', 'data'),
   State('insight-title-input', 'value'),
   State('insight-description-input', 'value'),
+  State('selected-round-store', 'data'),
   State('scenarios-select', 'value'),
   State('models-select', 'value'),
   State('location-select', 'value'),
@@ -103,6 +104,7 @@ def save_custom_insight(
   current_store,
   title,
   description,
+  round_number,
   scenarios,
   models,
   location,
@@ -136,6 +138,7 @@ def save_custom_insight(
     created_at=now,
     updated_at=now,
     controls=dict(
+      round=round_number,
       scenarios=scenarios,
       models=models,
       location=location,
@@ -160,6 +163,6 @@ def save_custom_insight(
     None,
     None,
     [notification],
-    '/viewer',
+    '/insight',
     f'?id={new_id}',
   )

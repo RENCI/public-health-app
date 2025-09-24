@@ -1,7 +1,7 @@
 from dash import html, Input, Output, State, callback, exceptions, register_page
 import dash_mantine_components as dmc
 from dash_iconify import DashIconify
-from src.data.round19 import get_insight
+from src.data.rounds.round19 import get_insight
 from src.components.save_insight_form import save_insight_form
 from src.components.viz_editor import visualization_editor
 from src.util.get_query_param import get_query_param
@@ -57,7 +57,8 @@ def update_back_button_href(search):
   starter = get_query_param(search, 'starter')
   if not starter:
     raise exceptions.PreventUpdate
-  return f'/viewer?id={starter}' if starter else '/'
+  return f'/insight?id={starter}' if starter else '/'
+
 
 @callback(
   Output('editor-contents', 'children'),
