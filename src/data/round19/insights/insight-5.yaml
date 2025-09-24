@@ -32,9 +32,12 @@ updated_at: 2025-05-18T22:45:12Z
 controls:
   location: "California"
   target: "incident_hospitalization"
-  models: [1, 2, 3]
-  scenarios: ["1", "2"]
+  models: ["Ensemble_LOP", "UT-ImmunoSEIRS"]
+  scenarios: ["A-2023-10-27", "B-2023-10-27"]
   uncertainty: "95%"
+  x_axis: "horizon"
+  y_axis: "value"
+  round_num: 19
   annotations:
     - value: 5000
       label: "Max with no intervention"

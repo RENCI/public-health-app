@@ -1,3 +1,5 @@
+from typing import Any
+
 import dash_mantine_components as dmc
 from dash import Input, Output, callback, html
 
@@ -7,7 +9,6 @@ from .controls import (
   age_group_select,
   annotations_input,
   create_selector_grid_column,
-  ensemble_select,
   location_select,
   models_select,
   scenarios_select,
@@ -19,13 +20,12 @@ available_rounds = [19]
 current_round = 19
 
 default_control_values = dict(
-  scenarios=['1', '2'],
-  models=['1', '2', '3'],
+  scenarios=['A-2023-10-27', 'B-2023-10-27'],
+  models=['Ensemble_LOP'],
   location='US',
   target='incident_hospitalization',
   age_group='0-130',
   uncertainty='None',
-  ensemble='Ensemble',
   annotations={},
 )
 
@@ -33,25 +33,29 @@ default_control_values = dict(
 def visualization_editor(control_values=None, show_controls=True):
   controls = {**default_control_values, **(control_values or {})}
 
-  init_scenarios = controls['scenarios']
-  init_models = controls['models']
-  init_location = controls['location']
-  init_target = controls['target']
-  init_age_group = controls['age_group']
-  init_uncertainty = controls['uncertainty']
-  init_ensemble = controls['ensemble']
-  init_annotations = controls['annotations']
+  init_scenarios: list[str] = controls.get('scenarios', ['A-2023-10-27', 'B-2023-10-27'])
+  init_models: list[str] = controls.get('models', ['Ensemble_LOP'])
+  init_location: str = controls.get('location', 'US')
+  init_target: str = controls.get('target', 'incident_hospitalization')
+  init_age_group: str = controls.get('age_group', '0-130')
+  init_uncertainty: str | None = controls.get('uncertainty')
+  init_annotations: dict[str, Any] = controls.get('annotations', {})
+  x_axis: str = controls.get('x_axis', 'date')
+  y_axis: str = controls.get('y_axis', 'value')
+  round_num: int = controls.get('round_num', 19)
 
   figure_control_values = ChartControls(
-    x_axis='date',
-    y_axis='value',
-    round_num=19,
+    x_axis=x_axis,
+    y_axis=y_axis,
+    round_num=round_num,
     pathogen='covid',
     scenario_ids=init_scenarios,
     model_ids=init_models,
     location_name=init_location,
     age_group=init_age_group,
     target=init_target,
+    certainty_percent=init_uncertainty,
+    annotations=init_annotations,
   )
   chart = Chart(PlotType.LINE, figure_control_values)
 
@@ -82,7 +86,7 @@ def visualization_editor(control_values=None, show_controls=True):
                   create_selector_grid_column(target_select, init_target),
                   create_selector_grid_column(age_group_select, init_age_group),
                   create_selector_grid_column(uncertainty_select, init_uncertainty),
-                  create_selector_grid_column(ensemble_select, init_ensemble),
+                  # create_selector_grid_column(ensemble_select, init_ensemble),
                   create_selector_grid_column(annotations_input, init_annotations),
                 ],
                 gutter=0,
@@ -111,7 +115,6 @@ def visualization_editor(control_values=None, show_controls=True):
 
 @callback(
   Output('insight-visualization-figure', 'children'),
-  Input('chart-type-select', 'value'),
   Input('scenarios-select', 'value'),
   Input('models-select', 'value'),
   Input('location-select', 'value'),
@@ -122,7 +125,6 @@ def visualization_editor(control_values=None, show_controls=True):
   # prevent_initial_call=True,
 )
 def update_chart(
-  chart_type: str,
   scenario_ids: list[int],
   models,
   location,
@@ -144,4 +146,4 @@ def update_chart(
     certainty_percent=uncertainty,
     annotations=annotations,
   )
-  return Chart(PlotType(chart_type), chart_controls)
+  return Chart(PlotType(PlotType.LINE), chart_controls)

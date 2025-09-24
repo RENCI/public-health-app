@@ -1,7 +1,7 @@
 {
   "pathogen": "RSV",
   "pathogen_display_name": "RSV",
-  "scenario_id": {
+  "scenario_name": {
     "1": "A-2023-10-27",
     "2": "B-2023-10-27",
     "3": "C-2023-10-27",
@@ -33,7 +33,7 @@
     "17": "NIH-RSV_WIN_old",
     "18": "UNCC-Hierbin"
   },
-  "color_dict": {
+  "model_color": {
     "Ensemble_LOP": "rgba(103, 72, 106, 1)",
     "Ensemble_LOP_untrimmed": "rgba(136, 174, 225, 1)",
     "Ensemble": "rgba(169, 169, 255, 1)",
@@ -52,7 +52,7 @@
     "Ensemble_LOP_all": "rgba(75, 75, 75, 1)",
     "UNCC-Hierbin": "rgba(170, 51, 106, 1)"
   },
-  "pathogen_color_dict": {
+  "pathogen_color": {
     "Combined": "rgba(116, 113, 174, 1)",
     "Flu": "rgba(200, 166, 02, 1)",
     "COVID-19": "rgba(102, 204, 238, 1)",

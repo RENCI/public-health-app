@@ -152,13 +152,9 @@ class Chart:
     self.controls = controls
     self.scenarios = controls.scenarios
     self._data_type = DataType.QUANTILE
-    self._data_path = self.build_dataset_path(
-      data_type=self._data_type,
-      round_number=self.controls.round_num,
-      location=self.controls.location,
-      target=self.controls.target,
+    self._raw_df = self.collect_data(
+      self._data_type, self.controls.round_num, self.controls.location, self.controls.target
     )
-    self._raw_df = self.collect_data(self._data_type, self._data_path)
     self._raw_df = self._raw_df.set_index(self.controls.x_axis)
     self._fig: go.Figure = go.Figure()
 
@@ -191,14 +187,15 @@ class Chart:
       )
 
     # load gold standard data (the actual data up to present day, not projections)
-    gold_std_path = f'src/data/round{self.controls.round_num}/gold_standard/covid_nhsn_hosp_inc.csv'  # path to cleaned CSV
-    gold_std_df = pd.read_csv(gold_std_path, parse_dates=['time_value'])
-    df = df.query(
-      'scenario_id.isin([scenario.id for scenario in self.controls.scenarios])'
-      & 'model_name.isin([model.name for model in self.controls.models])'
-      & 'age_group == @self.controls.age_group.input_value'
-      & 'location == @self.controls.location.name'
+    gold_std_df = self.collect_gold_std_data(
+      self.controls.round_num, self.controls.location, self.controls.target
     )
+    scenario_ids = [scenario.id for scenario in self.controls.scenarios]
+    model_names = [model.name for model in self.controls.models]
+    df = df.query('scenario_id.isin(@scenario_ids)')
+    df = df.query('model_name.isin(@model_names)')
+    df = df.query('age_group == @self.controls.age_group.input_value')
+    df = df.query('location == @self.controls.location.name')
 
     num_rows = len(self.controls.scenarios)
     self._fig = make_subplots(
@@ -219,7 +216,7 @@ class Chart:
         model_df = median_df.query('model_name == @model_name')
         self._fig.add_trace(
           go.Scatter(
-            x=model_df['target_end_date'],
+            x=model_df['horizon'],
             y=model_df['value'],
             mode='lines+markers',
             name=f'Model {model_name}',
@@ -242,7 +239,7 @@ class Chart:
 
             self._fig.add_trace(
               go.Scatter(
-                x=pd.concat([lower_model['target_end_date'], upper_model['target_end_date'][::-1]]),
+                x=pd.concat([lower_model['horizon'], upper_model['horizon'][::-1]]),
                 y=pd.concat([lower_model['value'], upper_model['value'][::-1]]),
                 fill='toself',
                 fillcolor=conf_int_colors[(lower_q, upper_q)],
@@ -258,7 +255,7 @@ class Chart:
       self._fig.add_trace(
         go.Scatter(
           x=gold_std_df['time_value'],
-          y=gold_std_df['value_numeric'],
+          y=gold_std_df['value'],
           mode='lines+markers',
           name='Gold standard',
           line=dict(color='rebeccapurple', dash='dot'),
@@ -310,7 +307,7 @@ class Chart:
   def get_data(self) -> pd.DataFrame:
     return self._raw_df
 
-  def build_dataset_path(
+  def _build_dataset_path(
     self,
     *,
     data_type: DataType = DataType.QUANTILE,
@@ -329,12 +326,25 @@ class Chart:
       / data_type.get_path_value()
       / f'part-{part}.{data_type.get_file_extension()}'
     )
-    print(path)
     if not path.exists() or not path.is_file():
       raise FileNotFoundError(f'File not found for chart: {path}')
     return path
 
-  def collect_data(self, data_type: DataType, path: Path) -> pd.DataFrame:
+  def collect_data(
+    self,
+    data_type: DataType = DataType.QUANTILE,
+    round_number: int = 1,
+    location: Location = Location('US'),
+    target: Target = Target.INCIDENT_HOSPITALIZATION,
+    part: int = 0,
+  ) -> pd.DataFrame:
+    path = self._build_dataset_path(
+      data_type=data_type,
+      round_number=round_number,
+      location=location,
+      target=target,
+      part=part,
+    )
     if not path.exists() or not path.is_file():
       raise FileNotFoundError(f'File not found for chart: {path}')
 
@@ -344,8 +354,25 @@ class Chart:
       elif data_type == DataType.SAMPLE and path.suffix == '.parquet':
         df = pd.read_parquet(path, engine='pyarrow')
       else:
-        raise ValueError(f'Path file extension does not match data type: {path}, {data_type}')
+        raise ValueError(
+          f'Path file extension {path.suffix} does not match expected file extension'
+          + f' {data_type.get_file_extension()} for data type: {data_type}'
+        )
       return df
     except Exception as e:
       print(f'Error reading file "{path}": {e}')
       raise e
+
+  def _build_gold_std_path(self, round_number: int, location: Location, target: Target) -> Path:
+    return BASE_DATA_DIR / f'round{round_number}' / 'gold_standard' / 'covid_nhsn_hosp_inc.csv'
+
+  def collect_gold_std_data(
+    self,
+    round_number: int,
+    location: Location,
+    target: Target,
+  ) -> pd.DataFrame:
+    gold_std_path = self._build_gold_std_path(round_number, location, target)
+    if not gold_std_path.exists() or not gold_std_path.is_file():
+      raise FileNotFoundError(f'File not found for gold standard data: {gold_std_path}')
+    return pd.read_csv(gold_std_path, parse_dates=['time_value'])

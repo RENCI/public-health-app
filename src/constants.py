@@ -22,13 +22,16 @@ def load_constants() -> None:
     constants = json.load(f)
 
   _CONSTANTS = constants
-  print('Loaded constants and locations')
+  print('Loaded constants')
 
 
 def load_locations() -> None:
   """Load the locations."""
   global _LOCATIONS
   locations_path = Path('src/data/metadata/locations.csv')
+  if not locations_path.exists():
+    raise FileNotFoundError(f'Locations file not found: {locations_path}')
+
   with open(locations_path, 'r') as f:
     locations = pd.read_csv(f).to_dict('records')
     locations_dict = {
@@ -39,7 +42,9 @@ def load_locations() -> None:
       )
       for record in locations
     }
-    _LOCATIONS = locations_dict
+
+  _LOCATIONS = locations_dict
+  print('Loaded locations')
 
 
 def get_constants() -> dict[str, Any]:
@@ -71,52 +76,63 @@ def get_pathogen_display_name() -> str:
 
 def get_scenario_name(id: int) -> str:
   """Get scenario ID mappings."""
-  scenario_ids = get_constants().get('scenario_id', {})
+  scenario_ids = get_constants().get('scenario_name', {})
   return scenario_ids.get(str(id), '')
+
+
+def get_models() -> dict[str, str]:
+  """Get model name mappings."""
+  return get_constants().get('model_name', {})
+
+
+def get_model_names() -> list[str]:
+  """Get model name mappings."""
+  return list(get_models().values())
 
 
 def get_model_name(id: int) -> str:
   """Get model name mappings."""
-  model_names = get_constants().get('model_name', {})
+  model_names = get_models()
   return model_names.get(str(id), '')
 
 
 def get_model_id(name: str) -> int:
   """Get model ID mappings."""
-  models: dict[str, str] = get_constants().get('model_name', {})
+  models: dict[str, str] = get_models()
   for model_id, model_name in models.items():
     if model_name == name:
       return int(model_id)
   raise ValueError(f"Model name '{name}' not found")
 
 
-def get_color_dict() -> dict[str, str]:
+def get_model_colors() -> dict[str, str]:
   """Get color mappings for models."""
-  return get_constants().get('color_dict', {})
+  return get_models().get('model_color', {})
 
 
-def get_pathogen_color_dict() -> dict[str, str]:
+def get_model_color(id: int = 1, name: str | None = None) -> str:
+  """Get the color for a specific model."""
+  colors = get_model_colors()
+  return colors.get(name or get_model_name(id), 'rgba(128, 128, 128, 1)')  # Default gray
+
+
+def get_pathogen_colors() -> dict[str, str]:
   """Get color mappings for pathogens."""
-  return get_constants().get('pathogen_color_dict', {})
+  return get_constants().get('pathogen_color', {})
+
+
+def get_pathogen_color(pathogen: str = 'RSV') -> str:
+  """Get the color for a specific pathogen."""
+  colors = get_pathogen_colors()
+  return colors.get(pathogen, 'rgba(128, 128, 128, 1)')  # Default gray
 
 
 def get_location_data(location: str) -> tuple[str, int, int]:
   """Get the short code for a specific location."""
+  location = location.lower().capitalize()
   return get_locations().get(location, ('', 0, 0))
 
 
 def get_location_order() -> list[str]:
   """Get the ordered list of locations."""
   return get_constants().get('location_order', [])
-
-
-def get_model_color(id: int = 1, name: str | None = None) -> str:
-  """Get the color for a specific model."""
-  colors = get_color_dict()
-  return colors.get(name or get_model_name(id), 'rgba(128, 128, 128, 1)')  # Default gray
-
-
-def get_pathogen_color(pathogen: str = 'RSV') -> str:
-  """Get the color for a specific pathogen."""
-  colors = get_pathogen_color_dict()
-  return colors.get(pathogen, 'rgba(128, 128, 128, 1)')  # Default gray
