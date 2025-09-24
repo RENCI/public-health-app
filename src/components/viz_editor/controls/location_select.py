@@ -10,6 +10,7 @@ locations = pd.read_csv(path)
 location_records = locations.to_dict('records')
 options = [location['location_name'] for location in location_records]
 
+
 def location_select(value='US'):
   return dmc.Select(
     label='Location',

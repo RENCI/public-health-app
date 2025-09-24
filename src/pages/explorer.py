@@ -59,6 +59,7 @@ def update_back_button_href(search):
     raise exceptions.PreventUpdate
   return f'/insight?id={starter}' if starter else '/'
 
+
 @callback(
   Output('editor-contents', 'children'),
   Input('reset-button', 'n_clicks'),

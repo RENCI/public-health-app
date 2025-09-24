@@ -4,8 +4,9 @@ from pathlib import Path
 import pandas as pd
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent # src
+BASE_DIR = Path(__file__).resolve().parent.parent  # src
 ROUNDS_DIR = os.path.join(BASE_DIR, 'data', 'rounds')
+
 
 def build_dataset_path(
   *,
@@ -47,8 +48,9 @@ def collect_data(path):
     print(f'Error reading file "{path}": {e}')
     return None
 
+
 def load_insights(path):
-  '''Load all YAML insight files from a given path.'''
+  """Load all YAML insight files from a given path."""
   insights = []
   if not os.path.exists(path):
     return insights
@@ -64,8 +66,9 @@ def load_insights(path):
   insights.sort(key=lambda x: x.get('title', '').lower())
   return insights
 
+
 def load_rounds():
-  '''Return dict of rounds, with its details and insights'''
+  """Return dict of rounds, with its details and insights"""
   rounds = {}
 
   for dirname in sorted(os.listdir(ROUNDS_DIR)):
@@ -82,7 +85,7 @@ def load_rounds():
       with open(details_path, 'r') as f:
         details = yaml.safe_load(f) or {}
 
-    insights = load_insights(insights_path)  
+    insights = load_insights(insights_path)
 
     rounds[round_number] = dict(
       round_number=int(round_number),

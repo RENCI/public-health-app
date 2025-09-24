@@ -14,14 +14,18 @@ lorem_ispum = [
   'Nostrud ut occaecat incididunt sed nulla nostrud est in.',
 ]
 
-options = [dict(
-  value=n,
-  label=f'Round {rounds[n]['round_number']}',
-  snippet=random.choice(lorem_ispum),
-  insights_count=len(rounds[n].get('insights')),
-) for n in rounds.keys()]
+options = [
+  dict(
+    value=n,
+    label=f'Round {rounds[n]["round_number"]}',
+    snippet=random.choice(lorem_ispum),
+    insights_count=len(rounds[n].get('insights')),
+  )
+  for n in rounds.keys()
+]
 
 sorted_options = sorted(options, key=lambda o: o['label'], reverse=True)
+
 
 def round_select(value='19'):
   return dmc.Select(
@@ -34,6 +38,7 @@ def round_select(value='19'):
     renderOption={'function': 'renderRoundOption'},
     style=dict(width='300px'),
   )
+
 
 @callback(
   Output('selected-round-store', 'data'),

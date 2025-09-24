@@ -10,6 +10,7 @@ add_annotation_button = dmc.Button(
   size='sm',
 )
 
+
 def remove_annotation_button(index=0):
   return dmc.ActionIcon(
     DashIconify(icon='feather:trash-2', color='crimson'),
@@ -17,6 +18,7 @@ def remove_annotation_button(index=0):
     size='lg',
     id={'type': 'remove-annotation', 'index': index},
   )
+
 
 def annotation_row(index, label='', value=0, color='#222222'):
   return dmc.Group(
@@ -49,6 +51,7 @@ def annotation_row(index, label='', value=0, color='#222222'):
     align='flex-end',
   )
 
+
 def annotations_input(value=[]):
   return dmc.Stack(
     id='annotations-input',
@@ -64,14 +67,15 @@ def annotations_input(value=[]):
     ],
   )
 
-@callback(
-  Output('annotations-container', 'children'),
-  Input('annotations-store', 'data')
-)
+
+@callback(Output('annotations-container', 'children'), Input('annotations-store', 'data'))
 def render_annotations(data):
   if not data:
     return []
-  return [annotation_row(i, d.get('label'), d.get('value'), d.get('color')) for i, d in enumerate(data)]
+  return [
+    annotation_row(i, d.get('label'), d.get('value'), d.get('color')) for i, d in enumerate(data)
+  ]
+
 
 @callback(
   Output('annotations-store', 'data'),
@@ -81,7 +85,7 @@ def render_annotations(data):
   Input({'type': 'color-value', 'index': ALL}, 'value'),
   Input({'type': 'remove-annotation', 'index': ALL}, 'n_clicks'),
   State('annotations-store', 'data'),
-  prevent_initial_call=True
+  prevent_initial_call=True,
 )
 def manage_annotations(add_clicks, values, labels, colors, delete_clicks, stored):
   stored = stored or []

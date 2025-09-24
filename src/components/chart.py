@@ -5,6 +5,7 @@ from src.util.data import build_dataset_path, collect_data
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+
 def chart(control_values={}):
   scenarios = [int(s) for s in control_values.get('scenarios', ['13'])]
   models = [int(s) for s in control_values.get('models', [])]
@@ -26,20 +27,21 @@ def chart(control_values={}):
     df = df[df['age_group'] == age_group]
 
   # load gold standard data
-  gold_std_path = 'src/data/rounds/round19/gold_standard/covid_nhsn_hosp_inc.csv'  # path to cleaned CSV
+  gold_std_path = (
+    'src/data/rounds/round19/gold_standard/covid_nhsn_hosp_inc.csv'  # path to cleaned CSV
+  )
   gold_std_df = pd.read_csv(gold_std_path, parse_dates=['time_value'])
 
   # filter gold standard to align with controls
   gold_std_df = gold_std_df[
-    (gold_std_df['age_group'] == age_group) &
-    (gold_std_df['geo_value_fullname'] == location)
+    (gold_std_df['age_group'] == age_group) & (gold_std_df['geo_value_fullname'] == location)
   ]
 
   # mapping confidence interval value to quantile bounds
   conf_int_map = {
     '50%': [(0.25, 0.75)],
     '95%': [(0.025, 0.975)],
-    'Multi': [(0.025, 0.975), (0.05, 0.95), (0.1, 0.9), (0.25, 0.75)]
+    'Multi': [(0.025, 0.975), (0.05, 0.95), (0.1, 0.9), (0.25, 0.75)],
   }
 
   # use same color with opacity for all confidence intervals
@@ -57,7 +59,7 @@ def chart(control_values={}):
 
   for i, scenario in enumerate(scenarios, start=1):
     scenario_df = df[df['scenario_id'] == scenario]
-    
+
     # add uncertainty intervals
     if uncertainty in conf_int_map:
       for lower_q, upper_q in conf_int_map[uncertainty]:
@@ -76,9 +78,10 @@ def chart(control_values={}):
               fillcolor=conf_int_color,
               line=dict(color='rgba(0,0,0,0)'),
               hoverinfo='skip',
-              showlegend=False
+              showlegend=False,
             ),
-            row=i, col=1
+            row=i,
+            col=1,
           )
 
     # main line for median (0.5 quantile)
@@ -92,9 +95,10 @@ def chart(control_values={}):
           mode='lines+markers',
           name=f'Model {model}',
           legendgroup=f'Model {model}',
-          showlegend=(i==1)
+          showlegend=(i == 1),
         ),
-        row=i, col=1
+        row=i,
+        col=1,
       )
 
     # gold standard line
@@ -107,18 +111,18 @@ def chart(control_values={}):
         line=dict(color='rebeccapurple', dash='dot'),
         marker=dict(symbol='diamond'),
         legendgroup='Gold standard',
-        showlegend=(i == 1)
+        showlegend=(i == 1),
       ),
-      row=i, col=1
+      row=i,
+      col=1,
     )
-
 
   for line in annotations:
     if line.get('value'):
       line_value = line.get('value')
       line_label = line.get('label', '')
       line_color = line.get('color', '#222222')
-  
+
       for yaxis_name in fig.select_yaxes():
         fig.add_hline(
           y=line_value,
@@ -131,9 +135,7 @@ def chart(control_values={}):
         )
 
   fig.update_layout(
-    hovermode='x unified',
-    height=300*num_rows,
-    title='Forecast values over time (by scenario)'
+    hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)'
   )
   fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
   fig.update_yaxes(showspikes=True, spikemode='across')
