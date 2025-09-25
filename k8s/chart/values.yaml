@@ -8,7 +8,7 @@ image:
   repository: containers.renci.org/comms/accidda-ui
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.6.0-dev"
+  tag: "0.7.0"
 
 nameOverride: ""
 fullnameOverride: ""
@@ -56,17 +56,17 @@ ingress:
      hosts:
        - accidda-ui.apps.renci.org
 
-resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+resources:
   limits:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 500m
+    memory: 512Mi
   requests:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 500m
+    memory: 512Mi
 
 autoscaling:
   enabled: false

@@ -8,7 +8,7 @@
 # ============
 # ⚙️ CONFIG
 APP_NAME := accidda-ui
-TAG := 0.6.0-dev
+TAG := 0.7.0
 IMAGE_NAME := containers.renci.org/comms/$(APP_NAME):$(TAG)
 PORT := 80
 RELEASE_NAME ?= $(APP_NAME)
