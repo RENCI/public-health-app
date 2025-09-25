@@ -74,15 +74,39 @@ def get_pathogen_display_name() -> str:
   return get_constants().get('pathogen_display_name', '')
 
 
+def get_scenarios() -> dict[str, str]:
+  """Get scenario ID mappings."""
+  return get_constants().get('scenarios', {})
+
+
+def get_scenario_ids() -> list[int]:
+  """Get scenario ID mappings."""
+  return [int(scenario_id_str) for scenario_id_str in get_scenarios().keys()]
+
+
+def get_scenario_id(name: str) -> int | None:
+  """Get scenario ID mappings."""
+  scenarios: dict[str, str] = get_scenarios()
+  for scenario_id, scenario_name in scenarios.items():
+    if scenario_name == name:
+      return int(scenario_id)
+  raise ValueError(f"Scenario id for name '{name}' not found")
+
+
+def get_scenario_names() -> list[str]:
+  """Get scenario name mappings."""
+  return list(get_scenarios().values())
+
+
 def get_scenario_name(id: int) -> str:
   """Get scenario ID mappings."""
-  scenario_ids = get_constants().get('scenario_name', {})
-  return scenario_ids.get(str(id), '')
+  scenarios = get_scenarios()
+  return scenarios.get(str(id), '')
 
 
 def get_models() -> dict[str, str]:
   """Get model name mappings."""
-  return get_constants().get('model_name', {})
+  return get_constants().get('models', {})
 
 
 def get_model_names() -> list[str]:
@@ -107,7 +131,7 @@ def get_model_id(name: str) -> int:
 
 def get_model_colors() -> dict[str, str]:
   """Get color mappings for models."""
-  return get_models().get('model_color', {})
+  return get_models().get('model_colors', {})
 
 
 def get_model_color(id: int = 1, name: str | None = None) -> str:
@@ -118,7 +142,7 @@ def get_model_color(id: int = 1, name: str | None = None) -> str:
 
 def get_pathogen_colors() -> dict[str, str]:
   """Get color mappings for pathogens."""
-  return get_constants().get('pathogen_color', {})
+  return get_constants().get('pathogen_colors', {})
 
 
 def get_pathogen_color(pathogen: str = 'RSV') -> str:

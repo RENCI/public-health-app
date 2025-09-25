@@ -1,12 +1,50 @@
-from enum import Enum, StrEnum
+from enum import Enum
+from typing import Self
 
 
-class Target(StrEnum):
-  INCIDENT_HOSPITALIZATION = 'incident_hospitalization'
-  CUMULATIVE_HOSPITALIZATION = 'cumulative_hospitalization'
+class InputAndDisplayEnum(Enum):
+  def __init__(self, display_value: str, input_value: str):
+    self.display_value = display_value
+    self.input_value = input_value
+
+  def get_display_value(self) -> str:
+    return self.display_value
+
+  def get_input_value(self) -> str:
+    return self.input_value
+
+  @classmethod
+  def from_input_value(cls, value: str) -> Self:
+    for member in cls:
+      if member.input_value == value:
+        return member
+    raise ValueError(f'No enum member found for input value: {value}')
+
+  @classmethod
+  def from_display_value(cls, value: str) -> Self:
+    for member in cls:
+      if member.display_value == value:
+        return member
+    raise ValueError(f'No enum member found for display value: {value}')
+
+  @classmethod
+  def display_values(cls) -> list[str]:
+    return [member.display_value for member in cls]
+
+  @classmethod
+  def input_values(cls) -> list[str]:
+    return [member.input_value for member in cls]
 
 
-class AgeGroup(Enum):
+class Target(InputAndDisplayEnum):
+  INCIDENT_HOSPITALIZATION = ('Incident Hospitalization', 'incident_hospitalization')
+  CUMULATIVE_HOSPITALIZATION = ('Cumulative Hospitalization', 'cumulative_hospitalization')
+
+  def __init__(self, display_value: str, input_value: str):
+    super().__init__(display_value, input_value)
+
+
+class AgeGroup(InputAndDisplayEnum):
   ALL = ('0-130', 'all ages')
   UNDER_ONE_YEAR_OLD = ('0-0.99', 'ages 0-1')
   ONE_TO_FOUR_YEARS_OLD = ('1-4', 'ages 1-4')
@@ -14,28 +52,7 @@ class AgeGroup(Enum):
   SIXTY_FIVE_AND_ABOVE = ('65-130', 'ages 65+')
 
   def __init__(self, input_value: str, display_value: str):
-    self.input_value = input_value
-    self.display_value = display_value
-
-  @classmethod
-  def from_input_value(cls, value: str) -> 'AgeGroup':
-    for member in cls:
-      if member.input_value == value:
-        return member
-    raise ValueError(f'No enum member found for input value: {value}')
-
-  @classmethod
-  def from_display_value(cls, value: str) -> 'AgeGroup':
-    for member in cls:
-      if member.display_value == value:
-        return member
-    raise ValueError(f'No enum member found for display value: {value}')
-
-  def get_input_value(self) -> str:
-    return self.input_value
-
-  def get_display_value(self) -> str:
-    return self.display_value
+    super().__init__(display_value, input_value)
 
 
 class DataType(Enum):
@@ -77,5 +94,9 @@ class Uncertainty(Enum):
     raise ValueError(f'No enum member found for display value: {value}')
 
   @classmethod
-  def values(cls) -> list[str]:
+  def display_values(cls) -> list[str]:
     return [member.display_value for member in cls]
+
+  @classmethod
+  def bounds_values(cls) -> list[str]:
+    return [member.bounds for member in cls]

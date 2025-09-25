@@ -1,5 +1,10 @@
 import dash_mantine_components as dmc
 
+from src.components.enums import Target
+
+targets = list(Target)
+options = [{'value': t.value, 'label': t.value} for t in targets]
+
 
 def target_select(value='Incident Hospitalization'):
   return dmc.Select(

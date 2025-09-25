@@ -125,17 +125,17 @@ def visualization_editor(control_values=None, show_controls=True):
   prevent_initial_call=True,
 )
 def update_chart(
-  scenario_ids: list[int],
-  models,
-  location,
-  target,
-  age_group,
-  uncertainty,
-  annotations,
+  scenario_names: list[str],
+  model_names: list[str],
+  location: str,
+  target: str,
+  age_group: str,
+  uncertainty: str,
+  annotations: list[dict[str, Any]] | None,
 ):
   try:
     print(
-      f'Callback inputs: scenario_ids={scenario_ids}, models={models}, location={location}, target={target}, age_group={age_group}, uncertainty={uncertainty}, annotations={annotations}'
+      f'Callback inputs: scenario_names={scenario_names}, models={model_names}, location={location}, target={target}, age_group={age_group}, uncertainty={uncertainty}, annotations={annotations}'
     )
 
     chart_controls = ChartControls(
@@ -143,8 +143,8 @@ def update_chart(
       y_axis='value',
       round_num=19,
       pathogen='covid',
-      scenario_names=scenario_ids,
-      model_names=models,
+      scenario_names=scenario_names,
+      model_names=model_names,
       location_name=location,
       target=target,
       age_group=age_group,

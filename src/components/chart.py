@@ -13,6 +13,7 @@ from src.constants import (
   get_model_color,
   get_model_id,
   get_model_name,
+  get_scenario_id,
   get_scenario_name,
 )
 
@@ -35,9 +36,15 @@ conf_int_colors = {
 
 
 class Scenario:
-  def __init__(self, scenario_id: int):
-    self.id = scenario_id
-    self.name = get_scenario_name(scenario_id)
+  def __init__(self, id: int | None = None, name: str | None = None):
+    if id:
+      self.id = id
+      self.name = get_scenario_name(id)
+    elif name:
+      self.id = get_scenario_id(name)
+      self.name = name
+    else:
+      raise ValueError('Scenario must be initialized with either scenario_id or scenario_name')
     self.variables = ['']  # TODO: add variables
 
   def __str__(self):
@@ -135,10 +142,10 @@ class ChartControls:
     self.y_axis = y_axis
     self.round_num = round_num
     self.pathogen = pathogen
-    self.scenarios = [Scenario(scenario_name) for scenario_name in scenario_names]
+    self.scenarios = [Scenario(name=scenario_name) for scenario_name in scenario_names]
     self.models = [Model(model_name) for model_name in model_names]
     self.location = Location(location_name)
-    self.target = Target(target)
+    self.target = Target.from_input_value(target)
     self.age_group = AgeGroup.from_input_value(age_group) if age_group else None
     self.annotations = (
       [Annotation(**annotation) for annotation in annotations] if annotations else []
@@ -191,37 +198,31 @@ class Chart:
     #     font=dict(color=annotation.color),
     #   )
 
-    # load gold standard data (the actual data up to present day, not projections)
-    gold_std_df = self.collect_gold_std_data(self.controls.round_num)
-    scenario_names = [scenario.name for scenario in self.controls.scenarios]
-    model_names = [model.name for model in self.controls.models]
-    # df = df.query('scenario_name.isin(@scenario_names)')
-    # df = df.query('model_name.isin(@model_names)')
-    df = df.query('age_group == @self.controls.age_group.input_value')
-    df = df.query('location == @self.controls.location.name')
-
     # create subplots
     num_rows = len(self.controls.scenarios)
     self._fig = make_subplots(
       rows=num_rows,
       cols=1,
       vertical_spacing=0.1,
-      subplot_titles=[f'Scenario {s}' for s in self.controls.scenarios],
+      subplot_titles=[f'Scenario {s.name}' for s in self.controls.scenarios],
     )
     # self._fig.update_xaxes(matches='x')
     # self._fig.update_yaxes(matches='y')
 
     # add traces for each scenario
     for i, scenario in enumerate(self.controls.scenarios, start=1):
-      scenario_df = df.query('scenario_name == @scenario.name')
+      scenario_df = df.query('scenario_id == @scenario.id')
 
       # main line for median (0.5 quantile)
       median_df = scenario_df.query('type_id == 0.5')
-      for model_name in median_df['model_name'].unique():
-        model_df = median_df.query('model_name == @model_name')
+      # model_name is used in the data as the column name for the model id
+      for model_id_col in median_df['model_name'].unique():
+        model_id = int(model_id_col)
+        model_name = get_model_name(model_id)
+        model_df = median_df.query('model_name == @model_id')
         self._fig.add_trace(
           go.Scatter(
-            x=model_df['horizon'],
+            x=model_df['target_end_date'],
             y=model_df['value'],
             mode='lines+markers',
             name=f'Model {model_name}',
@@ -234,17 +235,20 @@ class Chart:
 
       # add uncertainty intervals
       if (
-        self.controls.certainty_percent and self.controls.certainty_percent in Uncertainty.values()
+        self.controls.certainty_percent
+        and self.controls.certainty_percent in Uncertainty.display_values()
       ):
-        for lower_q, upper_q in Uncertainty.from_display_value(
+        uncertainty_bounds = Uncertainty.from_display_value(
           self.controls.certainty_percent
-        ).get_bounds():
+        ).get_bounds()
+        for lower_q, upper_q in uncertainty_bounds:
           lower = scenario_df.query('type_id == @lower_q')
           upper = scenario_df.query('type_id == @upper_q')
 
-          for model_name in lower['model_name'].unique():
-            lower_model = lower.query('model_name == @model_name')
-            upper_model = upper.query('model_name == @model_name')
+          for model_id_col in lower['model_name'].unique():
+            model_id = int(model_id_col)
+            lower_model = lower.query('model_name == @model_id')
+            upper_model = upper.query('model_name == @model_id')
 
             self._fig.add_trace(
               go.Scatter(
@@ -259,6 +263,11 @@ class Chart:
               row=i,
               col=1,
             )
+
+      # load gold standard data (the actual data up to present day, not projections)
+      gold_std_df = self.collect_gold_std_data(self.controls.round_num)
+      gold_std_df = gold_std_df.query('age_group == @self.controls.age_group.input_value')
+      gold_std_df = gold_std_df.query('geo_value_fullname == @self.controls.location.name')
 
       # add gold standard line
       self._fig.add_trace(
@@ -332,7 +341,7 @@ class Chart:
     path = (
       BASE_DATA_DIR
       / round_fragment
-      / str(target)
+      / target.input_value
       / location.name
       / data_type.get_path_value()
       / f'part-{part}.{data_type.get_file_extension()}'
