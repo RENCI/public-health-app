@@ -1,13 +1,17 @@
 import dash_mantine_components as dmc
 
 models = [
-  '1',
   '3',
-  '5',
   '6',
   '7',
-  '9',
-  '18',
+  '12',
+  '15',
+  '29',
+  '30',
+  '31',
+  '32',
+  '33',
+  '34',
 ]
 options = [{'value': m, 'label': m} for m in models]
 
