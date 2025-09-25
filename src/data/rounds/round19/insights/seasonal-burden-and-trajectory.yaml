@@ -1,0 +1,22 @@
+id: seasonal-burden-and-trajectory
+title: We expect continued substantial burden of disease from COVID-19 in the US, with two periods of increased COVID-19, in late summer/early fall 2025 and winter 2025-26.
+description: >
+  - **Two peaks similar to last winter’s peak** (~20,000 hospitalizations at peak) are projected for late August 2025 and January 2026.
+  
+  - **648,000 cumulative hospitalizations (95% PI 241,000–778,000) and 40,000 deaths (95% PI 25,000-59,000)** due to COVID-19 projected from April 27, 2025 to April 25, 2026 in the high-risk vaccination scenario (i.e., booster vaccination only among individuals aged 65+ or otherwise at high risk for elevated severity).
+  
+  - **The majority of hospitalization and death burden from COVID-19 is expected to occur in individuals 65+**:  56% of hospitalizations and 84% of deaths occur among 65+ in the high-risk vaccination scenario.
+image_url: assets/images/insight-preview/insight-5.png
+template: default
+created_at: 2025-05-18T22:45:12Z
+updated_at: 2025-05-18T22:45:12Z
+controls:
+  location: 'US'
+  target: 'incident_hospitalization'
+  models: []
+  scenarios: ['77', '78', '80']
+  uncertainty: '95%'
+  annotations:
+    - value: 17_000
+      label: "Some important value"
+      color: "#663399"

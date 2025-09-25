@@ -1,8 +1,7 @@
-import re
-
 import dash_mantine_components as dmc
-from dash import Input, Output, callback, dcc
+from dash import dcc
 
+from .round_select import round_select
 from .theme_toggle import theme_toggle
 
 logo = dcc.Link(
@@ -16,8 +15,7 @@ header = dmc.Flex(
     dmc.Group(
       [
         logo,
-        dmc.Anchor('Viewer', href='/', id='nav-viewer', style=dict(paddingTop='1rem')),
-        dmc.Anchor('Explorer', href='/explorer', id='nav-explorer', style=dict(paddingTop='1rem')),
+        round_select(),
       ],
     ),
     dmc.Group(
@@ -33,19 +31,3 @@ header = dmc.Flex(
   px='md',
   py=0,
 )
-
-
-@callback(
-  Output('nav-viewer', 'aria-current'),
-  Output('nav-explorer', 'aria-current'),
-  Input('url', 'pathname'),
-)
-def update_active_link(pathname):
-  def active_if(pattern):
-    if isinstance(pattern, (list, tuple)):
-      return 'page' if any(re.fullmatch(p, pathname) for p in pattern) else ''
-    return 'page' if re.fullmatch(pattern, pathname) else ''
-
-  return active_if(['/', r'^/viewer$', r'^/viewer/.*$']), active_if(
-    [r'^/explorer$', r'^/explorer/.*$']
-  )

@@ -16,7 +16,7 @@ from src.constants import (
   get_scenario_name,
 )
 
-BASE_DATA_DIR = Path(__file__).resolve().parent.parent / 'data'
+BASE_DATA_DIR = Path(__file__).resolve().parent.parent / 'data' / 'rounds'
 FIFTY_PERCENT = '50%'
 NINETY_FIVE_PERCENT = '95%'
 MULTI = 'Multi'
