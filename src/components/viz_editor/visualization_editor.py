@@ -1,7 +1,7 @@
 from typing import Any
 
 import dash_mantine_components as dmc
-from dash import Input, Output, callback, html
+from dash import Input, Output, callback, dcc, html
 
 from src.components.chart import Chart, ChartControls, PlotType
 
@@ -61,7 +61,7 @@ def visualization_editor(control_values=None, show_controls=True):
 
   figure_container = html.Div(
     id='insight-visualization-figure',
-    children=chart.get_fig(),
+    children=dcc.Graph(figure=chart.get_fig()),
   )
 
   if not show_controls:
@@ -146,4 +146,5 @@ def update_chart(
     certainty_percent=uncertainty,
     annotations=annotations,
   )
-  return Chart(PlotType(PlotType.LINE), chart_controls)
+  chart = Chart(PlotType(PlotType.LINE), chart_controls)
+  return dcc.Graph(figure=chart.get_fig())

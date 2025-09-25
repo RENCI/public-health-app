@@ -207,7 +207,7 @@ class Chart:
     self._fig.update_xaxes(matches='x')
     self._fig.update_yaxes(matches='y')
 
-    for i, scenario in enumerate(self.controls.scenarios, start=1):
+    for i, _ in enumerate(self.controls.scenarios, start=1):
       scenario_df = df.query('scenario_id == @scenario.id')
 
       # main line for median (0.5 quantile)
