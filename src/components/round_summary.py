@@ -1,11 +1,12 @@
-import dash_mantine_components as dmc
-from dash import ALL, callback, ctx, dcc, exceptions, no_update, Input, Output, State
-from dash_iconify import DashIconify
 import uuid
-from src.util.time_ago import time_ago
-from ..util.data import load_rounds
 
+import dash_mantine_components as dmc
+from dash import ALL, Input, Output, State, callback, ctx, dcc, exceptions, no_update
+from dash_iconify import DashIconify
+
+from src.util.data import load_rounds
 from src.util.format_timestamp import format_timestamp
+from src.util.time_ago import time_ago
 
 
 def tipped_text(text, tooltip=None, size='md'):

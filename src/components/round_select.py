@@ -1,7 +1,9 @@
 import random
-from dash import callback, Input, Output
+
 import dash_mantine_components as dmc
-from ..util.data import load_rounds
+from dash import Input, Output, callback
+
+from src.util.data import load_rounds
 
 rounds = load_rounds()
 
