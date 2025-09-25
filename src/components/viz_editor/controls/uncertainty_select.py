@@ -1,6 +1,8 @@
 import dash_mantine_components as dmc
 
-uncertainty_values = ['None', '50%', '95%', 'Multi']
+from src.components.enums import Uncertainty
+
+uncertainty_values = [v.display_value for v in Uncertainty]
 options = [{'value': v, 'label': v} for v in uncertainty_values]
 
 

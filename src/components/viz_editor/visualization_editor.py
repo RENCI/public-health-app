@@ -40,7 +40,7 @@ def visualization_editor(control_values=None, show_controls=True):
   init_age_group: str = controls.get('age_group', '0-130')
   init_uncertainty: str | None = controls.get('uncertainty')
   init_annotations: dict[str, Any] = controls.get('annotations', {})
-  x_axis: str = controls.get('x_axis', 'date')
+  x_axis: str = controls.get('x_axis', 'horizon')
   y_axis: str = controls.get('y_axis', 'value')
   round_num: int = controls.get('round_num', 19)
 
@@ -49,8 +49,8 @@ def visualization_editor(control_values=None, show_controls=True):
     y_axis=y_axis,
     round_num=round_num,
     pathogen='covid',
-    scenario_ids=init_scenarios,
-    model_ids=init_models,
+    scenario_names=init_scenarios,
+    model_names=init_models,
     location_name=init_location,
     age_group=init_age_group,
     target=init_target,
@@ -122,7 +122,7 @@ def visualization_editor(control_values=None, show_controls=True):
   Input('age-group-select', 'value'),
   Input('uncertainty-select', 'value'),
   Input('annotations-store', 'data'),
-  # prevent_initial_call=True,
+  prevent_initial_call=True,
 )
 def update_chart(
   scenario_ids: list[int],
@@ -133,18 +133,29 @@ def update_chart(
   uncertainty,
   annotations,
 ):
-  chart_controls = ChartControls(
-    x_axis='date',
-    y_axis='value',
-    round_num=19,
-    pathogen='covid',
-    scenario_ids=scenario_ids,
-    model_ids=models,
-    location_name=location,
-    target=target,
-    age_group=age_group,
-    certainty_percent=uncertainty,
-    annotations=annotations,
-  )
-  chart = Chart(PlotType(PlotType.LINE), chart_controls)
-  return dcc.Graph(figure=chart.get_fig())
+  try:
+    print(
+      f'Callback inputs: scenario_ids={scenario_ids}, models={models}, location={location}, target={target}, age_group={age_group}, uncertainty={uncertainty}, annotations={annotations}'
+    )
+
+    chart_controls = ChartControls(
+      x_axis='horizon',
+      y_axis='value',
+      round_num=19,
+      pathogen='covid',
+      scenario_names=scenario_ids,
+      model_names=models,
+      location_name=location,
+      target=target,
+      age_group=age_group,
+      certainty_percent=uncertainty,
+      annotations=annotations,
+    )
+    chart = Chart(PlotType.LINE, chart_controls)
+    return dcc.Graph(figure=chart.get_fig())
+  except Exception as e:
+    print(f'Error creating chart: {e}')
+    import traceback
+
+    traceback.print_exc()
+    return html.Div(f'Error loading chart: {str(e)}', style={'color': 'red'})

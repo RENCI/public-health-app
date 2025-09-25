@@ -57,8 +57,8 @@ def chart(control_values={}):
     vertical_spacing=0.1,
     subplot_titles=[f'Scenario {s}' for s in scenarios],
   )
-  fig.update_xaxes(matches='x')
-  fig.update_yaxes(matches='y')
+  # fig.update_xaxes(matches='x')
+  # fig.update_yaxes(matches='y')
 
   for i, scenario in enumerate(scenarios, start=1):
     scenario_df = df[df['scenario_id'] == scenario]

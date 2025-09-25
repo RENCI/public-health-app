@@ -28,7 +28,7 @@ no_insights_message = dmc.Card(
           dmc.Button(
             [
               'Build a custom insight',
-              dmc.Space(w=8),
+              ' ',
               DashIconify(icon='feather:arrow-right', width=20),
             ],
             variant='gradient',
@@ -62,7 +62,7 @@ new_insight_prompt = dmc.Card(
         dmc.Button(
           [
             'Build a new custom insight',
-            dmc.Space(w=8),
+            ' ',
             DashIconify(icon='feather:arrow-right', width=20),
           ],
           variant='gradient',
@@ -96,7 +96,7 @@ def insight_button(item):
 
   view_button = dmc.Anchor(
     dmc.Button(
-      ['View', dmc.Space(w=8), DashIconify(icon='feather:arrow-right', width=20)],
+      ['View', ' ', DashIconify(icon='feather:arrow-right', width=20)],
       variant='light',
       style=dict(
         textDecoration='none',
@@ -146,7 +146,7 @@ def custom_insight_button(item):
 
   view_button = dmc.Anchor(
     dmc.Button(
-      ['View', dmc.Space(w=8), DashIconify(icon='feather:arrow-right', width=20)],
+      ['View', ' ', DashIconify(icon='feather:arrow-right', width=20)],
       variant='light',
       style=dict(
         textDecoration='none',
@@ -272,7 +272,6 @@ def round_summary():
   Input('url', 'pathname'),
 )
 def update_round_summary(round_number, pathname):
-  print(dict(round_number=round_number, pathname=pathname))
   if not round_number:
     return 'No round selected', '...', []
   rounds = load_rounds()

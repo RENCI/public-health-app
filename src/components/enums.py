@@ -51,3 +51,31 @@ class DataType(Enum):
 
   def get_file_extension(self) -> str:
     return self.file_extension
+
+
+class Uncertainty(Enum):
+  NONE = ('None', [])
+  FIFTY_PERCENT = ('50%', [(0.25, 0.75)])
+  NINETY_FIVE_PERCENT = ('95%', [(0.025, 0.975)])
+  MULTI = ('Multi', [(0.025, 0.975), (0.05, 0.95), (0.1, 0.9), (0.25, 0.75)])
+
+  def __init__(self, display_value: str, bounds: list[tuple[float, float]]):
+    self.display_value = display_value
+    self.bounds = bounds
+
+  def get_display_value(self) -> str:
+    return self.display_value
+
+  def get_bounds(self) -> list[tuple[float, float]]:
+    return self.bounds
+
+  @classmethod
+  def from_display_value(cls, value: str) -> 'Uncertainty':
+    for member in cls:
+      if member.display_value == value:
+        return member
+    raise ValueError(f'No enum member found for display value: {value}')
+
+  @classmethod
+  def values(cls) -> list[str]:
+    return [member.display_value for member in cls]
