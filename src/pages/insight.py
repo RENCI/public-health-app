@@ -42,9 +42,9 @@ toolbar = dmc.Flex(
 layout = dmc.Container(
   [
     toolbar,
-    html.Div(id='insight-view-figure-container'),
-    dmc.Divider(my=24),
     dmc.Title(id='insight-view-title', order=1),
+    dmc.Divider(my=24),
+    html.Div(id='insight-view-figure-container', style=dict(margin='24px 0')),
     dcc.Markdown(id='insight-view-description'),
   ],
   size=1200,
