@@ -16,6 +16,13 @@ controls:
   models: []
   scenarios: ['77', '78', '80']
   uncertainty: '95%'
+  zoom:
+    x:
+      min: 2025-01-01
+      max: 2026-06-30
+    y:
+      min: 10_000
+      max: 25_000
   annotations:
     - value: 17_000
       label: "Some important value"

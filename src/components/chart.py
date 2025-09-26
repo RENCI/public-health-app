@@ -7,13 +7,19 @@ from plotly.subplots import make_subplots
 
 
 def chart(control_values={}):
-  scenarios = [int(s) for s in control_values.get('scenarios', ['13'])]
+  scenarios = [int(s) for s in control_values.get('scenarios', ['77'])]
   models = [int(s) for s in control_values.get('models', [])]
   age_group = control_values.get('age_group', '0-130')
   location = control_values.get('location', 'US')
   target = control_values.get('target', 'incident_hospitalization')
   uncertainty = control_values.get('uncertainty', 'None')
   annotations = control_values.get('annotations', {})
+  zoom = control_values.get('zoom', {})
+
+  x_min = zoom.get('x', {}).get('min')
+  x_max = zoom.get('x', {}).get('max')
+  y_min = zoom.get('y', {}).get('min')
+  y_max = zoom.get('y', {}).get('max')
 
   path = build_dataset_path(round_number=19, location=location, target=target)
   df = pd.DataFrame(collect_data(path))
@@ -54,8 +60,6 @@ def chart(control_values={}):
     vertical_spacing=0.1,
     subplot_titles=[f'Scenario {s}' for s in scenarios],
   )
-  fig.update_xaxes(matches='x')
-  fig.update_yaxes(matches='y')
 
   for i, scenario in enumerate(scenarios, start=1):
     scenario_df = df[df['scenario_id'] == scenario]
@@ -134,10 +138,21 @@ def chart(control_values={}):
           annotation_font_color=line_color,
         )
 
-  fig.update_layout(
-    hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)'
-  )
-  fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
-  fig.update_yaxes(showspikes=True, spikemode='across')
+  # updating axes
+  fig.update_xaxes(matches='x', showspikes=True, spikemode='across', spikesnap='cursor')
+  fig.update_yaxes(matches='y', showspikes=True, spikemode='across')
 
-  return dcc.Graph(figure=fig)
+  # and zoom ranges
+  if x_min is not None and x_max is not None:
+    fig.update_xaxes(range=[x_min, x_max])
+  if y_min is not None and y_max is not None:
+    fig.update_yaxes(range=[y_min, y_max])
+
+  fig.update_layout(
+    hovermode='x unified',
+    height=300 * num_rows,
+    title='Forecast values over time (by scenario)',
+    uirevision='df',
+  )
+
+  return dcc.Graph(figure=fig, id='chart-figure')
