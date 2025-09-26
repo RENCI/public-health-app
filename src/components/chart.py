@@ -222,7 +222,7 @@ class Chart:
         model_df = median_df.query('model_name == @model_id')
         self._fig.add_trace(
           go.Scatter(
-            x=model_df['target_end_date'],
+            x=model_df.index,
             y=model_df['value'],
             mode='lines+markers',
             name=f'Model {model_name}',

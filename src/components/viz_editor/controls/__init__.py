@@ -27,10 +27,8 @@ __all__ = [
 def create_selector_grid_column(
   selector: Callable, initial_values: Any, span: int = 12
 ) -> dmc.GridCol:
-  return (
-    dmc.GridCol(
-      selector(value=initial_values),
-      style=dict(padding='var(--mantine-spacing-sm)'),
-      span=dict(base=span),
-    ),
+  return dmc.GridCol(
+    selector(initial_values),  # Pass as positional argument, not keyword
+    style=dict(padding='var(--mantine-spacing-sm)'),
+    span=dict(base=span),
   )

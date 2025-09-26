@@ -26,7 +26,7 @@ default_control_values = dict(
   target='cumulative_hospitalization',
   age_group='0-130',
   uncertainty='None',
-  annotations={},
+  annotations=[],
 )
 
 
@@ -61,7 +61,7 @@ def visualization_editor(control_values=None, show_controls=True):
 
   figure_container = html.Div(
     id='insight-visualization-figure',
-    children=dcc.Graph(figure=chart.get_fig()),
+    children=[dcc.Graph(figure=chart.get_fig())],
   )
 
   if not show_controls:
@@ -80,22 +80,13 @@ def visualization_editor(control_values=None, show_controls=True):
             dmc.Card(
               dmc.Grid(
                 children=[
+                  # Restore all control components
                   create_selector_grid_column(scenarios_select, init_scenarios),
                   create_selector_grid_column(models_select, init_models),
                   create_selector_grid_column(location_select, init_location),
                   create_selector_grid_column(target_select, init_target),
                   create_selector_grid_column(age_group_select, init_age_group),
                   create_selector_grid_column(uncertainty_select, init_uncertainty),
-                  # create_selector_grid_column(ensemble_select, init_ensemble),
-                  create_selector_grid_column(annotations_input, init_annotations),
-                ],
-                gutter=0,
-              ),
-              variant='soft',
-            ),
-            dmc.Card(
-              dmc.Grid(
-                children=[
                   create_selector_grid_column(annotations_input, init_annotations),
                 ],
                 gutter=0,
@@ -135,7 +126,7 @@ def update_chart(
 ):
   try:
     print(
-      f'Callback inputs: scenario_names={scenario_names}, models={model_names}, location={location}, target={target}, age_group={age_group}, uncertainty={uncertainty}, annotations={annotations}'
+      f'Callback inputs: scenario_names={scenario_names}, models={model_names}, location={location}, target={target}, age_group={age_group}, uncertainty={uncertainty}'
     )
 
     chart_controls = ChartControls(
@@ -149,10 +140,10 @@ def update_chart(
       target=target,
       age_group=age_group,
       certainty_percent=uncertainty,
-      annotations=annotations,
+      annotations=annotations or [],
     )
     chart = Chart(PlotType.LINE, chart_controls)
-    return dcc.Graph(figure=chart.get_fig())
+    return [dcc.Graph(figure=chart.get_fig())]
   except Exception as e:
     print(f'Error creating chart: {e}')
     import traceback

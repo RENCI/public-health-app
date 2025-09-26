@@ -1,10 +1,10 @@
 import dash_mantine_components as dmc
 from dash import ALL, Input, Output, State, callback, ctx, dcc
-from dash_iconify import DashIconify
 
+# Simplified add annotation button
 add_annotation_button = dmc.Button(
   'Add annotation',
-  leftSection=DashIconify(icon='feather:plus'),
+  leftSection='➕',
   id='add-annotation-button',
   variant='light',
   size='sm',
@@ -13,7 +13,7 @@ add_annotation_button = dmc.Button(
 
 def remove_annotation_button(index=0):
   return dmc.ActionIcon(
-    DashIconify(icon='feather:trash-2', color='crimson'),
+    '🗑️',
     variant='subtle',
     size='lg',
     id={'type': 'remove-annotation', 'index': index},
@@ -21,38 +21,44 @@ def remove_annotation_button(index=0):
 
 
 def annotation_row(index, label='', value=0, color='#222222'):
-  return dmc.Group(
-    [
-      dmc.NumberInput(
-        value=value,
-        label='Value',
-        placeholder='Enter y-value',
-        id={'type': 'annotation-value', 'index': index},
-        size='sm',
-        w=85,
-      ),
-      dmc.TextInput(
-        value=label,
-        label='Label',
-        placeholder='Label',
-        id={'type': 'annotation-label', 'index': index},
-        size='sm',
-        style=dict(flex=1),
-      ),
-      dmc.ColorInput(
-        id={'type': 'color-value', 'index': index},
-        value=color,
-        label='Color',
-        w=105,
-      ),
-      remove_annotation_button(index),
-    ],
-    gap='xs',
-    align='flex-end',
-  )
+  """Create a single annotation row with error handling."""
+  try:
+    return dmc.Group(
+      [
+        dmc.NumberInput(
+          value=value,
+          label='Value',
+          placeholder='Enter y-value',
+          id={'type': 'annotation-value', 'index': index},
+          size='sm',
+          w=85,
+        ),
+        dmc.TextInput(
+          value=label,
+          label='Label',
+          placeholder='Label',
+          id={'type': 'annotation-label', 'index': index},
+          size='sm',
+          style=dict(flex=1),
+        ),
+        dmc.ColorInput(
+          id={'type': 'annotation-color', 'index': index},
+          value=color,
+          label='Color',
+          w=105,
+        ),
+        remove_annotation_button(index),
+      ],
+      gap='xs',
+      align='flex-end',
+    )
+  except Exception as e:
+    print(f'Error creating annotation row {index}: {e}')
+    return dmc.Text(f'Error creating annotation row {index}: {str(e)}', color='red')
 
 
 def annotations_input(value=[]):
+  """Create the annotations input component."""
   return dmc.Stack(
     id='annotations-input',
     children=[
@@ -68,45 +74,86 @@ def annotations_input(value=[]):
   )
 
 
-@callback(Output('annotations-container', 'children'), Input('annotations-store', 'data'))
+@callback(
+  Output('annotations-container', 'children'),
+  Input('annotations-store', 'data'),
+  prevent_initial_call=True,
+)
 def render_annotations(data):
+  """Render annotation rows based on store data."""
   if not data:
     return []
-  return [
-    annotation_row(i, d.get('label'), d.get('value'), d.get('color')) for i, d in enumerate(data)
-  ]
+
+  try:
+    rows = []
+    for i, d in enumerate(data):
+      try:
+        # Use the proper annotation_row function to create interactive inputs
+        row = annotation_row(
+          index=i,
+          label=d.get('label', ''),
+          value=d.get('value', 0),
+          color=d.get('color', '#00abc7'),
+        )
+        rows.append(row)
+      except Exception as e:
+        print(f'Error creating annotation row {i}: {e}')
+        rows.append(dmc.Text(f'Error in annotation {i}: {str(e)}', color='red'))
+
+    return rows
+  except Exception as e:
+    print(f'Error in render_annotations: {e}')
+    return [dmc.Text(f'Error rendering annotations: {str(e)}', color='red')]
 
 
 @callback(
   Output('annotations-store', 'data'),
   Input('add-annotation-button', 'n_clicks'),
+  Input({'type': 'remove-annotation', 'index': ALL}, 'n_clicks'),
   Input({'type': 'annotation-value', 'index': ALL}, 'value'),
   Input({'type': 'annotation-label', 'index': ALL}, 'value'),
-  Input({'type': 'color-value', 'index': ALL}, 'value'),
-  Input({'type': 'remove-annotation', 'index': ALL}, 'n_clicks'),
+  Input({'type': 'annotation-color', 'index': ALL}, 'value'),
   State('annotations-store', 'data'),
   prevent_initial_call=True,
 )
-def manage_annotations(add_clicks, values, labels, colors, delete_clicks, stored):
+def manage_annotations(add_clicks, remove_clicks, values, labels, colors, stored):
+  """Handle add/remove actions and field updates for annotations."""
   stored = stored or []
 
-  # Update existing annotations from input fields
-  if values is not None and labels is not None and colors is not None:
-    for i in range(min(len(stored), len(values), len(colors))):
-      stored[i]['value'] = values[i]
-      stored[i]['label'] = labels[i]
-      stored[i]['color'] = colors[i]
+  # Get the trigger information
+  trigger = ctx.triggered[0] if ctx.triggered else None
 
-  trigger = ctx.triggered_id
+  if not trigger:
+    return stored
 
-  # add new annotation
-  if trigger == 'add-annotation-button':
-    stored.append(dict(value=None, label='', color='#00abc7'))
+  trigger_id = trigger['prop_id']
 
-  # delete annotation
-  elif isinstance(trigger, dict) and trigger.get('type') == 'remove-annotation':
-    idx_to_remove = trigger['index']
-    if 0 <= idx_to_remove < len(stored):
-      stored.pop(idx_to_remove)
+  # Handle add annotation button click
+  if 'add-annotation-button' in trigger_id:
+    stored.append(dict(value=0, label='', color='#00abc7'))
+    return stored
+
+  # Handle remove annotation button clicks
+  if 'remove-annotation' in trigger_id:
+    # Extract index from trigger_id
+    import json
+
+    trigger_data = json.loads(trigger_id.split('.')[0])
+    index = trigger_data['index']
+    if 0 <= index < len(stored):
+      stored.pop(index)
+    return stored
+
+  # Handle field updates (value, label, color changes)
+  if any(x in trigger_id for x in ['annotation-value', 'annotation-label', 'annotation-color']):
+    # Update the stored data with current field values
+    for i in range(len(stored)):
+      if i < len(values) and values[i] is not None:
+        stored[i]['value'] = values[i]
+      if i < len(labels) and labels[i] is not None:
+        stored[i]['label'] = labels[i]
+      if i < len(colors) and colors[i] is not None:
+        stored[i]['color'] = colors[i]
+    return stored
 
   return stored

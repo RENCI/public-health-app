@@ -95,7 +95,6 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   State('target-select', 'value'),
   State('age-group-select', 'value'),
   State('uncertainty-select', 'value'),
-  State('ensemble-select', 'value'),
   State('annotations-store', 'data'),
   suppress_callback_exceptions=True,
 )
@@ -111,7 +110,6 @@ def save_custom_insight(
   target,
   age_group,
   uncertainty,
-  ensemble,
   annotations,
 ):
   if not n_clicks:
@@ -145,7 +143,6 @@ def save_custom_insight(
       target=target,
       age_group=age_group,
       uncertainty=uncertainty,
-      ensemble=ensemble,
       annotations=annotations,
     ),
   )

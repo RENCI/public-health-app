@@ -11,7 +11,6 @@ def initialize_app_data():
   """Load and initialize all application data at startup."""
   # Load constants from JSON file
   constants = get_constants()
-
   return constants
 
 
