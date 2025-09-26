@@ -123,10 +123,10 @@ def chart(control_values={}):
       line_value = line.get('value')
       line_label = line.get('label', '')
       line_color = line.get('color', '#222222')
-    
+
       if not line_value:
         continue
-    
+
       if axis == 'y':
         # horizontal lines
         for yaxis_name in fig.select_yaxes():
@@ -145,7 +145,7 @@ def chart(control_values={}):
         if isinstance(line_value, str):
           line_value = pd.to_datetime(line_value).date()
         elif isinstance(line_value, datetime.date):
-          line_value = datetime.datetime.combine(line_value, datetime.time())    
+          line_value = datetime.datetime.combine(line_value, datetime.time())
 
         for xaxis_name in fig.select_xaxes():
           fig.add_shape(
@@ -168,11 +168,14 @@ def chart(control_values={}):
             showarrow=False,
             font=dict(color=line_color),
             xanchor='left',
-            yanchor='bottom'
+            yanchor='bottom',
           )
 
   fig.update_layout(
-    hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)', uirevision='df',
+    hovermode='x unified',
+    height=300 * num_rows,
+    title='Forecast values over time (by scenario)',
+    uirevision='df',
   )
   fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
   fig.update_yaxes(showspikes=True, spikemode='across')

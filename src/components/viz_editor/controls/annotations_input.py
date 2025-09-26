@@ -42,11 +42,17 @@ def color_picker_popover(index, value='#222222'):
           value=value,
           format='hex',
           swatches=[
-            '#222222', '#663399', '#993366', '#ff0000', '#00abc7', '#00ff00', '#ff9900',
+            '#222222',
+            '#663399',
+            '#993366',
+            '#ff0000',
+            '#00abc7',
+            '#00ff00',
+            '#ff9900',
           ],
           fullWidth=True,
         ),
-        style=dict(padding='0.5rem')
+        style=dict(padding='0.5rem'),
       ),
     ],
   )
@@ -130,7 +136,8 @@ def render_annotations(data):
       d.get('value'),
       d.get('label'),
       d.get('color'),
-    ) for index, d in enumerate(data)
+    )
+    for index, d in enumerate(data)
   ]
 
 
@@ -149,10 +156,10 @@ def manage_annotations(add_clicks, axes, values, labels, colors, delete_clicks, 
   stored = stored or []
 
   for i in range(len(stored)):
-    stored[i]["axis"] = axes[i]
-    stored[i]["label"] = labels[i]
-    stored[i]["color"] = colors[i]
-    stored[i]["value"] = values[i]
+    stored[i]['axis'] = axes[i]
+    stored[i]['label'] = labels[i]
+    stored[i]['color'] = colors[i]
+    stored[i]['value'] = values[i]
 
   trigger = ctx.triggered_id
 
