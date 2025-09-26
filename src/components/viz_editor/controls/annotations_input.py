@@ -15,22 +15,78 @@ def remove_annotation_button(index=0):
   return dmc.ActionIcon(
     DashIconify(icon='feather:trash-2', color='crimson'),
     variant='subtle',
-    size='lg',
+    # size='lg',
     id={'type': 'remove-annotation', 'index': index},
   )
 
 
-def annotation_row(index, label='', value=0, color='#222222'):
+def color_picker_popover(index, value='#222222'):
+  return dmc.Popover(
+    position='bottom-start',
+    withArrow=True,
+    trapFocus=True,
+    closeOnEscape=True,
+    closeOnClickOutside=True,
+    children=[
+      dmc.PopoverTarget(
+        dmc.ActionIcon(
+          DashIconify(icon='feather:droplet', color=value),
+          id={'type': 'color-button', 'index': index},
+          variant='light',
+          # size='lg',
+        )
+      ),
+      dmc.PopoverDropdown(
+        dmc.ColorPicker(
+          id={'type': 'color-value', 'index': index},
+          value=value,
+          format='hex',
+          swatches=[
+            '#222222', '#663399', '#993366', '#ff0000', '#00abc7', '#00ff00', '#ff9900',
+          ],
+          fullWidth=True,
+        ),
+        style=dict(padding='0.5rem')
+      ),
+    ],
+  )
+
+
+def annotation_row(index, axis, value=0, label='', color='#222222'):
+  axis_selector = dmc.Select(
+    data=[{'value': 'x', 'label': 'X'}, {'value': 'y', 'label': 'Y'}],
+    value=axis,
+    label='Axis',
+    id={'type': 'annotation-axis', 'index': index},
+    size='sm',
+    w=60,
+    allowDeselect=False,
+  )
+
+  # value input (date if x-axis, number if y-axis)
+  if axis == 'x':
+    value_input = dmc.DatePickerInput(
+      value=value,  # datetime.date or string like '2025-10-01'
+      label='Date',
+      placeholder='Pick a date',
+      id={'type': 'annotation-value', 'index': index},
+      size='sm',
+      w=145,
+    )
+  else:
+    value_input = dmc.NumberInput(
+      value=value,
+      label='Value',
+      placeholder='Enter y-value',
+      id={'type': 'annotation-value', 'index': index},
+      size='sm',
+      w=145,
+    )
+
   return dmc.Group(
     [
-      dmc.NumberInput(
-        value=value,
-        label='Value',
-        placeholder='Enter y-value',
-        id={'type': 'annotation-value', 'index': index},
-        size='sm',
-        w=85,
-      ),
+      axis_selector,
+      value_input,
       dmc.TextInput(
         value=label,
         label='Label',
@@ -39,12 +95,7 @@ def annotation_row(index, label='', value=0, color='#222222'):
         size='sm',
         style=dict(flex=1),
       ),
-      dmc.ColorInput(
-        id={'type': 'color-value', 'index': index},
-        value=color,
-        label='Color',
-        w=105,
-      ),
+      color_picker_popover(index=index, value=color),
       remove_annotation_button(index),
     ],
     gap='xs',
@@ -57,7 +108,7 @@ def annotations_input(value=[]):
     id='annotations-input',
     children=[
       dcc.Store(id='annotations-store', storage_type='memory', data=value),
-      dmc.Text('Annotations', size='sm'),
+      dmc.Text('Annotations', size='md'),
       dmc.Stack(
         id='annotations-container',
         children=[],
@@ -73,13 +124,20 @@ def render_annotations(data):
   if not data:
     return []
   return [
-    annotation_row(i, d.get('label'), d.get('value'), d.get('color')) for i, d in enumerate(data)
+    annotation_row(
+      index,
+      d.get('axis'),
+      d.get('value'),
+      d.get('label'),
+      d.get('color'),
+    ) for index, d in enumerate(data)
   ]
 
 
 @callback(
   Output('annotations-store', 'data'),
   Input('add-annotation-button', 'n_clicks'),
+  Input({'type': 'annotation-axis', 'index': ALL}, 'value'),
   Input({'type': 'annotation-value', 'index': ALL}, 'value'),
   Input({'type': 'annotation-label', 'index': ALL}, 'value'),
   Input({'type': 'color-value', 'index': ALL}, 'value'),
@@ -87,21 +145,20 @@ def render_annotations(data):
   State('annotations-store', 'data'),
   prevent_initial_call=True,
 )
-def manage_annotations(add_clicks, values, labels, colors, delete_clicks, stored):
+def manage_annotations(add_clicks, axes, values, labels, colors, delete_clicks, stored):
   stored = stored or []
 
-  # Update existing annotations from input fields
-  if values is not None and labels is not None and colors is not None:
-    for i in range(min(len(stored), len(values), len(colors))):
-      stored[i]['value'] = values[i]
-      stored[i]['label'] = labels[i]
-      stored[i]['color'] = colors[i]
+  for i in range(len(stored)):
+    stored[i]["axis"] = axes[i]
+    stored[i]["label"] = labels[i]
+    stored[i]["color"] = colors[i]
+    stored[i]["value"] = values[i]
 
   trigger = ctx.triggered_id
 
   # add new annotation
   if trigger == 'add-annotation-button':
-    stored.append(dict(value=None, label='', color='#00abc7'))
+    stored.append(dict(axis='y', value=None, label='', color='#00abc7'))
 
   # delete annotation
   elif isinstance(trigger, dict) and trigger.get('type') == 'remove-annotation':

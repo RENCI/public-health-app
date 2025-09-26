@@ -172,7 +172,7 @@ def chart(control_values={}):
           )
 
   fig.update_layout(
-    hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)'
+    hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)', uirevision='df',
   )
   fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
   fig.update_yaxes(showspikes=True, spikemode='across')
