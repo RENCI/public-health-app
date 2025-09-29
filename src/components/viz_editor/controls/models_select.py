@@ -12,5 +12,6 @@ def models_select(value=['Ensemble_LOP']):
     placeholder='',
     id='models-select',
     value=value,
+    required=True,
     data=options,
   )

@@ -1,6 +1,7 @@
+from dataclasses import asdict, dataclass
 from enum import StrEnum
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 import pandas as pd
 import plotly.express as px
@@ -33,6 +34,20 @@ conf_int_colors = {
   (0.1, 0.9): 'rgba(100,100,255,0.4)',
   (0.25, 0.75): 'rgba(50,50,255,0.6)',  # darkest
 }
+
+
+@dataclass
+class Serializable:
+  """Base class for serializable dataclasses."""
+
+  def to_dict(self) -> dict[str, Any]:
+    """Convert object to dictionary for JSON serialization."""
+    return asdict(self)
+
+  @classmethod
+  def from_dict(cls, data: dict[str, Any]) -> Self:
+    """Create object from dictionary."""
+    return cls(**data)
 
 
 class Scenario:
@@ -78,7 +93,7 @@ class Location:
     return f'{self.name}'
 
 
-class Annotation:
+class Annotation(Serializable):
   def __init__(self, value: float, label: str, color: str):
     self.value = value
     self.label = label
@@ -102,14 +117,12 @@ class PlotTitle:
     scenario: Scenario,
     models: list[Model],
     location: Location,
-    age_group: AgeGroup | None,
+    age_group: AgeGroup,
   ):
     self.pathogen = pathogen
     self.scenario = scenario
     self.location = location
     self.age_group = age_group
-    if not age_group:
-      self.age_group = AgeGroup.ALL
 
   def __str__(self):
     return (
@@ -134,7 +147,7 @@ class ChartControls:
     model_names: list[str],
     location_name: str,
     target: str,
-    age_group: str | None = None,
+    age_group: str = '0-130',
     annotations: list[dict[str, Any]] | None = None,
     certainty_percent: str | None = None,
   ):
@@ -146,9 +159,9 @@ class ChartControls:
     self.models = [Model(model_name) for model_name in model_names]
     self.location = Location(location_name)
     self.target = Target.from_input_value(target)
-    self.age_group = AgeGroup.from_input_value(age_group) if age_group else None
+    self.age_group = AgeGroup.from_input_value(age_group)
     self.annotations = (
-      [Annotation(**annotation) for annotation in annotations] if annotations else []
+      [Annotation.from_dict(annotation) for annotation in annotations] if annotations else []
     )
     self.certainty_percent = (
       Uncertainty.from_display_value(certainty_percent) if certainty_percent else None
@@ -156,61 +169,73 @@ class ChartControls:
 
 
 class Chart:
+  """Chart class for displaying a chart"""
+
   def __init__(self, plot_type: PlotType, controls: ChartControls):
     self.plot_type = plot_type
-    self.controls = controls
+    self.x_axis = controls.x_axis
+    self.y_axis = controls.y_axis
+    self.round_num = controls.round_num
     self.scenarios = controls.scenarios
+    self.models = controls.models
+    self.location = controls.location
+    self.target = controls.target
+    self.age_group = controls.age_group
+    self.certainty_percent = controls.certainty_percent
+    self.annotations = controls.annotations
     self._data_type = DataType.QUANTILE
-    self._raw_df = self.collect_data(
-      self._data_type, self.controls.round_num, self.controls.location, self.controls.target
-    )
-    self._raw_df = self._raw_df.set_index(self.controls.x_axis)
+    self._raw_df = self.collect_data(self._data_type, self.round_num, self.location, self.target)
+    self._raw_df = self._raw_df.set_index(self.x_axis)
     self._fig: go.Figure = go.Figure()
-
-    # Public so that it can be accessed and modified by the viz editor
-    self.annotations: list[Annotation] = controls.annotations or []
 
     self.refresh_fig()
 
+  def _create_empty_figure(self):
+    self._fig = go.Figure()
+    self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
+    self._fig.update_yaxes(showspikes=True, spikemode='across')
+
   def refresh_fig(self) -> go.Figure:
-    if not self.controls.scenarios:
+    # update layout
+    num_rows = len(self.scenarios)
+    self._fig.update_layout(
+      hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)'
+    )
+    self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
+    self._fig.update_yaxes(showspikes=True, spikemode='across')
+
+    # handle empty properties
+    if not (self.scenarios and self.models and self.location and self.target):
+      self._create_empty_figure()
+      return self._fig
+    if not self.scenarios:
       raise ValueError('Scenario is required to display chart.')
-    if not self.controls.models:
+    if not self.models:
       raise ValueError('Models are required to display chart.')
 
-    df = self._raw_df.sort_values(by=self.controls.x_axis)
+    df = self._raw_df.sort_values(by=self.x_axis)
+    df = df.query('age_group == @self.age_group.input_value')
 
     # create base plot
     if self.plot_type == PlotType.LINE:
-      self._fig = px.line(df, y=self.controls.y_axis)
+      self._fig = px.line(df, y=self.y_axis)
     elif self.plot_type == PlotType.BOXPLOT:
-      self._fig = px.box(df, y=self.controls.y_axis)
+      self._fig = px.box(df, y=self.y_axis)
     else:
       raise ValueError(f'Invalid chart type: {self.plot_type}')
 
-    # add annotations
-    # for annotation in self.annotations:
-    #   self._fig.add_annotation(
-    #     x=annotation.value if isinstance(annotation, HorizontalAnnotation) else None,
-    #     y=annotation.value if isinstance(annotation, VerticalAnnotation) else None,
-    #     text=annotation.label,
-    #     showarrow=False,
-    #     font=dict(color=annotation.color),
-    #   )
-
     # create subplots
-    num_rows = len(self.controls.scenarios)
     self._fig = make_subplots(
       rows=num_rows,
       cols=1,
       vertical_spacing=0.1,
-      subplot_titles=[f'Scenario {s.name}' for s in self.controls.scenarios],
+      subplot_titles=[f'Scenario {s.name}' for s in self.scenarios],
     )
     # self._fig.update_xaxes(matches='x')
     # self._fig.update_yaxes(matches='y')
 
     # add traces for each scenario
-    for i, scenario in enumerate(self.controls.scenarios, start=1):
+    for i, scenario in enumerate(self.scenarios, start=1):
       scenario_df = df.query('scenario_id == @scenario.id')
 
       # main line for median (0.5 quantile)
@@ -224,7 +249,7 @@ class Chart:
           go.Scatter(
             x=model_df.index,
             y=model_df['value'],
-            mode='lines+markers',
+            mode='lines',
             name=f'Model {model_name}',
             legendgroup=f'Model {model_name}',
             showlegend=(i == 1),
@@ -234,13 +259,8 @@ class Chart:
         )
 
       # add uncertainty intervals
-      if (
-        self.controls.certainty_percent
-        and self.controls.certainty_percent in Uncertainty.display_values()
-      ):
-        uncertainty_bounds = Uncertainty.from_display_value(
-          self.controls.certainty_percent
-        ).get_bounds()
+      if self.certainty_percent and self.certainty_percent in Uncertainty.display_values():
+        uncertainty_bounds = Uncertainty.from_display_value(self.certainty_percent).get_bounds()
         for lower_q, upper_q in uncertainty_bounds:
           lower = scenario_df.query('type_id == @lower_q')
           upper = scenario_df.query('type_id == @upper_q')
@@ -265,16 +285,16 @@ class Chart:
             )
 
       # load gold standard data (the actual data up to present day, not projections)
-      gold_std_df = self.collect_gold_std_data(self.controls.round_num)
-      gold_std_df = gold_std_df.query('age_group == @self.controls.age_group.input_value')
-      gold_std_df = gold_std_df.query('geo_value_fullname == @self.controls.location.name')
+      gold_std_df = self.collect_gold_std_data(self.round_num)
+      gold_std_df = gold_std_df.query('age_group == @self.age_group.input_value')
+      gold_std_df = gold_std_df.query('geo_value_fullname == @self.location.name')
 
       # add gold standard line
       self._fig.add_trace(
         go.Scatter(
           x=gold_std_df['time_value'],
           y=gold_std_df['value'],
-          mode='lines+markers',
+          mode='lines',
           name='Gold standard',
           line=dict(color='rebeccapurple', dash='dot'),
           marker=dict(symbol='diamond'),
@@ -287,39 +307,15 @@ class Chart:
 
     # add annotations
     for annotation in self.annotations:
-      if isinstance(annotation, HorizontalAnnotation):
-        for _ in self._fig.select_yaxes():
-          self._fig.add_hline(
-            y=annotation.value,
-            line_dash='dot',
-            line_color=annotation.color,
-            line_width=1,
-            annotation_text=annotation.label,
-            annotation_font_color=annotation.color,
-          )
-
-      elif isinstance(annotation, VerticalAnnotation):
-        for _ in self._fig.select_xaxes():
-          self._fig.add_vline(
-            x=annotation.value,
-            line_dash='dot',
-            line_color=annotation.color,
-            line_width=1,
-            annotation_text=annotation.label,
-            annotation_font_color=annotation.color,
-          )
-
-    # update layout
-    self._fig.update_layout(
-      hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)'
-    )
-    self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
-    self._fig.update_yaxes(showspikes=True, spikemode='across')
+      self._fig.add_annotation(
+        x=annotation.value if isinstance(annotation, HorizontalAnnotation) else None,
+        y=annotation.value if isinstance(annotation, VerticalAnnotation) else None,
+        text=annotation.label,
+        showarrow=False,
+        font=dict(color=annotation.color),
+      )
 
     return self._fig
-
-  def get_controls(self) -> ChartControls:
-    return self.controls
 
   def get_fig(self) -> go.Figure:
     return self._fig

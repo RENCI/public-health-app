@@ -1,5 +1,9 @@
+import json
+
 import dash_mantine_components as dmc
 from dash import ALL, Input, Output, State, callback, ctx, dcc
+
+from src.components.chart import Annotation
 
 # Simplified add annotation button
 add_annotation_button = dmc.Button(
@@ -79,21 +83,21 @@ def annotations_input(value=[]):
   Input('annotations-store', 'data'),
   prevent_initial_call=True,
 )
-def render_annotations(data):
+def render_annotations(data: list[dict]):
   """Render annotation rows based on store data."""
   if not data:
     return []
 
   try:
+    annotations = [Annotation.from_dict(annotation_data) for annotation_data in data]
     rows = []
-    for i, d in enumerate(data):
+    for i, annotation in enumerate(annotations):
       try:
-        # Use the proper annotation_row function to create interactive inputs
         row = annotation_row(
           index=i,
-          label=d.get('label', ''),
-          value=d.get('value', 0),
-          color=d.get('color', '#00abc7'),
+          label=annotation.label,
+          value=annotation.value,
+          color=annotation.color,
         )
         rows.append(row)
       except Exception as e:
@@ -116,7 +120,14 @@ def render_annotations(data):
   State('annotations-store', 'data'),
   prevent_initial_call=True,
 )
-def manage_annotations(add_clicks, remove_clicks, values, labels, colors, stored):
+def update_annotations(
+  add_clicks: int,
+  remove_clicks: int,
+  values: list[float],
+  labels: list[str],
+  colors: list[str],
+  stored: list[dict],
+):
   """Handle add/remove actions and field updates for annotations."""
   stored = stored or []
 
@@ -130,14 +141,18 @@ def manage_annotations(add_clicks, remove_clicks, values, labels, colors, stored
 
   # Handle add annotation button click
   if 'add-annotation-button' in trigger_id:
-    stored.append(dict(value=0, label='', color='#00abc7'))
+    stored.append(
+      {
+        'value': 0,
+        'label': '',
+        'color': '#00abc7',
+      }
+    )
     return stored
 
-  # Handle remove annotation button clicks
+  # Handle remove annotation button click
   if 'remove-annotation' in trigger_id:
     # Extract index from trigger_id
-    import json
-
     trigger_data = json.loads(trigger_id.split('.')[0])
     index = trigger_data['index']
     if 0 <= index < len(stored):
@@ -154,6 +169,5 @@ def manage_annotations(add_clicks, remove_clicks, values, labels, colors, stored
         stored[i]['label'] = labels[i]
       if i < len(colors) and colors[i] is not None:
         stored[i]['color'] = colors[i]
-    return stored
 
   return stored

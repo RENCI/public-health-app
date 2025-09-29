@@ -12,6 +12,7 @@ def target_select(value='Incident Hospitalization'):
     placeholder='',
     id='target-select',
     value=value,
+    required=True,
     data=[
       dict(label='Incident Hospitalization', value='incident_hospitalization'),
       dict(label='Cumulative Hospitalization', value='cumulative_hospitalization'),

@@ -3,7 +3,7 @@ from typing import Any
 import dash_mantine_components as dmc
 from dash import Input, Output, callback, dcc, html
 
-from src.components.chart import Chart, ChartControls, PlotType
+from src.components.chart import Annotation, Chart, ChartControls, PlotType
 
 from .controls import (
   age_group_select,
@@ -125,10 +125,6 @@ def update_chart(
   annotations: list[dict[str, Any]] | None,
 ):
   try:
-    print(
-      f'Callback inputs: scenario_names={scenario_names}, models={model_names}, location={location}, target={target}, age_group={age_group}, uncertainty={uncertainty}'
-    )
-
     chart_controls = ChartControls(
       x_axis='horizon',
       y_axis='value',
@@ -140,10 +136,10 @@ def update_chart(
       target=target,
       age_group=age_group,
       certainty_percent=uncertainty,
-      annotations=annotations or [],
+      annotations=annotations,
     )
     chart = Chart(PlotType.LINE, chart_controls)
-    return [dcc.Graph(figure=chart.get_fig())]
+    return [dcc.Graph(figure=chart.get_fig())]  # must return a list here for the callback to work
   except Exception as e:
     print(f'Error creating chart: {e}')
     import traceback
