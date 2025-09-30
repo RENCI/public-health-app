@@ -231,8 +231,6 @@ class Chart:
       vertical_spacing=0.1,
       subplot_titles=[f'Scenario {s.name}' for s in self.scenarios],
     )
-    # self._fig.update_xaxes(matches='x')
-    # self._fig.update_yaxes(matches='y')
 
     # add traces for each scenario
     for i, scenario in enumerate(self.scenarios, start=1):

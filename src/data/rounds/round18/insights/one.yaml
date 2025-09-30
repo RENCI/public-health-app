@@ -17,6 +17,6 @@ controls:
   scenarios: ['77', '78', '80']
   uncertainty: '95%'
   annotations:
-    - value: 17_000
+    - value: 50000
       label: "Some important value"
       color: "#663399"

@@ -81,7 +81,6 @@ def annotations_input(value=[]):
 @callback(
   Output('annotations-container', 'children'),
   Input('annotations-store', 'data'),
-  prevent_initial_call=True,
 )
 def render_annotations(data: list[dict]):
   """Render annotation rows based on store data."""
