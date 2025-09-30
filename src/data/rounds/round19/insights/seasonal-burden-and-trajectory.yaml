@@ -24,6 +24,11 @@ controls:
       min: 0
       max: 65_000
   annotations:
-    - value: 17_000
-      label: "Some important value"
+    - axis: x
+      value: 2025-10-01
+      label: Some Policy change
+      color: "#993366"
+    - axis: y
+      value: 17_000
+      label: An important value
       color: "#663399"
