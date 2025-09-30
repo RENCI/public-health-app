@@ -115,6 +115,7 @@ def annotations_input(value=[]):
     children=[
       dcc.Store(id='annotations-store', storage_type='memory', data=value),
       dmc.Text('Annotations', size='md'),
+      dmc.Divider(),
       dmc.Stack(
         id='annotations-container',
         children=[],
