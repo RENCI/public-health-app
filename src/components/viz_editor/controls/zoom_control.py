@@ -12,7 +12,13 @@ def zoom_control(value={}):
   return dmc.Stack(
     children=[
       dcc.Store(id='zoom-store', data=value),
-      dmc.Text('Zoom', size='md'),
+      dmc.Flex(
+        [
+          dmc.Text('Zoom', size='md'),
+          dmc.Button('Use chart zoom', id='use-chart-zoom-button', size='xs', variant='subtle'),
+        ],
+        justify='space-between',
+      ),
       dmc.Divider(),
       dmc.Flex(
         [

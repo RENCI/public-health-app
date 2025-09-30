@@ -1,4 +1,4 @@
-from dash import callback, html, Input, Output
+from dash import callback, dcc, exceptions, html, Input, Output, State
 import dash_mantine_components as dmc
 from .controls.scenarios_select import scenarios_select
 from .controls.location_select import location_select
@@ -63,7 +63,7 @@ def visualization_editor(control_values=None, show_controls=True):
   return dmc.Grid(
     children=[
       dmc.GridCol(
-        figure_container,
+        [dcc.Store('chart-extent-store'), figure_container],
         id='visualization-column',
         span=dict(base=12, xl=8, lg=7, md=8),
       ),
@@ -128,3 +128,37 @@ def update_chart(scenarios, models, location, target, age_group, uncertainty, zo
     annotations=annotations,
   )
   return chart(control_values=control_values)
+
+
+@callback(
+  Output('chart-extent-store', 'data'),
+  Input('chart-figure', 'relayoutData'),
+)
+def sync_zoom_store(relayout):
+  if not relayout:
+    raise exceptions.PreventUpdate
+  return dict(
+    x={'min': relayout.get('xaxis.range[0]'), 'max': relayout.get('xaxis.range[1]')},
+    y={'min': relayout.get('yaxis.range[0]'), 'max': relayout.get('yaxis.range[1]')},
+  )
+
+
+@callback(
+  Output('zoom-x-min', 'value'),
+  Output('zoom-x-max', 'value'),
+  Output('zoom-y-min', 'value'),
+  Output('zoom-y-max', 'value'),
+  Input('use-chart-zoom-button', 'n_clicks'),
+  State('chart-extent-store', 'data'),
+  prevent_initial_call=True,
+)
+def apply_current_zoom(n_clicks, current_zoom):
+  if not n_clicks or not current_zoom:
+    raise exceptions.PreventUpdate
+
+  return (
+    current_zoom['x'].get('min'),
+    current_zoom['x'].get('max'),
+    current_zoom['y'].get('min'),
+    current_zoom['y'].get('max'),
+  )

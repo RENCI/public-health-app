@@ -41,23 +41,29 @@ toolbar = dmc.Flex(
 
 loading_title = dmc.Skeleton(h=85)
 loading_chart = dmc.Skeleton(h=600)
-loading_description = dmc.Stack([
-  dmc.Skeleton(h=30),
-  dmc.Skeleton(h=30),
-  dmc.Skeleton(h=30),
-])
-loading_details = dmc.Stack([
-  loading_chart,
-  dmc.Space(h=24),
-  loading_description,
-])
+loading_description = dmc.Stack(
+  [
+    dmc.Skeleton(h=30),
+    dmc.Skeleton(h=30),
+    dmc.Skeleton(h=30),
+  ]
+)
+loading_details = dmc.Stack(
+  [
+    loading_chart,
+    dmc.Space(h=24),
+    loading_description,
+  ]
+)
 
 layout = dmc.Container(
   [
     toolbar,
     dmc.Title(id='insight-view-title', order=1, children=loading_title),
     dmc.Divider(my=24),
-    html.Div(id='insight-view-figure-container', style=dict(margin='24px 0'), children=loading_details),
+    html.Div(
+      id='insight-view-figure-container', style=dict(margin='24px 0'), children=loading_details
+    ),
     dcc.Markdown(id='insight-view-description'),
   ],
   size=1200,
@@ -81,19 +87,19 @@ def show_details(pathname, search, custom_insights):
     insight_id = get_query_param(search, 'id')
     if not insight_id:
       raise ValueError('No insight ID in URL')
-    
+
     insight = get_insight(insight_id, custom_insights=custom_insights or [])
     if not insight:
       raise ValueError(f'Insight {insight_id} not found')
-    
+
     controls = insight.get('controls', {})
-    
+
     return (
       visualization_editor(control_values=controls, show_controls=False),
       insight.get('title', 'Untitled Insight'),
       insight.get('description', ''),
     )
-    
+
   # fallback
   except Exception as e:
     return (
