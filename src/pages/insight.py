@@ -1,7 +1,7 @@
 from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
-from dash import html, Input, Output, callback, dcc, register_page
+from dash import html, Input, Output, callback, dcc, no_update, register_page
 from dash_iconify import DashIconify
 from src.data.rounds.round19 import get_insight
 from src.util.get_query_param import get_query_param
@@ -39,12 +39,25 @@ toolbar = dmc.Flex(
   mb=24,
 )
 
+loading_title = dmc.Skeleton(h=85)
+loading_chart = dmc.Skeleton(h=600)
+loading_description = dmc.Stack([
+  dmc.Skeleton(h=30),
+  dmc.Skeleton(h=30),
+  dmc.Skeleton(h=30),
+])
+loading_details = dmc.Stack([
+  loading_chart,
+  dmc.Space(h=24),
+  loading_description,
+])
+
 layout = dmc.Container(
   [
     toolbar,
-    dmc.Title(id='insight-view-title', order=1),
+    dmc.Title(id='insight-view-title', order=1, children=loading_title),
     dmc.Divider(my=24),
-    html.Div(id='insight-view-figure-container', style=dict(margin='24px 0')),
+    html.Div(id='insight-view-figure-container', style=dict(margin='24px 0'), children=loading_details),
     dcc.Markdown(id='insight-view-description'),
   ],
   size=1200,
@@ -55,21 +68,39 @@ layout = dmc.Container(
   Output('insight-view-figure-container', 'children'),
   Output('insight-view-title', 'children'),
   Output('insight-view-description', 'children'),
+  Input('url', 'pathname'),
   Input('url', 'search'),
   Input('custom-insights-store', 'data'),
 )
-def show_details(search, custom_insights):
-  insight_id = get_query_param(search, 'id')
-  insight = get_insight(insight_id, custom_insights=custom_insights or [])
-  if not insight:
-    return '', 'Insight not Found', ''
+def show_details(pathname, search, custom_insights):
+  if pathname != '/insight':
+    # prevent rendering insight view if we're heading to another page
+    return no_update, no_update, no_update
 
-  controls = insight.get('controls')
-  return (
-    visualization_editor(control_values=controls, show_controls=False),
-    insight['title'],
-    insight['description'],
-  )
+  try:
+    insight_id = get_query_param(search, 'id')
+    if not insight_id:
+      raise ValueError('No insight ID in URL')
+    
+    insight = get_insight(insight_id, custom_insights=custom_insights or [])
+    if not insight:
+      raise ValueError(f'Insight {insight_id} not found')
+    
+    controls = insight.get('controls', {})
+    
+    return (
+      visualization_editor(control_values=controls, show_controls=False),
+      insight.get('title', 'Untitled Insight'),
+      insight.get('description', ''),
+    )
+    
+  # fallback
+  except Exception as e:
+    return (
+      dmc.Alert(f'Error loading insight: {e}', color='crimson', title='Insight Error'),
+      'Error',
+      '',
+    )
 
 
 @callback(
