@@ -1,3 +1,4 @@
+import datetime
 from dash import dcc
 import pandas as pd
 from src.util.data import build_dataset_path, collect_data
@@ -117,25 +118,64 @@ def chart(control_values={}):
       col=1,
     )
 
-  for line in annotations:
-    if line.get('value'):
+    for line in annotations:
+      axis = line.get('axis', 'y')
       line_value = line.get('value')
       line_label = line.get('label', '')
       line_color = line.get('color', '#222222')
 
-      for yaxis_name in fig.select_yaxes():
-        fig.add_hline(
-          y=line_value,
-          line_dash='dot',
-          line_color=line_color,
-          line_width=1,
-          annotation_text=line_label,
-          annotation_position='top left',
-          annotation_font_color=line_color,
-        )
+      if not line_value:
+        continue
+
+      if axis == 'y':
+        # horizontal lines
+        for yaxis_name in fig.select_yaxes():
+          fig.add_hline(
+            y=line_value,
+            line_dash='dot',
+            line_color=line_color,
+            line_width=1,
+            annotation_text=line_label,
+            annotation_position='top left',
+            annotation_font_color=line_color,
+          )
+      elif axis == 'x':
+        # vertical lines
+        # coerce a string to a timestamp
+        if isinstance(line_value, str):
+          line_value = pd.to_datetime(line_value).date()
+        elif isinstance(line_value, datetime.date):
+          line_value = datetime.datetime.combine(line_value, datetime.time())
+
+        for xaxis_name in fig.select_xaxes():
+          fig.add_shape(
+            type='line',
+            x0=line_value,
+            x1=line_value,
+            y0=0,
+            y1=1,
+            xref='x',
+            yref='paper',  # span entire height? reduces labels
+            line=dict(color=line_color, dash='dot', width=1),
+          )
+
+          fig.add_annotation(
+            x=line_value,
+            y=-0.033,  # [0, 1] ~ [bottom, top]
+            xref='x',
+            yref='paper',
+            text=line_label,
+            showarrow=False,
+            font=dict(color=line_color),
+            xanchor='center',
+            yanchor='top',
+          )
 
   fig.update_layout(
-    hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)'
+    hovermode='x unified',
+    height=300 * num_rows,
+    title='Forecast values over time (by scenario)',
+    uirevision='df',
   )
   fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
   fig.update_yaxes(showspikes=True, spikemode='across')
