@@ -271,7 +271,6 @@ def round_summary():
   Input('url', 'pathname'),
 )
 def update_round_summary(round_number, pathname):
-  print(dict(round_number=round_number, pathname=pathname))
   if not round_number:
     return 'No round selected', '...', []
   rounds = load_rounds()
