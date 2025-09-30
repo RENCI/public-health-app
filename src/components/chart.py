@@ -161,14 +161,14 @@ def chart(control_values={}):
 
           fig.add_annotation(
             x=line_value,
-            y=1,  # top
+            y=-0.033,  # [0, 1] ~ [bottom, top]
             xref='x',
             yref='paper',
             text=line_label,
             showarrow=False,
             font=dict(color=line_color),
-            xanchor='left',
-            yanchor='bottom',
+            xanchor='center',
+            yanchor='top',
           )
 
   fig.update_layout(
