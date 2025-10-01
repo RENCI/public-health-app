@@ -1,30 +1,21 @@
-import random
 from dash import callback, Input, Output
 import dash_mantine_components as dmc
 from ..util.data import load_rounds
 
 rounds = load_rounds()
 
-# temp, for round option blurbs
-lorem_ispum = [
-  'Aliquip ex dolor aliqua sed est ea minim aute in dolor.',
-  'Officia incididunt cillum eu minim excepteur proident.',
-  'Ullamco aliquip reprehenderit ea proident proident aliquip.',
-  'Lorem ipsum quis consectetur deserunt ad quis tempor cupidatat.',
-  'Nostrud ut occaecat incididunt sed nulla nostrud est in.',
-]
-
 options = [
   dict(
     value=n,
+    round_number=rounds[n]['round_number'],
     label=f'Round {rounds[n]["round_number"]}',
-    snippet=random.choice(lorem_ispum),
+    snippet=rounds[n]['name'],
     insights_count=len(rounds[n].get('insights')),
   )
   for n in rounds.keys()
 ]
 
-sorted_options = sorted(options, key=lambda o: o['label'], reverse=True)
+sorted_options = sorted(options, key=lambda o: o['round_number'], reverse=True)
 
 
 def round_select(value='19'):
