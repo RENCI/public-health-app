@@ -1,18 +1,35 @@
 .mantine-Select-dropdown {
-  height: min-content;
-}
+  --option-accent-color: var(--mantine-primary-color-filled);
+  --option-hover-accent-color: color-mix(
+    in oklab,
+    var(--mantine-primary-color-filled) 75%,
+    var(--mantine-color-gray-6) 25%
+  );
+  --option-bg-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+  --option-hover-bg-color: color-mix(in hsl, var(--option-bg-color), #999 10%);
 
-.mantine-Select-option:has(.round-option) {
+  height: min-content;
   padding: 0;
+  border: 0;
+  background-color: color-mix(in hsl, var(--option-bg-color), transparent 20%); /* kinda see-thru dropdown tray */
+  backdrop-filter: blur(3px); /* with glass effect  */
+  .mantine-ScrollArea-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 
 .round-option {
+  margin: 8px;
   width: 100%;
   display: flex;
-  align-items: space-between;
   padding: 1rem;
   border-radius: 4px;
   position: relative;
+  background-color: var(--option-bg-color);
+  border: 1px solid var(--mantine-color-gray-filled);
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
   .round-option-label {
     font-weight: bold;
   }
@@ -28,7 +45,8 @@
     background-color: var(--mantine-color-gray-filled);
   }
   &.selected {
-    background-color: color-mix(in hsl, var(--mantine-primary-color-filled) 5%, transparent);
+    background-color: var(--option-hover-bg-color);
+    border: 1px solid var(--mantine-primary-color-filled);
     .round-option-label {
       color: var(--mantine-primary-color-filled);
     }
@@ -37,3 +55,18 @@
     background-color: var(--mantine-primary-color-filled);
   }
 }
+
+.mantine-Select-option {
+  padding: 0;
+  background-color: transparent;
+  &:hover {
+    background-color: transparent;
+  }  
+  &:not([data-combobox-active="true"]):hover .round-option {
+    background-color: var(--option-hover-bg-color);
+    /*border: 1px solid var(--option-hover-accent-color);*/
+    &::before {
+      background-color: var(--option-hover-accent-color);
+    }
+  }
+}  

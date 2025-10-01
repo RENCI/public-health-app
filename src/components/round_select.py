@@ -28,6 +28,7 @@ def round_select(value='19'):
     allowDeselect=False,
     renderOption={'function': 'renderRoundOption'},
     style=dict(width='300px'),
+    withScrollArea=False,
   )
 
 
