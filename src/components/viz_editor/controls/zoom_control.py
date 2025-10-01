@@ -1,6 +1,5 @@
-from dash import callback, ctx, dcc, exceptions, Input, Output, State
+from dash import callback, ctx, dcc, Input, Output, State
 import dash_mantine_components as dmc
-from dash_iconify import DashIconify
 
 
 def zoom_control(value={}):
