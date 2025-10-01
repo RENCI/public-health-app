@@ -131,7 +131,7 @@ def save_custom_insight(
     return no_update, title_error, desc_error, no_update, no_update, no_update
 
   now = datetime.datetime.utcnow().isoformat()
-  new_id = f'custom-{uuid.uuid4()}'
+  new_id = str(uuid.uuid4())
   new_item = dict(
     id=new_id,
     title=title.strip(),
