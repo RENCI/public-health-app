@@ -1,4 +1,5 @@
 from urllib.parse import parse_qs
+from weasyprint import HTML
 
 import dash_mantine_components as dmc
 from dash import html, Input, Output, callback, dcc, no_update, register_page
@@ -22,14 +23,11 @@ explorer_button = dcc.Link(
   id='explorer-button',
   href='#',
 )
-download_button = dcc.Link(
-  dmc.Button(
-    'Download',
-    leftSection=DashIconify(icon='feather:download'),
-    variant='outline',
-  ),
+download_button = dmc.Button(
+  'Download',
+  leftSection=DashIconify(icon='feather:download'),
+  variant='outline',
   id='download-button',
-  href='#',
 )
 
 toolbar = dmc.Flex(
@@ -65,6 +63,7 @@ layout = dmc.Container(
       id='insight-view-figure-container', style=dict(margin='24px 0'), children=loading_details
     ),
     dcc.Markdown(id='insight-view-description'),
+    dcc.Download(id='pdf-download'),
   ],
   size=1200,
 )
@@ -117,3 +116,27 @@ def add_back_link_href(search):
   query = parse_qs(search.lstrip('?'))
   insight_id = query.get('id', [None])[0]
   return f'/explorer?starter={insight_id}'
+
+
+@callback(
+  Output('pdf-download', 'data'), Input('download-button', 'n_clicks'), prevent_initial_call=True
+)
+def generate_pdf(n_clicks):
+  pdf_html = """
+  <html>
+    <head>
+      <style>
+        body { margin: 0; }
+        h1 { color: rebeccapurple; }
+        p { font-family: monospace; }
+      </style>
+    </head>
+    <body>
+      <h1>Insight Report</h1>
+      <p>Are you seeing this customized PDF?!</p>
+    </body>
+  </html>
+  """
+
+  pdf_bytes = HTML(string=pdf_html).write_pdf()
+  return dcc.send_bytes(lambda x: x.write(pdf_bytes), 'report.pdf')
