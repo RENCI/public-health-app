@@ -215,7 +215,6 @@ def custom_insight_button(item):
             ],
             justify='space-between',
             align='flex-end',
-            style=dict(alignSelf='stretch', width='100%', display='flex'),
           ),
         ],
         justify='space-between',
