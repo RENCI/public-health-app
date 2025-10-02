@@ -89,32 +89,9 @@ def load_rounds():
 
     rounds[round_number] = dict(
       round_number=int(round_number),
-      name=f'Round {round_number}',
+      name=details.get('name'),
       report=details.get('report', ''),
       insights=insights,
     )
 
   return rounds
-
-  # rounds = {}
-  # for round_dir in sorted(os.listdir(ROUNDS_DIR)):
-  #   full_path = os.path.join(ROUNDS_DIR, round_dir)
-  #   if not os.path.isdir(full_path) or not round_dir.lower().startswith('round'):
-  #     continue
-
-  #   # reduce key to just the number
-  #   round_num = round_dir.lower().replace('round', '')
-
-  #   insights = []
-  #   for filename in sorted(os.listdir(full_path)):
-  #     if filename.endswith('.yaml'):
-  #       path = os.path.join(full_path, filename)
-  #       with open(path, 'r') as f:
-  #         insight = yaml.safe_load(f)
-  #         insight['type'] = 'system'
-  #         insights.append(insight)
-
-  #   insights.sort(key=lambda x: x.get('title', '').lower())
-  #   rounds[round_num] = insights
-
-  # return rounds
