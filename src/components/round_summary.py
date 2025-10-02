@@ -1,4 +1,3 @@
-import json
 import uuid
 from lzstring import LZString
 from dash import ALL, callback, ctx, dcc, exceptions, no_update, Input, Output, State
@@ -6,6 +5,7 @@ import dash_mantine_components as dmc
 from dash_iconify import DashIconify
 from src.util.time_ago import time_ago
 from ..util.data import load_rounds
+from ..util.insight import generate_insight_share_url
 
 from src.util.format_timestamp import format_timestamp
 
@@ -107,7 +107,7 @@ def insight_button(item):
         minHeight='100%',
       ),
     ),
-    href=f'/insight?id={item["id"]}',
+    href=f'/insight/{item["id"]}',
     underline=False,
   )
 
@@ -173,7 +173,7 @@ def custom_insight_button(item):
         minHeight='100%',
       ),
     ),
-    href=f'/insight?id={item["id"]}',
+    href=f'/insight/{item["id"]}',
     underline=False,
   )
 
@@ -261,7 +261,6 @@ def round_summary():
   return dmc.Stack(
     [
       delete_modal,
-      dcc.Clipboard(id='clipboard', style=dict(display='none')),
       dmc.Title(id='round-title', order=1, my=24, style=dict(textAlign='center')),
       dmc.Divider(),
       dmc.Box(id='round-overview'),
@@ -378,42 +377,25 @@ def handle_click_share(share_clicks, clipboard_clicks, href, selected_round, cus
   if not ctx.triggered_id or not any(share_clicks):
     raise exceptions.PreventUpdate
 
-  # get the id of the clicked insight
   insight_id = ctx.triggered_id['id']
   if not insight_id:
     raise exceptions.PreventUpdate
 
-  # find the clicked insight
-  insight = next((i for i in custom_insights if str(i['id']) == str(insight_id)), None)
-  if not insight:
-    raise exceptions.PreventUpdate
-
-  # collect metadata, controls, etc.; controls fallback to empty dict
-  round_number = selected_round
-  title = insight.get('title', '')
-  description = insight.get('description', '')
-  controls = insight.get('controls', {})
-
-  compressed_state = lz.compressToEncodedURIComponent(
-    json.dumps(
-      dict(
-        round=round_number,
-        title=title,
-        description=description,
-        controls=controls,
-      )
-    )
+  # Use helper for share URL
+  share_url = generate_insight_share_url(
+    round_number=selected_round,
+    insight_id=insight_id,
+    insights=custom_insights,
+    base_url=href.split('?')[0].rstrip('/'),
   )
 
-  base_url = href.split('?')[0].rstrip('/')
-  share_url = f'{base_url}/shared/{compressed_state}'
-
-  notification = dict(
-    action='show',
-    id=f'share-success-{uuid.uuid4()}',
-    message='Link to this insight copied successfuly!',
-    color='green',
-  )
+  # Prepare notification
+  notification = {
+    'action': 'show',
+    'id': f'share-success-{uuid.uuid4()}',
+    'message': 'Link to this insight copied successfully!',
+    'color': 'green',
+  }
   new_clipboard_clicks = (clipboard_clicks or 0) + 1
 
   return [notification], share_url, new_clipboard_clicks

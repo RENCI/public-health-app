@@ -4,10 +4,11 @@ from dash import dcc, html, Input, Output, State, callback, exceptions, register
 import dash_mantine_components as dmc
 from src.components.chart import chart
 
+lz = LZString()
+
 # this path gets used below to define `encoded`, so keep that and path_template aligned
 register_page(__name__, path_template='/shared/<compressed>', name='Shared Insight')
 
-lz = LZString()
 
 back_button = dmc.Anchor('← Home', href='/', id='back-button')
 
@@ -64,7 +65,7 @@ def render_shared_insight(pathname, search, selected_round, custom_insights):
     decoded = lz.decompressFromEncodedURIComponent(encoded)
     if decoded:
       state = json.loads(decoded)
-      round_number = state.get('round', '18')
+      # round_number = state.get('round', '18')
       controls = state['controls']
       title = state['title']
       description = state['description']

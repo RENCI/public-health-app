@@ -2,7 +2,7 @@ import datetime
 import uuid
 
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, exceptions, no_update
+from dash import Input, Output, State, callback, exceptions
 from dash_iconify import DashIconify
 
 form_toggle_button = dmc.Button(
@@ -83,7 +83,6 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   Output('insight-description-input', 'error'),
   Output('notification-container', 'sendNotifications'),
   Output('_pages_location', 'pathname'),  # update path
-  Output('_pages_location', 'search'),  # add ?id=insight_id
   Input('save-button', 'n_clicks'),
   State('custom-insights-store', 'data'),
   State('insight-title-input', 'value'),
@@ -128,7 +127,7 @@ def save_custom_insight(
     desc_error = 'Description is required.'
 
   if title_error or desc_error:
-    return no_update, title_error, desc_error, no_update, no_update, no_update
+    raise exceptions.PreventUpdate
 
   now = datetime.datetime.utcnow().isoformat()
   new_id = str(uuid.uuid4())
@@ -166,6 +165,5 @@ def save_custom_insight(
     None,
     None,
     [notification],
-    '/insight',
-    f'?id={new_id}',
+    f'/insight/{new_id}',
   )
