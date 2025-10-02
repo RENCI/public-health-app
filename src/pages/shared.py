@@ -1,12 +1,11 @@
-import json
-from lzstring import LZString
 from dash import dcc, html, Input, Output, State, callback, exceptions, register_page
 import dash_mantine_components as dmc
 from src.components.chart import chart
+from src.util.insight import extract_controls_from_share_url
 
-lz = LZString()
 
-# this path gets used below to define `encoded`, so keep that and path_template aligned
+# this path gets used in util.insight.extract_controls_from_share_url,
+# so ensure that `encoded` there stays aligned with path_template here.
 register_page(__name__, path_template='/shared/<compressed>', name='Shared Insight')
 
 
@@ -50,27 +49,13 @@ layout = dmc.Container(
   State('custom-insights-store', 'data'),
 )
 def render_shared_insight(pathname, search, selected_round, custom_insights):
-  # we're expecting URLs like: /shared/<compressed-state>
-  if not pathname or not pathname.startswith('/shared/'):
+  state = extract_controls_from_share_url(pathname)
+
+  if not state:
     raise exceptions.PreventUpdate
 
-  # strip '/shared/' -- keep aligned with `path_template` above  ^^
-  encoded = pathname.removeprefix('/shared/')
-  state = {}
-  controls = {}
-  title = ''
-  description = ''
-
-  try:
-    decoded = lz.decompressFromEncodedURIComponent(encoded)
-    if decoded:
-      state = json.loads(decoded)
-      # round_number = state.get('round', '18')
-      controls = state['controls']
-      title = state['title']
-      description = state['description']
-  except Exception as e:
-    print('Error decoding state:', e)
-    state = None
+  controls = state.get('controls', {})
+  title = state.get('title')
+  description = state.get('description')
 
   return title, chart(control_values=controls), description

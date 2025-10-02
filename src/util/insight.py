@@ -23,3 +23,18 @@ def generate_insight_share_url(
 
   compressed_state = lz.compressToEncodedURIComponent(json.dumps(state))
   return f'{base_url}/shared/{compressed_state}'
+
+
+def extract_controls_from_share_url(pathname: str) -> dict | None:
+  """Decode /shared/<compressed-state> into a state dict, or None on failure."""
+  if not pathname or not pathname.startswith('/shared/'):
+    return None
+
+  encoded = pathname.removeprefix('/shared/')
+
+  try:
+    decoded = lz.decompressFromEncodedURIComponent(encoded)
+    return json.loads(decoded) if decoded else None
+  except Exception as error:
+    print('Error decoding insight:', error)
+    return None

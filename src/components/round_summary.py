@@ -381,7 +381,6 @@ def handle_click_share(share_clicks, clipboard_clicks, href, selected_round, cus
   if not insight_id:
     raise exceptions.PreventUpdate
 
-  # Use helper for share URL
   share_url = generate_insight_share_url(
     round_number=selected_round,
     insight_id=insight_id,
@@ -389,7 +388,6 @@ def handle_click_share(share_clicks, clipboard_clicks, href, selected_round, cus
     base_url=href.split('?')[0].rstrip('/'),
   )
 
-  # Prepare notification
   notification = {
     'action': 'show',
     'id': f'share-success-{uuid.uuid4()}',
