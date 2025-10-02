@@ -1,4 +1,6 @@
-from dataclasses import asdict, dataclass
+from abc import ABC
+from dataclasses import asdict
+from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, Self
@@ -34,20 +36,6 @@ conf_int_colors = {
   (0.1, 0.9): 'rgba(100,100,255,0.4)',
   (0.25, 0.75): 'rgba(50,50,255,0.6)',  # darkest
 }
-
-
-@dataclass
-class Serializable:
-  """Base class for serializable dataclasses."""
-
-  def to_dict(self) -> dict[str, Any]:
-    """Convert object to dictionary for JSON serialization."""
-    return asdict(self)
-
-  @classmethod
-  def from_dict(cls, data: dict[str, Any]) -> Self:
-    """Create object from dictionary."""
-    return cls(**data)
 
 
 class Scenario:
@@ -93,21 +81,65 @@ class Location:
     return f'{self.name}'
 
 
-class Annotation(Serializable):
-  def __init__(self, value: float, label: str, color: str):
+class Annotation(ABC):
+  """Abstract base class for annotations with factory pattern support."""
+
+  def __init__(self, value: float, label: str, color: str, type: str):
+    """
+    Initialize annotation with factory pattern support.
+    """
     self.value = value
     self.label = label
     self.color = color
+    self.type = type
+
+  @classmethod
+  def create(cls, value: float, label: str, color: str, type: str) -> 'Annotation':
+    """Factory method to create appropriate annotation subclass based on type."""
+    if not type:
+      return HorizontalAnnotation(value, label, color)
+
+    type_lower = type.lower()
+    if type_lower == 'horizontal':
+      return HorizontalAnnotation(value, label, color)
+    elif type_lower == 'vertical':
+      return VerticalAnnotation(value, label, color)
+    else:
+      raise ValueError(f'Invalid type "{type}". Must be "horizontal" or "vertical"')
+
+  def to_dict(self) -> dict[str, Any]:
+    """Convert object to dictionary for JSON serialization."""
+    return asdict(self)
+
+  @classmethod
+  def from_dict(cls, data: dict[str, Any]) -> Self:
+    """Create object from dictionary using factory pattern."""
+    return cls.create(
+      value=data['value'], label=data['label'], color=data['color'], type=data['type']
+    )
+
+  def get_plotly_annotation(self) -> dict[str, Any]:
+    """Return plotly annotation configuration for horizontal annotation."""
+    return {
+      'x': self.value if self.type == 'vertical' else None,
+      'y': None if self.type == 'horizontal' else None,
+      'text': self.label,
+      'font': {'color': self.color},
+    }
 
 
 class HorizontalAnnotation(Annotation):
+  """Annotation that appears horizontally (on x-axis)."""
+
   def __init__(self, value: float, label: str, color: str):
-    super().__init__(value, label, color)
+    super().__init__(value, label, color, 'horizontal')
 
 
 class VerticalAnnotation(Annotation):
+  """Annotation that appears vertically (on y-axis)."""
+
   def __init__(self, value: float, label: str, color: str):
-    super().__init__(value, label, color)
+    super().__init__(value, label, color, 'vertical')
 
 
 class PlotTitle:
@@ -139,6 +171,7 @@ class PlotType(StrEnum):
 class ChartControls:
   def __init__(
     self,
+    x_start_date: str,
     x_axis: str,
     y_axis: str,
     round_num: int,
@@ -151,6 +184,7 @@ class ChartControls:
     annotations: list[dict[str, Any]] | None = None,
     certainty_percent: str | None = None,
   ):
+    self.x_start_date = datetime.strptime(x_start_date, '%Y-%m-%d')
     self.x_axis = x_axis
     self.y_axis = y_axis
     self.round_num = round_num
@@ -161,7 +195,7 @@ class ChartControls:
     self.target = Target.from_input_value(target)
     self.age_group = AgeGroup.from_input_value(age_group)
     self.annotations = (
-      [Annotation.from_dict(annotation) for annotation in annotations] if annotations else []
+      [Annotation.from_dict(annotation) for annotation in annotations] if annotations else None
     )
     self.certainty_percent = (
       Uncertainty.from_display_value(certainty_percent) if certainty_percent else None
@@ -173,6 +207,7 @@ class Chart:
 
   def __init__(self, plot_type: PlotType, controls: ChartControls):
     self.plot_type = plot_type
+    self.x_start_date = controls.x_start_date
     self.x_axis = controls.x_axis
     self.y_axis = controls.y_axis
     self.round_num = controls.round_num
@@ -185,7 +220,6 @@ class Chart:
     self.annotations = controls.annotations
     self._data_type = DataType.QUANTILE
     self._raw_df = self.collect_data(self._data_type, self.round_num, self.location, self.target)
-    self._raw_df = self._raw_df.set_index(self.x_axis)
     self._fig: go.Figure = go.Figure()
 
     self.refresh_fig()
@@ -201,8 +235,8 @@ class Chart:
     self._fig.update_layout(
       hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)'
     )
-    self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
-    self._fig.update_yaxes(showspikes=True, spikemode='across')
+    # self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
+    # self._fig.update_yaxes(showspikes=True, spikemode='across')
 
     # handle empty properties
     if not (self.scenarios and self.models and self.location and self.target):
@@ -213,12 +247,26 @@ class Chart:
     if not self.models:
       raise ValueError('Models are required to display chart.')
 
-    df = self._raw_df.sort_values(by=self.x_axis)
+    df = self._raw_df
+    projections_start_date: pd.Series = df[self.x_axis].min()
+    projections_start_date = projections_start_date.strftime('%Y-%m-%d')
+    projections_end_date: pd.Series = df[self.x_axis].max()
+    projections_end_date = projections_end_date.strftime('%Y-%m-%d')
+    print(
+      f'projections_start_date: {projections_start_date}, projections_end_date: {projections_end_date}'
+    )
+
+    df[self.x_axis] = pd.to_datetime(df[self.x_axis])
+    df = df.set_index(self.x_axis)
+    df.loc[projections_start_date:projections_end_date]
+    df = df.query(
+      '@projections_start_date <= @self.x_axis and @self.x_axis <= @projections_end_date'
+    )
     df = df.query('age_group == @self.age_group.input_value')
 
     # create base plot
     if self.plot_type == PlotType.LINE:
-      self._fig = px.line(df, y=self.y_axis)
+      self._fig = px.line(df, y=self.y_axis, line_group='model_name')
     elif self.plot_type == PlotType.BOXPLOT:
       self._fig = px.box(df, y=self.y_axis)
     else:
@@ -245,8 +293,8 @@ class Chart:
         model_df = median_df.query('model_name == @model_id')
         self._fig.add_trace(
           go.Scatter(
-            x=model_df.index,
-            y=model_df['value'],
+            x=model_df[self.x_axis],
+            y=model_df[self.y_axis],
             mode='lines',
             name=f'Model {model_name}',
             legendgroup=f'Model {model_name}',
@@ -270,8 +318,8 @@ class Chart:
 
             self._fig.add_trace(
               go.Scatter(
-                x=pd.concat([lower_model['horizon'], upper_model['horizon'][::-1]]),
-                y=pd.concat([lower_model['value'], upper_model['value'][::-1]]),
+                x=pd.concat([lower_model[self.x_axis], upper_model[self.x_axis][::-1]]),
+                y=pd.concat([lower_model[self.y_axis], upper_model[self.y_axis][::-1]]),
                 fill='toself',
                 fillcolor=conf_int_colors[(lower_q, upper_q)],
                 line=dict(color='rgba(0,0,0,0)'),
@@ -286,6 +334,9 @@ class Chart:
       gold_std_df = self.collect_gold_std_data(self.round_num)
       gold_std_df = gold_std_df.query('age_group == @self.age_group.input_value')
       gold_std_df = gold_std_df.query('geo_value_fullname == @self.location.name')
+      gold_std_df = gold_std_df.query(
+        '@projections_start_date <= time_value and time_value <= @projections_end_date'
+      )
 
       # add gold standard line
       self._fig.add_trace(
@@ -312,6 +363,10 @@ class Chart:
         showarrow=False,
         font=dict(color=annotation.color),
       )
+
+    self._fig.update_xaxes(
+      range=[projections_start_date, None], dtick='M1', tickformat='%b\n%Y', ticklabelmode='period'
+    )
 
     return self._fig
 

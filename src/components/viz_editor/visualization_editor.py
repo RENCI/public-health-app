@@ -43,8 +43,10 @@ def visualization_editor(control_values=None, show_controls=True):
   x_axis: str = controls.get('x_axis', 'horizon')
   y_axis: str = controls.get('y_axis', 'value')
   round_num: int = controls.get('round_num', 19)
+  x_start_date: str = controls.get('x_start_date', '2025-01-01')
 
   figure_control_values = ChartControls(
+    x_start_date=x_start_date,
     x_axis=x_axis,
     y_axis=y_axis,
     round_num=round_num,
@@ -127,7 +129,8 @@ def update_chart(
 ):
   try:
     chart_controls = ChartControls(
-      x_axis='horizon',
+      x_start_date='2025-01-01',
+      x_axis='target_end_date',
       y_axis='value',
       round_num=19,
       pathogen='covid',

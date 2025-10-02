@@ -1,5 +1,11 @@
 import dash_mantine_components as dmc
 
+options = [
+  {'value': 'Ensemble', 'label': 'Ensemble'},
+  {'value': 'Ensemble_LOP', 'label': 'Ensemble_LOP'},
+  {'value': 'Individual Models', 'label': 'Individual Models'},
+]
+
 
 def ensemble_select(value='Ensemble'):
   return dmc.Select(
@@ -7,6 +13,6 @@ def ensemble_select(value='Ensemble'):
     placeholder='',
     id='ensemble-select',
     value=value,
-    data=['Ensemble', 'All'],
+    data=options,
     allowDeselect=False,
   )

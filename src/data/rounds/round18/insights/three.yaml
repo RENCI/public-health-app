@@ -6,7 +6,7 @@ description: >
   - **Sint sit do dolore fugiat velit cupidatat qui eu.**
 
   Culpa aute in dolore sint amet et aliqua eiusmod.
-  
+
   Eu ut deserunt enim ut ea mollit aliqua veniam et mollit.
   Sint labore id commodo ut proident dolore exercitation incididunt id excepteur culpa.
   Ut sit do nostrud tempor ex nulla anim occaecat voluptate eu in in ut esse eu culpa in.
@@ -15,12 +15,13 @@ template: default
 created_at: 2025-05-18T22:45:12Z
 updated_at: 2025-05-18T22:45:12Z
 controls:
-  location: 'US'
-  target: 'incident_hospitalization'
+  location: "US"
+  target: "incident_hospitalization"
   models: []
-  scenarios: ['77', '78', '80']
-  uncertainty: '95%'
+  scenarios: ["77", "78", "80"]
+  uncertainty: "95%"
   annotations:
-    - value: 50000
+    - type: "horizontal"
+      value: 50000
       label: "Some important value"
       color: "#886622"

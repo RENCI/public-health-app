@@ -16,10 +16,12 @@ controls:
   scenarios: ["A-2023-10-27", "B-2023-10-27"]
   uncertainty: "95%"
   age_group: "0-130"
+  x_start: "2025-01-01"
   x_axis: "target_end_date"
   y_axis: "value"
   round_num: 19
   annotations:
-    - value: 50000
+    - type: "horizontal"
+      value: 50000
       label: "Some important value"
       color: "#886622"
