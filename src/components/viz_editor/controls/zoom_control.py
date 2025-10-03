@@ -1,12 +1,18 @@
-from dash import callback, ctx, dcc, Input, Output, State
 import dash_mantine_components as dmc
+from dash import Input, Output, State, callback, ctx, dcc
 
 
-def zoom_control(value={}):
-  x_min = value.get('x', {}).get('min')
-  x_max = value.get('x', {}).get('max')
-  y_min = value.get('y', {}).get('min')
-  y_max = value.get('y', {}).get('max')
+def zoom_control(value=None):
+  if not value:
+    x_min = '2025-01-01'
+    x_max = '2026-06-30'
+    y_min = 0
+    y_max = 65_000
+  else:
+    x_min = value.get('x', {}).get('min')
+    x_max = value.get('x', {}).get('max')
+    y_min = value.get('y', {}).get('min')
+    y_max = value.get('y', {}).get('max')
 
   return dmc.Stack(
     children=[
