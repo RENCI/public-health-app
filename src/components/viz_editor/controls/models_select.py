@@ -6,7 +6,7 @@ models = [model_name for model_name in get_model_names()]
 options = [{'value': m, 'label': m} for m in models]
 
 
-def models_select(value=['Ensemble_LOP']):
+def models_select(value=['Ensemble']):
   return dmc.MultiSelect(
     label='Models',
     placeholder='',

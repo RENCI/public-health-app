@@ -64,9 +64,6 @@ class Model:
       self.name = model_id_or_name
     self.color = get_model_color(self.id)
 
-  def __str__(self):
-    return f'{self.name}'
-
 
 class Location:
   def __init__(self, location_name: str):
@@ -126,6 +123,9 @@ class Annotation(ABC):
       'text': self.label,
       'font': {'color': self.color},
     }
+
+  def get_cache_key(self) -> str:
+    return f'annotation:{self.type}:{self.label}:{self.value}'
 
 
 class HorizontalAnnotation(Annotation):
@@ -226,8 +226,8 @@ class Chart:
 
   def _create_empty_figure(self):
     self._fig = go.Figure()
-    self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
-    self._fig.update_yaxes(showspikes=True, spikemode='across')
+    # self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
+    # self._fig.update_yaxes(showspikes=True, spikemode='across')
 
   def refresh_fig(self) -> go.Figure:
     # update layout
@@ -248,20 +248,10 @@ class Chart:
       raise ValueError('Models are required to display chart.')
 
     df = self._raw_df
-    projections_start_date: pd.Series = df[self.x_axis].min()
-    projections_start_date = projections_start_date.strftime('%Y-%m-%d')
-    projections_end_date: pd.Series = df[self.x_axis].max()
-    projections_end_date = projections_end_date.strftime('%Y-%m-%d')
-    print(
-      f'projections_start_date: {projections_start_date}, projections_end_date: {projections_end_date}'
-    )
-
+    # Filter data to start from x_start_date
     df[self.x_axis] = pd.to_datetime(df[self.x_axis])
     df = df.set_index(self.x_axis)
-    df.loc[projections_start_date:projections_end_date]
-    df = df.query(
-      '@projections_start_date <= @self.x_axis and @self.x_axis <= @projections_end_date'
-    )
+    df = df.query(f'{self.x_axis} >= @self.x_start_date')
     df = df.query('age_group == @self.age_group.input_value')
 
     # create base plot
@@ -286,66 +276,84 @@ class Chart:
 
       # main line for median (0.5 quantile)
       median_df = scenario_df.query('type_id == 0.5')
-      # model_name is used in the data as the column name for the model id
-      for model_id_col in median_df['model_name'].unique():
-        model_id = int(model_id_col)
-        model_name = get_model_name(model_id)
-        model_df = median_df.query('model_name == @model_id')
+      print([model.name for model in self.models])
+      for model in self.models:
+        model_df = median_df.query('model_name == @model.id')
         self._fig.add_trace(
           go.Scatter(
-            x=model_df[self.x_axis],
+            x=model_df.index,
             y=model_df[self.y_axis],
             mode='lines',
-            name=f'Model {model_name}',
-            legendgroup=f'Model {model_name}',
-            showlegend=(i == 1),
+            name=f'Model {model.name}',
+            legendgroup=f'Model {model.name}',
+            showlegend=(i == 1),  # Only show legend for first subplot
+            line=dict(color=model.color),  # Use consistent model color
           ),
           row=i,
           col=1,
         )
 
+      # for model_id_col in median_df['model_name'].unique():
+      #   model_id = int(model_id_col)
+      #   model_name = get_model_name(model_id)
+      #   model_df = median_df.query('model_name == @model_id')
+      #   self._fig.add_trace(
+      #     go.Scatter(
+      #       x=model_df[self.x_axis],
+      #       y=model_df[self.y_axis],
+      #       mode='lines',
+      #       name=f'Model {model_name}',
+      #       legendgroup=f'Model {model_name}',
+      #       showlegend=(i == 1),
+      #     ),
+      #     row=i,
+      #     col=1,
+      #   )
+
       # add uncertainty intervals
-      if self.certainty_percent and self.certainty_percent in Uncertainty.display_values():
-        uncertainty_bounds = Uncertainty.from_display_value(self.certainty_percent).get_bounds()
-        for lower_q, upper_q in uncertainty_bounds:
-          lower = scenario_df.query('type_id == @lower_q')
-          upper = scenario_df.query('type_id == @upper_q')
+      # if self.certainty_percent and self.certainty_percent in Uncertainty.display_values():
+      #   uncertainty_bounds = Uncertainty.from_display_value(self.certainty_percent).get_bounds()
+      #   for lower_q, upper_q in uncertainty_bounds:
+      #     lower = scenario_df.query('type_id == @lower_q')
+      #     upper = scenario_df.query('type_id == @upper_q')
 
-          for model_id_col in lower['model_name'].unique():
-            model_id = int(model_id_col)
-            lower_model = lower.query('model_name == @model_id')
-            upper_model = upper.query('model_name == @model_id')
+      #     for model_id_col in lower['model_name'].unique():
+      #       model_id = int(model_id_col)
+      #       lower_model = lower.query('model_name == @model_id')
+      #       upper_model = upper.query('model_name == @model_id')
 
-            self._fig.add_trace(
-              go.Scatter(
-                x=pd.concat([lower_model[self.x_axis], upper_model[self.x_axis][::-1]]),
-                y=pd.concat([lower_model[self.y_axis], upper_model[self.y_axis][::-1]]),
-                fill='toself',
-                fillcolor=conf_int_colors[(lower_q, upper_q)],
-                line=dict(color='rgba(0,0,0,0)'),
-                hoverinfo='skip',
-                showlegend=False,
-              ),
-              row=i,
-              col=1,
-            )
+      #       self._fig.add_trace(
+      #         go.Scatter(
+      #           x=pd.concat([lower_model[self.x_axis], upper_model[self.x_axis][::-1]]),
+      #           y=pd.concat([lower_model[self.y_axis], upper_model[self.y_axis][::-1]]),
+      #           fill='toself',
+      #           fillcolor=conf_int_colors[(lower_q, upper_q)],
+      #           line=dict(color='rgba(0,0,0,0)'),
+      #           hoverinfo='skip',
+      #           showlegend=False,
+      #         ),
+      #         row=i,
+      #         col=1,
+      #       )
 
       # load gold standard data (the actual data up to present day, not projections)
       gold_std_df = self.collect_gold_std_data(self.round_num)
+      gold_std_df['time_value'] = pd.to_datetime(gold_std_df['time_value'])
+      gold_std_df = gold_std_df.set_index('time_value')
       gold_std_df = gold_std_df.query('age_group == @self.age_group.input_value')
       gold_std_df = gold_std_df.query('geo_value_fullname == @self.location.name')
-      gold_std_df = gold_std_df.query(
-        '@projections_start_date <= time_value and time_value <= @projections_end_date'
-      )
+      # Filter gold standard data to start from x_start_date
+
+      gold_std_df = gold_std_df.query('time_value >= @self.x_start_date')
 
       # add gold standard line
       self._fig.add_trace(
         go.Scatter(
-          x=gold_std_df['time_value'],
+          x=gold_std_df.index,
           y=gold_std_df['value'],
           mode='lines',
           name='Gold standard',
-          line=dict(color='rebeccapurple', dash='dot'),
+          line=dict(color='black', dash='dot'),
           marker=dict(symbol='diamond'),
           legendgroup='Gold standard',
           showlegend=(i == 1),
@@ -355,17 +363,22 @@ class Chart:
       )
 
     # add annotations
-    for annotation in self.annotations:
-      self._fig.add_annotation(
-        x=annotation.value if isinstance(annotation, HorizontalAnnotation) else None,
-        y=annotation.value if isinstance(annotation, VerticalAnnotation) else None,
-        text=annotation.label,
-        showarrow=False,
-        font=dict(color=annotation.color),
-      )
+    if self.annotations:
+      for annotation in self.annotations:
+        self._fig.add_annotation(
+          x=annotation.value if isinstance(annotation, VerticalAnnotation) else None,
+          y=annotation.value if isinstance(annotation, HorizontalAnnotation) else None,
+          text=annotation.label,
+          showarrow=False,
+          font=dict(color=annotation.color),
+        )
 
+    # Set x-axis range to start from x_start_date
     self._fig.update_xaxes(
-      range=[projections_start_date, None], dtick='M1', tickformat='%b\n%Y', ticklabelmode='period'
+      range=[self.x_start_date.strftime('%Y-%m-%d'), None],
+      dtick='M1',
+      tickformat='%b\n%Y',
+      ticklabelmode='period',
     )
 
     return self._fig
@@ -444,3 +457,13 @@ class Chart:
     if not gold_std_path.exists() or not gold_std_path.is_file():
       raise FileNotFoundError(f'File not found for gold standard data: {gold_std_path}')
     return pd.read_csv(gold_std_path, parse_dates=['time_value'])
+
+  def get_cache_key(self) -> str:
+    return (
+      'chart:'
+      + f'{self.round_num}:{self.location.name}:{self.target.input_value}:'
+      + f'{self.age_group.input_value}:{self.plot_type.value}:{self.certainty_percent.value}:'
+      + f'{[scenario.name for scenario in self.scenarios]}:'
+      + f'{[model.name for model in self.models]}:'
+      + f'{[annotation.get_cache_key() for annotation in self.annotations]}'
+    )

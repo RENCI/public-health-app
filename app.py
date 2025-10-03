@@ -2,20 +2,22 @@ import dash_mantine_components as dmc
 from dash import Dash, _dash_renderer, dcc
 
 from src.components.layout import layout
+from src.components.redis_chart_cache import RedisChartCache
 from src.constants import get_constants
 from src.theme import DEFAULT_THEME
 
 
-# One-time loading of startup data
 def initialize_app_data():
   """Load and initialize all application data at startup."""
-  # Load constants from JSON file
+  # load constants from JSON file
   constants = get_constants()
-  return constants
+  # initialize chart cache
+  chart_cache = RedisChartCache(host='localhost', port=6379, db=0)
+  return constants, chart_cache
 
 
-# Load and return constants once at application startup
-CONSTANTS = initialize_app_data()
+# load and return constants/chart cache once at application startup
+CONSTANTS, CHART_CACHE = initialize_app_data()
 
 _dash_renderer._set_react_version('18.2.0')
 insight_store = dcc.Store(id='selected_insight', storage_type='local')
@@ -31,8 +33,10 @@ app = Dash(
   pages_folder='src/pages',
 )
 
-# Store constants in app state for use in callbacks
+# store constants in app state for use in callbacks
 app.constants = CONSTANTS
+# store chart cache in app state for use in callbacks
+app.chart_cache = CHART_CACHE
 
 app.title = 'ACCIDDA'
 app.layout = dmc.MantineProvider(

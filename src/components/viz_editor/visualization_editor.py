@@ -3,7 +3,7 @@ from typing import Any
 import dash_mantine_components as dmc
 from dash import Input, Output, callback, dcc, html
 
-from src.components.chart import Annotation, Chart, ChartControls, PlotType
+from src.components.chart import Chart, ChartControls, PlotType
 
 from .controls import (
   age_group_select,
@@ -21,7 +21,7 @@ current_round = 19
 
 default_control_values = dict(
   scenarios=['A-2023-10-27', 'B-2023-10-27'],
-  models=['Ensemble_LOP'],
+  models=['Ensemble'],
   location='US',
   target='cumulative_hospitalization',
   age_group='0-130',
@@ -34,13 +34,13 @@ def visualization_editor(control_values=None, show_controls=True):
   controls = {**default_control_values, **(control_values or {})}
 
   init_scenarios: list[str] = controls.get('scenarios', ['A-2023-10-27', 'B-2023-10-27'])
-  init_models: list[str] = controls.get('models', ['Ensemble_LOP'])
+  init_models: list[str] = controls.get('models', ['Ensemble'])
   init_location: str = controls.get('location', 'US')
   init_target: str = controls.get('target', 'incident_hospitalization')
   init_age_group: str = controls.get('age_group', '0-130')
   init_uncertainty: str | None = controls.get('uncertainty')
   init_annotations: dict[str, Any] = controls.get('annotations', {})
-  x_axis: str = controls.get('x_axis', 'horizon')
+  x_axis: str = controls.get('x_axis', 'target_end_date')
   y_axis: str = controls.get('y_axis', 'value')
   round_num: int = controls.get('round_num', 19)
   x_start_date: str = controls.get('x_start_date', '2025-01-01')
