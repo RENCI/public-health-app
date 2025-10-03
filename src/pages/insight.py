@@ -52,7 +52,7 @@ layout = dmc.Container(
 )
 def show_insight_details(pathname, custom_insights):
   if not pathname or not pathname.startswith('/insight/'):
-    return exceptions.PreventUpdate
+    raise exceptions.PreventUpdate
 
   try:
     insight_id = pathname.split('/insight/')[-1]

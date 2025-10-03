@@ -53,7 +53,7 @@ def save_insight_form(initial_title='', initial_description=''):
                   dmc.Button(
                     'Save',
                     leftSection=DashIconify(icon='feather:check'),
-                    id='save-button',
+                    id='save-insight-button',
                   ),
                 ],
                 justify='flex-end',
@@ -83,7 +83,7 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   Output('insight-description-input', 'error'),
   Output('notification-container', 'sendNotifications'),
   Output('_pages_location', 'pathname'),  # update path
-  Input('save-button', 'n_clicks'),
+  Input('save-insight-button', 'n_clicks'),
   State('custom-insights-store', 'data'),
   State('insight-title-input', 'value'),
   State('insight-description-input', 'value'),
