@@ -2,7 +2,6 @@ import dash_mantine_components as dmc
 from dash import Dash, _dash_renderer, dcc
 
 from src.components.layout import layout
-from src.components.redis_chart_cache import RedisChartCache
 from src.constants import get_constants
 from src.theme import DEFAULT_THEME
 
@@ -12,12 +11,11 @@ def initialize_app_data():
   # load constants from JSON file
   constants = get_constants()
   # initialize chart cache
-  chart_cache = RedisChartCache(host='localhost', port=6379, db=0)
-  return constants, chart_cache
+  return constants
 
 
 # load and return constants/chart cache once at application startup
-CONSTANTS, CHART_CACHE = initialize_app_data()
+CONSTANTS = initialize_app_data()
 
 _dash_renderer._set_react_version('18.2.0')
 insight_store = dcc.Store(id='selected_insight', storage_type='local')
@@ -35,8 +33,6 @@ app = Dash(
 
 # store constants in app state for use in callbacks
 app.constants = CONSTANTS
-# store chart cache in app state for use in callbacks
-app.chart_cache = CHART_CACHE
 
 app.title = 'ACCIDDA'
 app.layout = dmc.MantineProvider(

@@ -1,7 +1,7 @@
 from typing import Any
 
 import dash_mantine_components as dmc
-from dash import Input, Output, callback, dcc, html
+from dash import Input, Output, State, callback, dcc, html
 
 from src.components.chart import Chart, ChartControls, PlotType
 
@@ -26,7 +26,7 @@ default_control_values = dict(
   target='cumulative_hospitalization',
   age_group='0-130',
   uncertainty='None',
-  annotations=[],
+  annotations=None,
 )
 
 
@@ -39,16 +39,10 @@ def visualization_editor(control_values=None, show_controls=True):
   init_target: str = controls.get('target', 'incident_hospitalization')
   init_age_group: str = controls.get('age_group', '0-130')
   init_uncertainty: str | None = controls.get('uncertainty')
-  init_annotations: dict[str, Any] = controls.get('annotations', {})
-  x_axis: str = controls.get('x_axis', 'target_end_date')
-  y_axis: str = controls.get('y_axis', 'value')
+  init_annotations: dict[str, Any] | None = controls.get('annotations', None)
   round_num: int = controls.get('round_num', 19)
-  x_start_date: str = controls.get('x_start_date', '2025-01-01')
 
   figure_control_values = ChartControls(
-    x_start_date=x_start_date,
-    x_axis=x_axis,
-    y_axis=y_axis,
     round_num=round_num,
     pathogen='covid',
     scenario_names=init_scenarios,
@@ -116,6 +110,7 @@ def visualization_editor(control_values=None, show_controls=True):
   Input('age-group-select', 'value'),
   Input('uncertainty-select', 'value'),
   Input('annotations-store', 'data'),
+  # State('round-number-store', 'value'),
   prevent_initial_call=True,
 )
 def update_chart(
@@ -126,12 +121,10 @@ def update_chart(
   age_group: str,
   uncertainty: str,
   annotations: list[dict[str, Any]] | None,
+  # round_num: int,
 ):
   try:
     chart_controls = ChartControls(
-      x_start_date='2025-01-01',
-      x_axis='target_end_date',
-      y_axis='value',
       round_num=19,
       pathogen='covid',
       scenario_names=scenario_names,
@@ -143,6 +136,8 @@ def update_chart(
       annotations=annotations,
     )
     chart = Chart(PlotType.LINE, chart_controls)
+    if not chart and not isinstance(chart, Chart):
+      raise Exception('Chart not found or is not a valid chart')
     return [dcc.Graph(figure=chart.get_fig())]  # must return a list here for the callback to work
   except Exception as e:
     print(f'Error creating chart: {e}')

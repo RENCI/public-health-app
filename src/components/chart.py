@@ -2,6 +2,7 @@ from abc import ABC
 from dataclasses import asdict
 from datetime import datetime
 from enum import StrEnum
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Self
 
@@ -53,6 +54,12 @@ class Scenario:
   def __str__(self):
     return f'{self.name}'
 
+  def __hash__(self):
+    return hash(self.name)
+
+  def __eq__(self, other):
+    return isinstance(other, Scenario) and self.name == other.name
+
 
 class Model:
   def __init__(self, model_id_or_name: int | str):
@@ -63,6 +70,12 @@ class Model:
       self.id = get_model_id(model_id_or_name)
       self.name = model_id_or_name
     self.color = get_model_color(self.id)
+
+  def __hash__(self):
+    return hash(self.name)
+
+  def __eq__(self, other):
+    return isinstance(other, Model) and self.name == other.name
 
 
 class Location:
@@ -76,6 +89,12 @@ class Location:
 
   def __str__(self):
     return f'{self.name}'
+
+  def __hash__(self):
+    return hash(self.name)
+
+  def __eq__(self, other):
+    return isinstance(other, Location) and self.name == other.name
 
 
 class Annotation(ABC):
@@ -115,17 +134,20 @@ class Annotation(ABC):
       value=data['value'], label=data['label'], color=data['color'], type=data['type']
     )
 
-  def get_plotly_annotation(self) -> dict[str, Any]:
-    """Return plotly annotation configuration for horizontal annotation."""
-    return {
-      'x': self.value if self.type == 'vertical' else None,
-      'y': None if self.type == 'horizontal' else None,
-      'text': self.label,
-      'font': {'color': self.color},
-    }
+  @staticmethod
+  def get_cache_key(type: str, label: str, value: float) -> str:
+    return f'annotation:{type}:{label}:{value}'
 
-  def get_cache_key(self) -> str:
-    return f'annotation:{self.type}:{self.label}:{self.value}'
+  def __hash__(self):
+    return hash(self.value + self.label + self.type)
+
+  def __eq__(self, other):
+    return (
+      isinstance(other, Annotation)
+      and self.value == other.value
+      and self.label == other.label
+      and self.type == other.type
+    )
 
 
 class HorizontalAnnotation(Annotation):
@@ -162,18 +184,35 @@ class PlotTitle:
       + f'{(self.age_group.display_value + " ") if self.age_group else ""} in {self.location}'
     )
 
+  def __hash__(self):
+    return hash(
+      self.pathogen + self.scenario.name + self.location.name + self.age_group.input_value
+    )
+
+  def __eq__(self, other):
+    return (
+      isinstance(other, PlotTitle)
+      and self.pathogen == other.pathogen
+      and self.scenario == other.scenario
+      and self.location == other.location
+      and self.age_group == other.age_group
+    )
+
 
 class PlotType(StrEnum):
   LINE = 'line'
   BOXPLOT = 'boxplot'
 
+  def __hash__(self):
+    return hash(self.value)
+
+  def __eq__(self, other):
+    return isinstance(other, PlotType) and self.value == other.value
+
 
 class ChartControls:
   def __init__(
     self,
-    x_start_date: str,
-    x_axis: str,
-    y_axis: str,
     round_num: int,
     pathogen: str,
     scenario_names: list[str],
@@ -184,9 +223,6 @@ class ChartControls:
     annotations: list[dict[str, Any]] | None = None,
     certainty_percent: str | None = None,
   ):
-    self.x_start_date = datetime.strptime(x_start_date, '%Y-%m-%d')
-    self.x_axis = x_axis
-    self.y_axis = y_axis
     self.round_num = round_num
     self.pathogen = pathogen
     self.scenarios = [Scenario(name=scenario_name) for scenario_name in scenario_names]
@@ -207,9 +243,9 @@ class Chart:
 
   def __init__(self, plot_type: PlotType, controls: ChartControls):
     self.plot_type = plot_type
-    self.x_start_date = controls.x_start_date
-    self.x_axis = controls.x_axis
-    self.y_axis = controls.y_axis
+    self.x_start_date = datetime.strptime('2025-01-01', '%Y-%m-%d')
+    self.x_axis = 'target_end_date'
+    self.y_axis = 'value'
     self.round_num = controls.round_num
     self.scenarios = controls.scenarios
     self.models = controls.models
@@ -219,10 +255,41 @@ class Chart:
     self.certainty_percent = controls.certainty_percent
     self.annotations = controls.annotations
     self._data_type = DataType.QUANTILE
-    self._raw_df = self.collect_data(self._data_type, self.round_num, self.location, self.target)
-    self._fig: go.Figure = go.Figure()
+    self._raw_df = Chart.collect_data(
+      self._data_type, self.round_num, self.location.name, self.target.input_value
+    )
+    self._raw_df[self.x_axis] = pd.to_datetime(self._raw_df[self.x_axis])
+    self._raw_df = self._raw_df.set_index(self.x_axis)
+    self._fig = go.Figure()
 
     self.refresh_fig()
+
+  def __hash__(self):
+    return hash(
+      self.plot_type
+      + self.round_num
+      + self.scenarios
+      + self.models
+      + self.location
+      + self.target
+      + self.age_group
+      + self.certainty_percent
+      + (self.annotations.__hash__() if self.annotations else '')
+    )
+
+  def __eq__(self, other):
+    return (
+      isinstance(other, Chart)
+      and self.plot_type == other.plot_type
+      and self.round_num == other.round_num
+      and self.scenarios == other.scenarios
+      and self.models == other.models
+      and self.location == other.location
+      and self.target == other.target
+      and self.age_group == other.age_group
+      and self.certainty_percent == other.certainty_percent
+      and self.annotations == other.annotations
+    )
 
   def _create_empty_figure(self):
     self._fig = go.Figure()
@@ -235,8 +302,6 @@ class Chart:
     self._fig.update_layout(
       hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)'
     )
-    # self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
-    # self._fig.update_yaxes(showspikes=True, spikemode='across')
 
     # handle empty properties
     if not (self.scenarios and self.models and self.location and self.target):
@@ -247,22 +312,18 @@ class Chart:
     if not self.models:
       raise ValueError('Models are required to display chart.')
 
+    # start with the raw dataframe
     df = self._raw_df
-    # Filter data to start from x_start_date
-    df[self.x_axis] = pd.to_datetime(df[self.x_axis])
-    df = df.set_index(self.x_axis)
-    df = df.query(f'{self.x_axis} >= @self.x_start_date')
+
+    # filter data to start from x_start_date and use given age group
+    # df = df.loc[[self.x_start_date :]]
     df = df.query('age_group == @self.age_group.input_value')
 
-    # create base plot
-    if self.plot_type == PlotType.LINE:
-      self._fig = px.line(df, y=self.y_axis, line_group='model_name')
-    elif self.plot_type == PlotType.BOXPLOT:
-      self._fig = px.box(df, y=self.y_axis)
-    else:
-      raise ValueError(f'Invalid chart type: {self.plot_type}')
+    # create boxplot if prudent
+    if self.plot_type == PlotType.BOXPLOT:
+      return px.box(df, y=self.y_axis)
 
-    # create subplots
+    # otherwise,create subplots
     self._fig = make_subplots(
       rows=num_rows,
       cols=1,
@@ -274,11 +335,39 @@ class Chart:
     for i, scenario in enumerate(self.scenarios, start=1):
       scenario_df = df.query('scenario_id == @scenario.id')
 
-      # main line for median (0.5 quantile)
-      median_df = scenario_df.query('type_id == 0.5')
-      print([model.name for model in self.models])
+      # set up uncertainty intervals if necessary
+      should_add_uncertainty_intervals = (
+        self.certainty_percent and self.certainty_percent in Uncertainty.display_values()
+      )
+      if should_add_uncertainty_intervals:
+        uncertainty_bounds = Uncertainty.from_display_value(self.certainty_percent).get_bounds()
+        for lower_q, upper_q in uncertainty_bounds:
+          lower_data = scenario_df.query('type_id == @lower_q')
+          upper_data = scenario_df.query('type_id == @upper_q')
+
+      # add traces for each model
+      main_data = scenario_df.query('type_id == 0.5')
       for model in self.models:
-        model_df = median_df.query('model_name == @model.id')
+        # add uncertainty intervals if necessary
+        if should_add_uncertainty_intervals and lower_data and upper_data and lower_q and upper_q:
+          lower_model = lower_data.query('model_name == @model.id')
+          upper_model = upper_data.query('model_name == @model.id')
+          self._fig.add_trace(
+            go.Scatter(
+              x=pd.concat([lower_model.index, upper_model.index[::-1]]),
+              y=pd.concat([lower_model[self.y_axis], upper_model[self.y_axis][::-1]]),
+              fill='toself',
+              fillcolor=conf_int_colors[(lower_q, upper_q)],
+              line=dict(color='rgba(0,0,0,0)'),
+              hoverinfo='skip',
+              showlegend=False,
+            ),
+            row=i,
+            col=1,
+          )
+
+        # add main line (0.5 quantile)
+        model_df = main_data.query('model_name == @model.id')
         self._fig.add_trace(
           go.Scatter(
             x=model_df.index,
@@ -286,65 +375,23 @@ class Chart:
             mode='lines',
             name=f'Model {model.name}',
             legendgroup=f'Model {model.name}',
-            showlegend=(i == 1),  # Only show legend for first subplot
-            line=dict(color=model.color),  # Use consistent model color
+            showlegend=(i == 1),
+            line=dict(color=model.color),
           ),
           row=i,
           col=1,
         )
 
-      # for model_id_col in median_df['model_name'].unique():
-      #   model_id = int(model_id_col)
-      #   model_name = get_model_name(model_id)
-      #   model_df = median_df.query('model_name == @model_id')
-      #   self._fig.add_trace(
-      #     go.Scatter(
-      #       x=model_df[self.x_axis],
-      #       y=model_df[self.y_axis],
-      #       mode='lines',
-      #       name=f'Model {model_name}',
-      #       legendgroup=f'Model {model_name}',
-      #       showlegend=(i == 1),
-      #     ),
-      #     row=i,
-      #     col=1,
-      #   )
-
-      # add uncertainty intervals
-      # if self.certainty_percent and self.certainty_percent in Uncertainty.display_values():
-      #   uncertainty_bounds = Uncertainty.from_display_value(self.certainty_percent).get_bounds()
-      #   for lower_q, upper_q in uncertainty_bounds:
-      #     lower = scenario_df.query('type_id == @lower_q')
-      #     upper = scenario_df.query('type_id == @upper_q')
-
-      #     for model_id_col in lower['model_name'].unique():
-      #       model_id = int(model_id_col)
-      #       lower_model = lower.query('model_name == @model_id')
-      #       upper_model = upper.query('model_name == @model_id')
-
-      #       self._fig.add_trace(
-      #         go.Scatter(
-      #           x=pd.concat([lower_model[self.x_axis], upper_model[self.x_axis][::-1]]),
-      #           y=pd.concat([lower_model[self.y_axis], upper_model[self.y_axis][::-1]]),
-      #           fill='toself',
-      #           fillcolor=conf_int_colors[(lower_q, upper_q)],
-      #           line=dict(color='rgba(0,0,0,0)'),
-      #           hoverinfo='skip',
-      #           showlegend=False,
-      #         ),
-      #         row=i,
-      #         col=1,
-      #       )
-
       # load gold standard data (the actual data up to present day, not projections)
-      gold_std_df = self.collect_gold_std_data(self.round_num)
+      gold_std_df = Chart.collect_gold_std_data(self.round_num)
       gold_std_df['time_value'] = pd.to_datetime(gold_std_df['time_value'])
       gold_std_df = gold_std_df.set_index('time_value')
       gold_std_df = gold_std_df.query('age_group == @self.age_group.input_value')
       gold_std_df = gold_std_df.query('geo_value_fullname == @self.location.name')
-      # Filter gold standard data to start from x_start_date
 
-      gold_std_df = gold_std_df.query('time_value >= @self.x_start_date')
+      # filter gold standard data to start from x_start_date
+      gold_std_df = gold_std_df.loc[self.x_start_date :]
+      # gold_std_df = gold_std_df.query('time_value >= @self.x_start_date')
 
       # add gold standard line
       self._fig.add_trace(
@@ -365,21 +412,30 @@ class Chart:
     # add annotations
     if self.annotations:
       for annotation in self.annotations:
-        self._fig.add_annotation(
-          x=annotation.value if isinstance(annotation, VerticalAnnotation) else None,
-          y=annotation.value if isinstance(annotation, HorizontalAnnotation) else None,
-          text=annotation.label,
-          showarrow=False,
-          font=dict(color=annotation.color),
-        )
+        if annotation.type == 'horizontal':
+          self._fig.add_hline(
+            y=annotation.value,
+            line_dash='dot',
+            line_color=annotation.color,
+            line_width=1,
+            annotation_text=annotation.label,
+          )
+        else:
+          self._fig.add_vline(
+            x=annotation.value,
+            line_dash='dot',
+            line_color=annotation.color,
+            line_width=1,
+            annotation_text=annotation.label,
+          )
 
     # Set x-axis range to start from x_start_date
-    self._fig.update_xaxes(
-      range=[self.x_start_date.strftime('%Y-%m-%d'), None],
-      dtick='M1',
-      tickformat='%b\n%Y',
-      ticklabelmode='period',
-    )
+    # self._fig.update_xaxes(
+    #   range=[self.x_start_date.strftime('%Y-%m-%d'), None],
+    #   dtick='M1',
+    #   tickformat='%b\n%Y',
+    #   ticklabelmode='period',
+    # )
 
     return self._fig
 
@@ -389,13 +445,13 @@ class Chart:
   def get_data(self) -> pd.DataFrame:
     return self._raw_df
 
+  @staticmethod
+  @lru_cache(maxsize=128)
   def _build_dataset_path(
-    self,
-    *,
     data_type: DataType = DataType.QUANTILE,
     round_number: int = 1,
-    location: Location = Location('US'),
-    target: Target = Target.INCIDENT_HOSPITALIZATION,
+    location_name: str = 'US',
+    target_value: str = 'incident_hospitalization',
     part: int = 0,
   ) -> Path:
     part = str(part)
@@ -403,8 +459,8 @@ class Chart:
     path = (
       BASE_DATA_DIR
       / round_fragment
-      / target.input_value
-      / location.name
+      / target_value
+      / location_name
       / data_type.get_path_value()
       / f'part-{part}.{data_type.get_file_extension()}'
     )
@@ -412,58 +468,40 @@ class Chart:
       raise FileNotFoundError(f'File not found for chart: {path}')
     return path
 
+  @staticmethod
+  @lru_cache(maxsize=64)
   def collect_data(
-    self,
     data_type: DataType = DataType.QUANTILE,
     round_number: int = 1,
-    location: Location = Location('US'),
-    target: Target = Target.INCIDENT_HOSPITALIZATION,
+    location_name: str = 'US',
+    target_value: str = 'incident_hospitalization',
     part: int = 0,
   ) -> pd.DataFrame:
-    path = self._build_dataset_path(
+    path = Chart._build_dataset_path(
       data_type=data_type,
       round_number=round_number,
-      location=location,
-      target=target,
+      location_name=location_name,
+      target_value=target_value,
       part=part,
     )
     if not path.exists() or not path.is_file():
       raise FileNotFoundError(f'File not found for chart: {path}')
 
     try:
-      # if data_type == DataType.QUANTILE and path.suffix == '.csv':
-      #   df = pd.read_csv(path, engine='pyarrow')
-      # elif data_type == DataType.SAMPLE and path.suffix == '.parquet':
-      #   df = pd.read_parquet(path, engine='pyarrow')
-      # else:
-      #   raise ValueError(
-      #     f'Path file extension {path.suffix} does not match expected file extension'
-      #     + f' {data_type.get_file_extension()} for data type: {data_type}'
-      #   )
-      df = pd.read_csv(path, parse_dates=['target_end_date'])
-      return df
+      return pd.read_csv(path, parse_dates=['target_end_date'])
     except Exception as e:
       print(f'Error reading file "{path}": {e}')
       raise e
 
-  def _build_gold_std_path(self, round_number: int) -> Path:
+  @staticmethod
+  @lru_cache(maxsize=32)
+  def _build_gold_std_path(round_number: int) -> Path:
     return BASE_DATA_DIR / f'round{round_number}' / 'gold_standard' / 'covid_nhsn_hosp_inc.csv'
 
-  def collect_gold_std_data(
-    self,
-    round_number: int,
-  ) -> pd.DataFrame:
-    gold_std_path = self._build_gold_std_path(round_number)
+  @staticmethod
+  @lru_cache(maxsize=32)
+  def collect_gold_std_data(round_number: int) -> pd.DataFrame:
+    gold_std_path = Chart._build_gold_std_path(round_number)
     if not gold_std_path.exists() or not gold_std_path.is_file():
       raise FileNotFoundError(f'File not found for gold standard data: {gold_std_path}')
     return pd.read_csv(gold_std_path, parse_dates=['time_value'])
-
-  def get_cache_key(self) -> str:
-    return (
-      'chart:'
-      + f'{self.round_num}:{self.location.name}:{self.target.input_value}:'
-      + f'{self.age_group.input_value}:{self.plot_type.value}:{self.certainty_percent.value}:'
-      + f'{[scenario.name for scenario in self.scenarios]}:'
-      + f'{[model.name for model in self.models]}:'
-      + f'{[annotation.get_cache_key() for annotation in self.annotations]}'
-    )

@@ -24,7 +24,7 @@ def remove_annotation_button(index=0):
   )
 
 
-def annotation_row(index, label='', value=0, color='#222222'):
+def annotation_row(index, label='', value=0, color='#222222', type='horizontal'):
   """Create a single annotation row with error handling."""
   try:
     return dmc.Group(
@@ -50,6 +50,16 @@ def annotation_row(index, label='', value=0, color='#222222'):
           value=color,
           label='Color',
           w=105,
+        ),
+        dmc.Select(
+          id={'type': 'annotation-type', 'index': index},
+          value=type,
+          label='Type',
+          w=105,
+          data=[
+            {'value': 'horizontal', 'label': 'Horizontal'},
+            {'value': 'vertical', 'label': 'Vertical'},
+          ],
         ),
         remove_annotation_button(index),
       ],
@@ -82,7 +92,7 @@ def annotations_input(value=[]):
   Output('annotations-container', 'children'),
   Input('annotations-store', 'data'),
 )
-def render_annotations(data: list[dict]):
+def render_annotations(data: list[dict] | None):
   """Render annotation rows based on store data."""
   if not data:
     return []
@@ -97,6 +107,7 @@ def render_annotations(data: list[dict]):
           label=annotation.label,
           value=annotation.value,
           color=annotation.color,
+          type=annotation.type,
         )
         rows.append(row)
       except Exception as e:
@@ -116,6 +127,7 @@ def render_annotations(data: list[dict]):
   Input({'type': 'annotation-value', 'index': ALL}, 'value'),
   Input({'type': 'annotation-label', 'index': ALL}, 'value'),
   Input({'type': 'annotation-color', 'index': ALL}, 'value'),
+  Input({'type': 'annotation-type', 'index': ALL}, 'value'),
   State('annotations-store', 'data'),
   prevent_initial_call=True,
 )
@@ -125,6 +137,7 @@ def update_annotations(
   values: list[float],
   labels: list[str],
   colors: list[str],
+  types: list[str],
   stored: list[dict],
 ):
   """Handle add/remove actions and field updates for annotations."""
@@ -145,6 +158,7 @@ def update_annotations(
         'value': 0,
         'label': '',
         'color': '#00abc7',
+        'type': 'horizontal',
       }
     )
     return stored
@@ -168,5 +182,7 @@ def update_annotations(
         stored[i]['label'] = labels[i]
       if i < len(colors) and colors[i] is not None:
         stored[i]['color'] = colors[i]
+      if i < len(types) and types[i] is not None:
+        stored[i]['type'] = types[i]
 
   return stored

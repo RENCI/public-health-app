@@ -35,6 +35,12 @@ class InputAndDisplayEnum(Enum):
   def input_values(cls) -> list[str]:
     return [member.input_value for member in cls]
 
+  def __hash__(self):
+    return hash(self.input_value)
+
+  def __eq__(self, other):
+    return isinstance(other, InputAndDisplayEnum) and self.input_value == other.input_value
+
 
 class Target(InputAndDisplayEnum):
   INCIDENT_HOSPITALIZATION = ('Incident Hospitalization', 'incident_hospitalization')
@@ -69,6 +75,12 @@ class DataType(Enum):
   def get_file_extension(self) -> str:
     return self.file_extension
 
+  def __hash__(self):
+    return hash(self.path_value)
+
+  def __eq__(self, other):
+    return isinstance(other, DataType) and self.path_value == other.path_value
+
 
 class Uncertainty(Enum):
   NONE = ('None', [])
@@ -100,3 +112,9 @@ class Uncertainty(Enum):
   @classmethod
   def bounds_values(cls) -> list[str]:
     return [member.bounds for member in cls]
+
+  def __hash__(self):
+    return hash(self.display_value)
+
+  def __eq__(self, other):
+    return isinstance(other, Uncertainty) and self.display_value == other.display_value
