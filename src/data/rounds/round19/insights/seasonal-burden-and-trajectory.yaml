@@ -18,8 +18,19 @@ controls:
   uncertainty: "95%"
   age_group: "0-130"
   round_num: 19
-  # annotations:
-  #   - type: "horizontal"
-  #     value: 50000
-  #     label: "Some important value"
-  #     color: "#663399"
+  zoom:
+    x:
+      min: 2025-01-01
+      max: 2026-06-30
+    y:
+      min: 0
+      max: 65_000
+  annotations:
+    - type: vertical
+      value: 2025-10-01
+      label: Some Policy change
+      color: "#993366"
+    - type: horizontal
+      value: 17_000
+      label: An important value
+      color: "#663399"

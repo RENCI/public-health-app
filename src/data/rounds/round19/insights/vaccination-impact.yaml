@@ -20,8 +20,8 @@ controls:
   x_axis: "target_end_date"
   y_axis: "value"
   round_num: 19
-  # annotations:
-  #   - type: "horizontal"
-  #     value: 50000
-  #     label: "Some important value"
-  #     color: "#886622"
+  annotations:
+    - type: vertical
+      value: 19_000
+      label: "An important value"
+      color: "#886622"

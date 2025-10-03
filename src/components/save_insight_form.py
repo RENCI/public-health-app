@@ -95,6 +95,7 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   State('target-select', 'value'),
   State('age-group-select', 'value'),
   State('uncertainty-select', 'value'),
+  State('zoom-store', 'data'),
   State('annotations-store', 'data'),
   suppress_callback_exceptions=True,
 )
@@ -110,6 +111,7 @@ def save_custom_insight(
   target,
   age_group,
   uncertainty,
+  zoom,
   annotations,
 ):
   if not n_clicks:
@@ -126,7 +128,7 @@ def save_custom_insight(
   if title_error or desc_error:
     return no_update, title_error, desc_error, no_update, no_update, no_update
 
-  now = datetime.datetime.utcnow().isoformat()
+  now = datetime.datetime.now(datetime.timezone.utc).isoformat()
   new_id = f'custom-{uuid.uuid4()}'
   new_item = dict(
     id=new_id,
@@ -143,6 +145,7 @@ def save_custom_insight(
       target=target,
       age_group=age_group,
       uncertainty=uncertainty,
+      zoom=zoom,
       annotations=annotations,
     ),
   )

@@ -1,19 +1,19 @@
 from typing import Any
 
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, dcc, html
+from dash import Input, Output, State, callback, dcc, exceptions, html
 
 from src.components.chart import Chart, ChartControls, PlotType
 
 from .controls import (
   age_group_select,
   annotations_input,
-  create_selector_grid_column,
   location_select,
   models_select,
   scenarios_select,
   target_select,
   uncertainty_select,
+  zoom_control,
 )
 
 available_rounds = [19]
@@ -26,6 +26,7 @@ default_control_values = dict(
   target='cumulative_hospitalization',
   age_group='0-130',
   uncertainty='None',
+  zoom=None,
   annotations=None,
 )
 
@@ -33,17 +34,17 @@ default_control_values = dict(
 def visualization_editor(control_values=None, show_controls=True):
   controls = {**default_control_values, **(control_values or {})}
 
-  init_scenarios: list[str] = controls.get('scenarios', ['A-2023-10-27', 'B-2023-10-27'])
-  init_models: list[str] = controls.get('models', ['Ensemble'])
-  init_location: str = controls.get('location', 'US')
-  init_target: str = controls.get('target', 'incident_hospitalization')
-  init_age_group: str = controls.get('age_group', '0-130')
-  init_uncertainty: str | None = controls.get('uncertainty')
-  init_annotations: dict[str, Any] | None = controls.get('annotations', None)
-  round_num: int = controls.get('round_num', 19)
+  init_scenarios = controls['scenarios']
+  init_models = controls['models']
+  init_location = controls['location']
+  init_target = controls['target']
+  init_age_group = controls['age_group']
+  init_uncertainty = controls['uncertainty']
+  init_zoom = controls['zoom']
+  init_annotations = controls['annotations']
 
   figure_control_values = ChartControls(
-    round_num=round_num,
+    round_num=19,
     pathogen='covid',
     scenario_names=init_scenarios,
     model_names=init_models,
@@ -51,6 +52,7 @@ def visualization_editor(control_values=None, show_controls=True):
     age_group=init_age_group,
     target=init_target,
     certainty_percent=init_uncertainty,
+    zoom=init_zoom,
     annotations=init_annotations,
   )
   chart = Chart(PlotType.LINE, figure_control_values)
@@ -67,34 +69,40 @@ def visualization_editor(control_values=None, show_controls=True):
   return dmc.Grid(
     children=[
       dmc.GridCol(
-        figure_container,
+        [dcc.Store('chart-extent-store'), figure_container],
         id='visualization-column',
-        span=7,
+        span=dict(base=12, xl=8, lg=7, md=8),
       ),
       dmc.GridCol(
         dmc.Stack(
           [
             dmc.Card(
-              dmc.Grid(
-                children=[
-                  # Restore all control components
-                  create_selector_grid_column(scenarios_select, init_scenarios),
-                  create_selector_grid_column(models_select, init_models),
-                  create_selector_grid_column(location_select, init_location),
-                  create_selector_grid_column(target_select, init_target),
-                  create_selector_grid_column(age_group_select, init_age_group),
-                  create_selector_grid_column(uncertainty_select, init_uncertainty),
-                  create_selector_grid_column(annotations_input, init_annotations),
+              dmc.Stack(
+                [
+                  scenarios_select(value=init_scenarios),
+                  models_select(value=init_models),
+                  location_select(value=init_location),
+                  target_select(value=init_target),
+                  age_group_select(value=init_age_group),
+                  uncertainty_select(value=init_uncertainty),
                 ],
-                gutter=0,
+                gap='sm',
               ),
+              variant='soft',
+            ),
+            dmc.Card(
+              zoom_control(value=init_zoom),
+              variant='soft',
+            ),
+            dmc.Card(
+              annotations_input(value=init_annotations),
               variant='soft',
             ),
           ],
           gap='md',
         ),
         id='controls-column',
-        span=5,
+        span=dict(base=12, xl=4, lg=5, md=4),
       ),
     ],
     mb=12,
@@ -109,6 +117,7 @@ def visualization_editor(control_values=None, show_controls=True):
   Input('target-select', 'value'),
   Input('age-group-select', 'value'),
   Input('uncertainty-select', 'value'),
+  Input('zoom-store', 'data'),
   Input('annotations-store', 'data'),
   # State('round-number-store', 'value'),
   prevent_initial_call=True,
@@ -120,6 +129,7 @@ def update_chart(
   target: str,
   age_group: str,
   uncertainty: str,
+  zoom: dict[str, Any],
   annotations: list[dict[str, Any]] | None,
   # round_num: int,
 ):
@@ -133,6 +143,7 @@ def update_chart(
       target=target,
       age_group=age_group,
       certainty_percent=uncertainty,
+      zoom=zoom,
       annotations=annotations,
     )
     chart = Chart(PlotType.LINE, chart_controls)
@@ -145,3 +156,37 @@ def update_chart(
 
     traceback.print_exc()
     return html.Div(f'Error loading chart: {str(e)}', style={'color': 'red'})
+
+
+@callback(
+  Output('chart-extent-store', 'data'),
+  Input('chart-figure', 'relayoutData'),
+)
+def sync_zoom_store(relayout):
+  if not relayout:
+    raise exceptions.PreventUpdate
+  return dict(
+    x={'min': relayout.get('xaxis.range[0]'), 'max': relayout.get('xaxis.range[1]')},
+    y={'min': relayout.get('yaxis.range[0]'), 'max': relayout.get('yaxis.range[1]')},
+  )
+
+
+@callback(
+  Output('zoom-x-min', 'value'),
+  Output('zoom-x-max', 'value'),
+  Output('zoom-y-min', 'value'),
+  Output('zoom-y-max', 'value'),
+  Input('use-chart-zoom-button', 'n_clicks'),
+  State('chart-extent-store', 'data'),
+  prevent_initial_call=True,
+)
+def apply_current_zoom(n_clicks, current_zoom):
+  if not n_clicks or not current_zoom:
+    raise exceptions.PreventUpdate
+
+  return (
+    current_zoom['x'].get('min'),
+    current_zoom['x'].get('max'),
+    current_zoom['y'].get('min'),
+    current_zoom['y'].get('max'),
+  )

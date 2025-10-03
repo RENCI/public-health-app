@@ -47,7 +47,7 @@ def load_rounds():
 
     rounds[round_number] = dict(
       round_number=int(round_number),
-      name=f'Round {round_number}',
+      name=details.get('name'),
       report=details.get('report', ''),
       insights=insights,
     )

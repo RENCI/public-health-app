@@ -1,6 +1,6 @@
+from datetime import datetime
 from abc import ABC
 from dataclasses import asdict
-from datetime import datetime
 from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
@@ -210,6 +210,23 @@ class PlotType(StrEnum):
     return isinstance(other, PlotType) and self.value == other.value
 
 
+class AxisRange:
+  def __init__(self, min: str | None, max: str | None):
+    self.min = min
+    self.max = max
+
+
+class Zoom:
+  def __init__(self, x: dict[str, str] | None = None, y: dict[str, str] | None = None):
+    if x is None:
+      self.x = AxisRange(None, None)
+    if y is None:
+      self.y = AxisRange(None, None)
+    else:
+      self.x = AxisRange(x['min'], x['max'])
+      self.y = AxisRange(y['min'], y['max'])
+
+
 class ChartControls:
   def __init__(
     self,
@@ -220,6 +237,7 @@ class ChartControls:
     location_name: str,
     target: str,
     age_group: str = '0-130',
+    zoom: dict[str, dict[str, Any]] | None = None,
     annotations: list[dict[str, Any]] | None = None,
     certainty_percent: str | None = None,
   ):
@@ -236,6 +254,7 @@ class ChartControls:
     self.certainty_percent = (
       Uncertainty.from_display_value(certainty_percent) if certainty_percent else None
     )
+    self.zoom = Zoom(zoom['x'], zoom['y']) if zoom else Zoom()
 
 
 class Chart:
@@ -254,6 +273,7 @@ class Chart:
     self.age_group = controls.age_group
     self.certainty_percent = controls.certainty_percent
     self.annotations = controls.annotations
+    self.zoom = controls.zoom
     self._data_type = DataType.QUANTILE
     self._raw_df = Chart.collect_data(
       self._data_type, self.round_num, self.location.name, self.target.input_value
@@ -429,13 +449,22 @@ class Chart:
             annotation_text=annotation.label,
           )
 
-    # Set x-axis range to start from x_start_date
-    # self._fig.update_xaxes(
-    #   range=[self.x_start_date.strftime('%Y-%m-%d'), None],
-    #   dtick='M1',
-    #   tickformat='%b\n%Y',
-    #   ticklabelmode='period',
-    # )
+    # updating axes
+    self._fig.update_xaxes(matches='x', showspikes=True, spikemode='across', spikesnap='cursor')
+    self._fig.update_yaxes(matches='y', showspikes=True, spikemode='across')
+
+    # and zoom ranges
+    if self.zoom.x.min is not None and self.zoom.x.max is not None:
+      self._fig.update_xaxes(range=[self.zoom.x.min, self.zoom.x.max])
+    if self.zoom.y.min is not None and self.zoom.y.max is not None:
+      self._fig.update_yaxes(range=[self.zoom.y.min, self.zoom.y.max])
+
+    self._fig.update_layout(
+      hovermode='x unified',
+      height=300 * num_rows,
+      title='Forecast values over time (by scenario)',
+      uirevision='df',
+    )
 
     return self._fig
 
