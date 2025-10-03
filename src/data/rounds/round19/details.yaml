@@ -1,19 +1,12 @@
 round_number: 19
 name: "Vaccine Recommendation Levels"
 report: >
-  ## Executive Summary Report
-
-  ### _Round completed: June 4, 2025_
-
   In the 19th Round of COVID-19 scenario projections, the US COVID-19 Scenario
   Modeling Hub aimed to estimate the impact of three vaccine recommendation
   levels for the 2025-26 season:
-
     i. no recommendation, resulting in minimal
     vaccine coverage;
-
     ii. high-risk group recommendation, including individuals
     over 65 years and those under 65 years with high-risk conditions; and
-
     iii. universal recommendation for all eligible age groups, each with uptake
     corresponding to 2024-25 coverage levels.
