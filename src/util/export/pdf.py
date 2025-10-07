@@ -77,11 +77,6 @@ def generate_insight_pdf(insight):
   controls = insight.get('controls', {})
   round_number = controls.get('round', '18')
 
-  # title
-  # summary
-  # description
-  # image_url
-
   body = f"""
     <header>
       <div class="letterhead">
