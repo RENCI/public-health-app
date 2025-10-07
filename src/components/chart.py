@@ -1,6 +1,6 @@
-from datetime import datetime
 from abc import ABC
 from dataclasses import asdict
+from datetime import datetime
 from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
@@ -9,6 +9,7 @@ from typing import Any, Self
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from dash import dcc
 from plotly.subplots import make_subplots
 
 from src.components.enums import AgeGroup, DataType, Target, Uncertainty
@@ -130,6 +131,8 @@ class Annotation(ABC):
   @classmethod
   def from_dict(cls, data: dict[str, Any]) -> Self:
     """Create object from dictionary using factory pattern."""
+    if not data['type']:
+      return HorizontalAnnotation(data['value'], data['label'], data['color'])
     return cls.create(
       value=data['value'], label=data['label'], color=data['color'], type=data['type']
     )
@@ -359,32 +362,28 @@ class Chart:
       should_add_uncertainty_intervals = (
         self.certainty_percent and self.certainty_percent in Uncertainty.display_values()
       )
-      if should_add_uncertainty_intervals:
-        uncertainty_bounds = Uncertainty.from_display_value(self.certainty_percent).get_bounds()
-        for lower_q, upper_q in uncertainty_bounds:
-          lower_data = scenario_df.query('type_id == @lower_q')
-          upper_data = scenario_df.query('type_id == @upper_q')
 
       # add traces for each model
       main_data = scenario_df.query('type_id == 0.5')
       for model in self.models:
         # add uncertainty intervals if necessary
-        if should_add_uncertainty_intervals and lower_data and upper_data and lower_q and upper_q:
-          lower_model = lower_data.query('model_name == @model.id')
-          upper_model = upper_data.query('model_name == @model.id')
-          self._fig.add_trace(
-            go.Scatter(
-              x=pd.concat([lower_model.index, upper_model.index[::-1]]),
-              y=pd.concat([lower_model[self.y_axis], upper_model[self.y_axis][::-1]]),
-              fill='toself',
-              fillcolor=conf_int_colors[(lower_q, upper_q)],
-              line=dict(color='rgba(0,0,0,0)'),
-              hoverinfo='skip',
-              showlegend=False,
-            ),
-            row=i,
-            col=1,
-          )
+        if should_add_uncertainty_intervals:
+          for lower_q, upper_q in self.certainty_percent.get_bounds():
+            lower_model = scenario_df.query('type_id == @lower_q and model_name == @model.id')
+            upper_model = scenario_df.query('type_id == @upper_q and model_name == @model.id')
+            self._fig.add_trace(
+              go.Scatter(
+                x=pd.concat([lower_model.index, upper_model.index[::-1]]),
+                y=pd.concat([lower_model[self.y_axis], upper_model[self.y_axis][::-1]]),
+                fill='toself',
+                fillcolor=conf_int_colors[(lower_q, upper_q)],
+                line=dict(color='rgba(0,0,0,0)'),
+                hoverinfo='skip',
+                showlegend=False,
+              ),
+              row=i,
+              col=1,
+            )
 
         # add main line (0.5 quantile)
         model_df = main_data.query('model_name == @model.id')
@@ -429,50 +428,61 @@ class Chart:
         col=1,
       )
 
-    # add annotations
-    if self.annotations:
-      for annotation in self.annotations:
-        if annotation.type == 'horizontal':
-          self._fig.add_hline(
-            y=annotation.value,
-            line_dash='dot',
-            line_color=annotation.color,
-            line_width=1,
-            annotation_text=annotation.label,
-          )
-        else:
-          self._fig.add_vline(
-            x=annotation.value,
-            line_dash='dot',
-            line_color=annotation.color,
-            line_width=1,
-            annotation_text=annotation.label,
-          )
+    # plot annotations
+    self.plot_annotations()
 
-    # updating axes
+    # update axes
     self._fig.update_xaxes(matches='x', showspikes=True, spikemode='across', spikesnap='cursor')
     self._fig.update_yaxes(matches='y', showspikes=True, spikemode='across')
 
-    # and zoom ranges
+    # update zoom ranges
     if self.zoom.x.min is not None and self.zoom.x.max is not None:
       self._fig.update_xaxes(range=[self.zoom.x.min, self.zoom.x.max])
     if self.zoom.y.min is not None and self.zoom.y.max is not None:
       self._fig.update_yaxes(range=[self.zoom.y.min, self.zoom.y.max])
 
-    self._fig.update_layout(
-      hovermode='x unified',
-      height=300 * num_rows,
-      title='Forecast values over time (by scenario)',
-      uirevision='df',
-    )
+    # # update layout
+    # self._fig.update_layout(
+    #   hovermode='x unified',
+    #   height=300 * num_rows,
+    #   title='Forecast values over time (by scenario)',
+    #   uirevision='df',
+    # )
 
     return self._fig
 
   def get_fig(self) -> go.Figure:
     return self._fig
 
+  def get_graph(self) -> dcc.Graph:
+    return dcc.Graph(id='graph', figure=self._fig)
+
   def get_data(self) -> pd.DataFrame:
     return self._raw_df
+
+  def plot_annotations(self) -> go.Figure:
+    if not self.annotations:
+      return
+    for annotation in self.annotations:
+      if isinstance(annotation, HorizontalAnnotation):
+        self._fig.add_hline(
+          y=annotation.value,
+          line_dash='dot',
+          line_color=annotation.color,
+          line_width=1,
+          annotation_text=annotation.label,
+        )
+      elif isinstance(annotation, VerticalAnnotation):
+        self._fig.add_vline(
+          x=annotation.value,
+          line_dash='dot',
+          line_color=annotation.color,
+          line_width=1,
+          annotation_text=annotation.label,
+        )
+      else:
+        raise ValueError(f'Invalid annotation type: {annotation.type}')
+    return self._fig
 
   @staticmethod
   @lru_cache(maxsize=128)

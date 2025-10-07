@@ -21,7 +21,7 @@ controls:
   y_axis: "value"
   round_num: 19
   annotations:
-    - type: vertical
+    - type: horizontal
       value: 19_000
-      label: "An important value"
+      label: Value for vaccination-impact insight
       color: "#886622"

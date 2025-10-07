@@ -59,7 +59,7 @@ def visualization_editor(control_values=None, show_controls=True):
 
   figure_container = html.Div(
     id='insight-visualization-figure',
-    children=[dcc.Graph(figure=chart.get_fig())],
+    children=[chart.get_graph()],
     style={'height': '70vh'},
   )
 
@@ -149,7 +149,7 @@ def update_chart(
     chart = Chart(PlotType.LINE, chart_controls)
     if not chart and not isinstance(chart, Chart):
       raise Exception('Chart not found or is not a valid chart')
-    return [dcc.Graph(figure=chart.get_fig())]  # must return a list here for the callback to work
+    return [chart.get_graph()]  # must return a list here for the callback to work
   except Exception as e:
     print(f'Error creating chart: {e}')
     import traceback
@@ -160,7 +160,7 @@ def update_chart(
 
 @callback(
   Output('chart-extent-store', 'data'),
-  Input('chart-figure', 'relayoutData'),
+  Input('graph', 'relayoutData'),
 )
 def sync_zoom_store(relayout):
   if not relayout:

@@ -32,5 +32,5 @@ controls:
       color: "#993366"
     - type: horizontal
       value: 17_000
-      label: An important value
+      label: Value for seasonal-burden-and-trajectory insight
       color: "#663399"
