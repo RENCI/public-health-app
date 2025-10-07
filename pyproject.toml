@@ -13,6 +13,7 @@ dependencies = [
     "markdown>=3.9",
     "numpy>=2.3.2",
     "pandas>=2.3.2",
+    "python-slugify>=8.0.4",
     "pyyaml>=6.0.2",
     "weasyprint>=66.0",
 ]

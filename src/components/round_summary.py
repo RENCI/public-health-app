@@ -8,7 +8,7 @@ from src.util.time_ago import time_ago
 from src.util.data import load_rounds
 from src.util.export.pdf import generate_round_pdf
 from src.util.format_timestamp import format_timestamp
-
+from src.util.slugify import slugify
 
 def tipped_text(text, tooltip=None, size='md'):
   return dmc.Tooltip(
@@ -393,9 +393,12 @@ def handle_click_download(n_clicks, round_number, search):
     if not this_round:
       raise exceptions.PreventUpdate
 
-    pdf = generate_round_pdf(this_round)
+    slugified_name = slugify(this_round.get('name', ''))
 
-    return dcc.send_bytes(pdf, 'round-report.pdf'), no_update
+    pdf = generate_round_pdf(this_round)
+    filename = f'SMH-round-{round_number}_{slugified_name}.pdf'
+
+    return dcc.send_bytes(pdf, filename), no_update
 
   except Exception as error:
     print(f'Download failed: {error}')

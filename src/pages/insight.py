@@ -9,6 +9,7 @@ from dash_iconify import DashIconify
 from src.data.rounds.round19 import get_insight
 from src.util.get_query_param import get_query_param
 from src.util.export.pdf import generate_insight_pdf
+from src.util.slugify import slugify
 from src.components.viz_editor import visualization_editor
 
 register_page(__name__, path_template='/insight', name='Insight Details')
@@ -142,9 +143,13 @@ def handle_click_download(n_clicks, custom_insights, search):
     if not insight:
       raise ValueError(f'Insight {insight_id} not found')
 
-    pdf = generate_insight_pdf(insight)
+    round_number = insight.get('controls', {}).get('round_number', '18')
+    slugified_title = slugify(insight.get('title', ''))
 
-    return dcc.send_bytes(pdf, 'insight-report.pdf'), no_update
+    pdf = generate_insight_pdf(insight)
+    filename = f'SMH_{round_number}_{slugified_title}.pdf'
+
+    return dcc.send_bytes(pdf, filename), no_update
 
   except Exception as error:
     print(f'Download failed: {error}')
