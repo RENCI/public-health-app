@@ -383,8 +383,6 @@ def handle_click_share(share_clicks, clipboard_clicks, href, selected_round, cus
     insights=custom_insights,
     base_url=href.split('/insight/')[0].rstrip('/'),
   )
-  print(dict(href=href, share_url=share_url))
-  print(href.split('?')[0].rstrip('/'))
 
   notification = {
     'action': 'show',
