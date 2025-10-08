@@ -15,7 +15,7 @@ from plotly.subplots import make_subplots
 from src.components.enums import AgeGroup, DataType, Target, Uncertainty
 from src.constants import (
   get_locations,
-  get_model_color,
+  get_model_color_by_id,
   get_model_id,
   get_model_name,
   get_scenario_id,
@@ -23,15 +23,7 @@ from src.constants import (
 )
 
 BASE_DATA_DIR = Path(__file__).resolve().parent.parent / 'data' / 'rounds'
-FIFTY_PERCENT = '50%'
-NINETY_FIVE_PERCENT = '95%'
-MULTI = 'Multi'
 # mapping confidence interval value to quantile bounds
-conf_int_map = {
-  FIFTY_PERCENT: [(0.25, 0.75)],
-  NINETY_FIVE_PERCENT: [(0.025, 0.975)],
-  MULTI: [(0.025, 0.975), (0.05, 0.95), (0.1, 0.9), (0.25, 0.75)],
-}
 conf_int_colors = {
   (0.025, 0.975): 'rgba(200,200,255,0.2)',  # lightest
   (0.05, 0.95): 'rgba(150,150,255,0.3)',
@@ -70,7 +62,7 @@ class Model:
     else:
       self.id = get_model_id(model_id_or_name)
       self.name = model_id_or_name
-    self.color = get_model_color(self.id)
+    self.color = get_model_color_by_id(self.id)
 
   def __hash__(self):
     return hash(self.name)
@@ -320,12 +312,6 @@ class Chart:
     # self._fig.update_yaxes(showspikes=True, spikemode='across')
 
   def refresh_fig(self) -> go.Figure:
-    # update layout
-    num_rows = len(self.scenarios)
-    self._fig.update_layout(
-      hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)'
-    )
-
     # handle empty properties
     if not (self.scenarios and self.models and self.location and self.target):
       self._create_empty_figure()
@@ -334,6 +320,12 @@ class Chart:
       raise ValueError('Scenario is required to display chart.')
     if not self.models:
       raise ValueError('Models are required to display chart.')
+
+    # update layout
+    num_rows = len(self.scenarios)
+    self._fig.update_layout(
+      hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)'
+    )
 
     # start with the raw dataframe
     df = self._raw_df
@@ -360,37 +352,23 @@ class Chart:
 
       # set up uncertainty intervals if necessary
       should_add_uncertainty_intervals = (
-        self.certainty_percent and self.certainty_percent in Uncertainty.display_values()
+        self.certainty_percent
+        and self.certainty_percent.display_value in Uncertainty.display_values()
       )
 
       # add traces for each model
-      main_data = scenario_df.query('type_id == 0.5')
       for model in self.models:
+        print('model_id: ' + str(model.id) + ' model_name: ' + model.name)
         # add uncertainty intervals if necessary
         if should_add_uncertainty_intervals:
-          for lower_q, upper_q in self.certainty_percent.get_bounds():
-            lower_model = scenario_df.query('type_id == @lower_q and model_name == @model.id')
-            upper_model = scenario_df.query('type_id == @upper_q and model_name == @model.id')
-            self._fig.add_trace(
-              go.Scatter(
-                x=pd.concat([lower_model.index, upper_model.index[::-1]]),
-                y=pd.concat([lower_model[self.y_axis], upper_model[self.y_axis][::-1]]),
-                fill='toself',
-                fillcolor=conf_int_colors[(lower_q, upper_q)],
-                line=dict(color='rgba(0,0,0,0)'),
-                hoverinfo='skip',
-                showlegend=False,
-              ),
-              row=i,
-              col=1,
-            )
+          self._plot_uncertainty_intervals(scenario_df=scenario_df, model=model, row_num=i)
 
         # add main line (0.5 quantile)
-        model_df = main_data.query('model_name == @model.id')
+        primary_line_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
         self._fig.add_trace(
           go.Scatter(
-            x=model_df.index,
-            y=model_df[self.y_axis],
+            x=primary_line_data.index,
+            y=primary_line_data[self.y_axis],
             mode='lines',
             name=f'Model {model.name}',
             legendgroup=f'Model {model.name}',
@@ -429,7 +407,7 @@ class Chart:
       )
 
     # plot annotations
-    self.plot_annotations()
+    self._plot_annotations()
 
     # update axes
     self._fig.update_xaxes(matches='x', showspikes=True, spikemode='across', spikesnap='cursor')
@@ -440,14 +418,6 @@ class Chart:
       self._fig.update_xaxes(range=[self.zoom.x.min, self.zoom.x.max])
     if self.zoom.y.min is not None and self.zoom.y.max is not None:
       self._fig.update_yaxes(range=[self.zoom.y.min, self.zoom.y.max])
-
-    # # update layout
-    # self._fig.update_layout(
-    #   hovermode='x unified',
-    #   height=300 * num_rows,
-    #   title='Forecast values over time (by scenario)',
-    #   uirevision='df',
-    # )
 
     return self._fig
 
@@ -460,7 +430,27 @@ class Chart:
   def get_data(self) -> pd.DataFrame:
     return self._raw_df
 
-  def plot_annotations(self) -> go.Figure:
+  def _plot_uncertainty_intervals(
+    self, scenario_df: pd.DataFrame, model: Model, row_num: int
+  ) -> go.Figure:
+    for lower_q, upper_q in self.certainty_percent.get_bounds():
+      lower_model = scenario_df.query('type_id == @lower_q and model_name == @model.id')
+      upper_model = scenario_df.query('type_id == @upper_q and model_name == @model.id')
+      self._fig.add_trace(
+        go.Scatter(
+          x=pd.concat([lower_model.index.to_series(), upper_model.index.to_series()[::-1]]),
+          y=pd.concat([lower_model[self.y_axis], upper_model[self.y_axis][::-1]]),
+          fill='toself',
+          fillcolor=conf_int_colors[(lower_q, upper_q)],
+          line=dict(color='rgba(0,0,0,0)'),
+          hoverinfo='skip',
+          showlegend=False,
+        ),
+        row=row_num,
+        col=1,
+      )
+
+  def _plot_annotations(self) -> go.Figure:
     if not self.annotations:
       return
     for annotation in self.annotations:

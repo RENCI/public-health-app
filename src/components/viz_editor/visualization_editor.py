@@ -60,7 +60,7 @@ def visualization_editor(control_values=None, show_controls=True):
   figure_container = html.Div(
     id='insight-visualization-figure',
     children=[chart.get_graph()],
-    style={'height': '70vh'},
+    style={'min-height': '70vh'},
   )
 
   if not show_controls:

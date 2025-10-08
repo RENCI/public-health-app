@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from dash import dcc
 from plotly.subplots import make_subplots
+
 from src.util.data import build_dataset_path, collect_data
 
 
@@ -44,10 +45,10 @@ def chart(control_values={}):
   }
 
   conf_int_colors = {
-    (0.025, 0.975): 'rgba(200,200,255,0.2)',  # lightest
-    (0.05, 0.95): 'rgba(150,150,255,0.3)',
-    (0.1, 0.9): 'rgba(100,100,255,0.4)',
-    (0.25, 0.75): 'rgba(50,50,255,0.6)',  # darkest
+    (0.025, 0.975): 'rgba(200,200,200,0.3)',  # lightest gray
+    (0.05, 0.95): 'rgba(150,150,150,0.4)',
+    (0.1, 0.9): 'rgba(100,100,100,0.5)',
+    (0.25, 0.75): 'rgba(50,50,50,0.6)',  # darkest gray
   }
 
   num_rows = len(scenarios)
