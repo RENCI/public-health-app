@@ -22,7 +22,6 @@ def load_constants() -> None:
     constants = json.load(f)
 
   _CONSTANTS = constants
-  print('Loaded constants')
 
 
 def load_locations() -> None:
@@ -44,7 +43,6 @@ def load_locations() -> None:
     }
 
   _LOCATIONS = locations_dict
-  print('Loaded locations')
 
 
 def get_constants() -> dict[str, Any]:

@@ -13,12 +13,11 @@ dependencies = [
     "numpy>=2.3.2",
     "pandas>=2.3.2",
     "pyyaml>=6.0.2",
-    "redis>=6.4.0",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.12.12",
+    "ruff>=0.14.0",
 ]
 
 [tool.ruff]

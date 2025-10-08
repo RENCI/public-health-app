@@ -93,7 +93,7 @@ class Location:
 class Annotation(ABC):
   """Abstract base class for annotations with factory pattern support."""
 
-  def __init__(self, value: float, label: str, color: str, type: str):
+  def __init__(self, value: Any, label: str, color: str, type: str):
     """
     Initialize annotation with factory pattern support.
     """
@@ -103,10 +103,16 @@ class Annotation(ABC):
     self.type = type
 
   @classmethod
-  def create(cls, value: float, label: str, color: str, type: str) -> 'Annotation':
+  def create(cls, value: Any, label: str, color: str, type: str) -> 'Annotation':
     """Factory method to create appropriate annotation subclass based on type."""
     if not type:
-      return HorizontalAnnotation(value, label, color)
+      if isinstance(value, str):
+        value = datetime.strptime(value, '%Y-%m-%d')
+        return VerticalAnnotation(value, label, color)
+      elif isinstance(value, float):
+        return HorizontalAnnotation(value, label, color)
+      else:
+        raise ValueError(f'Invalid value type "{type(value)}".')
 
     type_lower = type.lower()
     if type_lower == 'horizontal':
@@ -114,7 +120,7 @@ class Annotation(ABC):
     elif type_lower == 'vertical':
       return VerticalAnnotation(value, label, color)
     else:
-      raise ValueError(f'Invalid type "{type}". Must be "horizontal" or "vertical"')
+      raise ValueError(f'Invalid type "{type}".')
 
   def to_dict(self) -> dict[str, Any]:
     """Convert object to dictionary for JSON serialization."""
@@ -155,7 +161,7 @@ class HorizontalAnnotation(Annotation):
 class VerticalAnnotation(Annotation):
   """Annotation that appears vertically (on y-axis)."""
 
-  def __init__(self, value: float, label: str, color: str):
+  def __init__(self, value: datetime, label: str, color: str):
     super().__init__(value, label, color, 'vertical')
 
 
@@ -323,9 +329,19 @@ class Chart:
 
     # update layout
     num_rows = len(self.scenarios)
-    self._fig.update_layout(
-      hovermode='x unified', height=300 * num_rows, title='Forecast values over time (by scenario)'
-    )
+    # Define fixed dimensions
+    SUBPLOT_HEIGHT = 300  # Fixed height per subplot in pixels
+    FIXED_SPACING = 100  # Fixed spacing between subplots in pixels
+
+    # Calculate total figure height accounting for fixed spacing
+    total_height = (SUBPLOT_HEIGHT * num_rows) + (FIXED_SPACING * (num_rows - 1))
+
+    # Calculate vertical_spacing as a fraction of total height
+    # This ensures the actual pixel spacing remains constant
+    if num_rows > 1:
+      vertical_spacing = FIXED_SPACING / total_height
+    else:
+      vertical_spacing = 0  # No spacing needed for single subplot
 
     # start with the raw dataframe
     df = self._raw_df
@@ -342,7 +358,8 @@ class Chart:
     self._fig = make_subplots(
       rows=num_rows,
       cols=1,
-      vertical_spacing=0.1,
+      vertical_spacing=vertical_spacing,
+      row_heights=[1] * num_rows,
       subplot_titles=[f'Scenario {s.name}' for s in self.scenarios],
     )
 
@@ -358,7 +375,6 @@ class Chart:
 
       # add traces for each model
       for model in self.models:
-        print('model_id: ' + str(model.id) + ' model_name: ' + model.name)
         # add uncertainty intervals if necessary
         if should_add_uncertainty_intervals:
           self._plot_uncertainty_intervals(scenario_df=scenario_df, model=model, row_num=i)
@@ -419,6 +435,12 @@ class Chart:
     if self.zoom.y.min is not None and self.zoom.y.max is not None:
       self._fig.update_yaxes(range=[self.zoom.y.min, self.zoom.y.max])
 
+    self._fig.update_layout(
+      hovermode='x unified',
+      height=total_height,
+      title='Forecast values over time (by scenario)',
+    )
+
     return self._fig
 
   def get_fig(self) -> go.Figure:
@@ -443,6 +465,7 @@ class Chart:
           fill='toself',
           fillcolor=conf_int_colors[(lower_q, upper_q)],
           line=dict(color='rgba(0,0,0,0)'),
+          legendgroup=f'Model {model.name}',
           hoverinfo='skip',
           showlegend=False,
         ),

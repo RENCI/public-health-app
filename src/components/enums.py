@@ -52,9 +52,7 @@ class Target(InputAndDisplayEnum):
 
 class AgeGroup(InputAndDisplayEnum):
   ALL = ('0-130', 'all ages')
-  UNDER_ONE_YEAR_OLD = ('0-0.99', 'ages 0-1')
-  ONE_TO_FOUR_YEARS_OLD = ('1-4', 'ages 1-4')
-  FIVE_TO_SIXTY_FOUR_YEARS_OLD = ('5-64', 'ages 5-64')
+  UNDER_SIXTY_FIVE = ('0-64', 'ages 0-64')
   SIXTY_FIVE_AND_ABOVE = ('65-130', 'ages 65+')
 
   def __init__(self, input_value: str, display_value: str):

@@ -65,8 +65,6 @@ def color_picker_popover(index, value='#222222'):
 def annotation_row(
   index, type: str = 'horizontal', value: Any = None, label: str = '', color: str = '#222222'
 ):
-  if not type:
-    print('type is None')
   type_selector = dmc.Select(
     data=[{'value': 'vertical', 'label': 'X'}, {'value': 'horizontal', 'label': 'Y'}],
     value=type,
