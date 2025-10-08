@@ -136,7 +136,7 @@ def render_shared_insight(pathname, selected_round, custom_insights):
   Output('shared-insights-store', 'data'),
   Output('notification-container', 'sendNotifications'),
   Input('save-shared-insight-button', 'n_clicks'),
-  Input('url', 'pathname'),
+  State('url', 'pathname'),
   State('selected-round-store', 'data'),
   State('shared-insights-store', 'data'),
   suppress_callback_exceptions=True,
@@ -148,6 +148,7 @@ def save_shared_insight(save_clicks, pathname, selected_round, shared_insights):
 
   if not pathname or not pathname.startswith('/shared/'):
     return None
+
   compressed = pathname.removeprefix('/shared/')
   new_insight = json.loads(lz.decompressFromEncodedURIComponent(compressed))
 

@@ -1,3 +1,4 @@
+import json
 import uuid
 from lzstring import LZString
 from dash import ALL, callback, ctx, dcc, exceptions, no_update, Input, Output, State
@@ -301,9 +302,11 @@ def update_custom_insights_list(custom_insights, shared_insights, round_number):
   if not custom_insights or not shared_insights or not round_number:
     return [no_insights_message]
 
+  print(json.dumps(dict(custom_insights=custom_insights, shared_insights=shared_insights), indent=2))
+
   filtered = [
     insight
-    for insight in custom_insights + shared_insights
+    for insight in custom_insights
     if str(insight.get('controls', {}).get('round')) == str(round_number)
   ]
   return [custom_insight_button(i) for i in filtered] + [new_insight_prompt] or [
