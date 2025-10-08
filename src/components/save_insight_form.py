@@ -78,10 +78,10 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
 
 
 @callback(
-  Output('custom-insights-store', 'data'),
+  Output('custom-insights-store', 'data', allow_duplicate=True),
   Output('insight-title-input', 'error'),
   Output('insight-description-input', 'error'),
-  Output('notification-container', 'sendNotifications'),
+  Output('notification-container', 'sendNotifications', allow_duplicate=True),
   Output('_pages_location', 'pathname'),  # update path
   Input('save-insight-button', 'n_clicks'),
   State('custom-insights-store', 'data'),
@@ -98,6 +98,7 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   State('zoom-store', 'data'),
   State('annotations-store', 'data'),
   suppress_callback_exceptions=True,
+  prevent_initial_call=True,
 )
 def save_custom_insight(
   n_clicks,

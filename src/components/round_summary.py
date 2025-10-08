@@ -294,15 +294,16 @@ def update_round_summary(round_number, pathname):
 @callback(
   Output('custom-insights-list', 'children'),
   Input('custom-insights-store', 'data'),
+  Input('shared-insights-store', 'data'),
   Input('selected-round-store', 'data'),
 )
-def update_custom_insights_list(custom_insights, round_number):
-  if not custom_insights or not round_number:
+def update_custom_insights_list(custom_insights, shared_insights, round_number):
+  if not custom_insights or not shared_insights or not round_number:
     return [no_insights_message]
 
   filtered = [
     insight
-    for insight in custom_insights
+    for insight in custom_insights + shared_insights
     if str(insight.get('controls', {}).get('round')) == str(round_number)
   ]
   return [custom_insight_button(i) for i in filtered] + [new_insight_prompt] or [
