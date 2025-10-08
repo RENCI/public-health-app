@@ -10,7 +10,7 @@ loading_insight = [
   dmc.Flex(  # toolbar
     children=[
       dmc.Skeleton(h=36, w=200),
-      dmc.Group([dmc.Skeleton(h=36, w=36), dmc.Skeleton(h=36, w=36), dmc.Skeleton(h=36, w=110)]),
+      dmc.Group([dmc.Skeleton(h=36, w=36), dmc.Skeleton(h=36, w=110)]),
     ],
     justify='space-between',
     align='center',
@@ -86,16 +86,9 @@ def show_insight_details(pathname, custom_insights):
       href='#',
     )
 
-    share_button = dmc.ActionIcon(
-      DashIconify(icon='feather:share-2'),
-      id={'type': 'share-insight', 'id': insight_id},
-      variant='subtle',
-      size='lg',
-    )
-
     return [
       dmc.Flex(  # toolbar
-        children=[back_button, dmc.Group([share_button, download_button, explorer_button])],
+        children=[back_button, dmc.Group([download_button, explorer_button])],
         justify='space-between',
         align='center',
         mb=24,

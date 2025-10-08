@@ -73,20 +73,8 @@ download_button = tooltip(
   ),
 )
 
-explorer_button = tooltip(
-  label='Open in Insight Explorer',
-  children=dcc.Link(
-    dmc.Button(
-      'Explore',
-      leftSection=DashIconify(icon='feather:arrow-up-right'),
-    ),
-    id='explorer-button',
-    href=f'/explorer?starter=???',
-  ),
-)
-
 shared_insight_toolbar = dmc.Flex(
-  children=[back_button, dmc.Group([save_button, download_button, explorer_button])],
+  children=[back_button, dmc.Group([save_button, download_button])],
   justify='space-between',
   align='center',
   mb=24,
@@ -133,12 +121,13 @@ def render_shared_insight(pathname, selected_round, custom_insights):
   ]
 
 @callback(
-  Output('shared-insights-store', 'data'),
+  Output('custom-insights-store', 'data'),
   Output('notification-container', 'sendNotifications'),
+  Output('_pages_location', 'pathname', allow_duplicate=True),  # update path
   Input('save-shared-insight-button', 'n_clicks'),
   State('url', 'pathname'),
   State('selected-round-store', 'data'),
-  State('shared-insights-store', 'data'),
+  State('custom-insights-store', 'data'),
   suppress_callback_exceptions=True,
   prevent_initial_call=True,
 )
@@ -149,8 +138,14 @@ def save_shared_insight(save_clicks, pathname, selected_round, shared_insights):
   if not pathname or not pathname.startswith('/shared/'):
     return None
 
+  now = datetime.datetime.utcnow().isoformat()
+  new_id = str(uuid.uuid4())
   compressed = pathname.removeprefix('/shared/')
   new_insight = json.loads(lz.decompressFromEncodedURIComponent(compressed))
+  new_insight['id'] = new_id
+  new_insight['image_url'] = 'https://placehold.co/400?text=Visualization'
+  new_insight['created_at'] = now
+  new_insight['updated_at'] = new_insight['created_at']
 
   notification = {
     'action': 'show',
@@ -159,4 +154,4 @@ def save_shared_insight(save_clicks, pathname, selected_round, shared_insights):
     'color': 'limegreen',
   }
 
-  return shared_insights + [new_insight], [notification]
+  return shared_insights + [new_insight], [notification], f'/insight/{new_id}'

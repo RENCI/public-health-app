@@ -200,11 +200,9 @@ def custom_insight_button(item):
                   tipped_text(
                     f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'
                   ),
-                  tipped_text(
-                    f'Last updated: {format_timestamp(updated_at)}', time_ago(updated_at), size='xs'
-                  ),
                 ],
-                align='flex-start',
+                align='center',
+                justify='flex-start',
               ),
               dmc.Group(
                 [
@@ -236,7 +234,6 @@ def custom_insight_button(item):
       flexDirection='row',
     ),
   )
-
 
 delete_modal = dmc.Modal(
   id='delete-confirmation-modal',
@@ -295,23 +292,19 @@ def update_round_summary(round_number, pathname):
 @callback(
   Output('custom-insights-list', 'children'),
   Input('custom-insights-store', 'data'),
-  Input('shared-insights-store', 'data'),
   Input('selected-round-store', 'data'),
 )
-def update_custom_insights_list(custom_insights, shared_insights, round_number):
-  if not custom_insights or not shared_insights or not round_number:
+def update_custom_insights_list(custom_insights, round_number):
+  if not round_number:
     return [no_insights_message]
 
-  print(json.dumps(dict(custom_insights=custom_insights, shared_insights=shared_insights), indent=2))
-
-  filtered = [
+  filtered_custom_insights = [
     insight
     for insight in custom_insights
     if str(insight.get('controls', {}).get('round')) == str(round_number)
   ]
-  return [custom_insight_button(i) for i in filtered] + [new_insight_prompt] or [
-    no_insights_message
-  ]
+
+  return [custom_insight_button(insight) for insight in filtered_custom_insights] + [new_insight_prompt] or [no_insights_message]
 
 
 @callback(
@@ -388,8 +381,10 @@ def handle_click_share(share_clicks, clipboard_clicks, href, selected_round, cus
     round_number=selected_round,
     insight_id=insight_id,
     insights=custom_insights,
-    base_url=href.split('?')[0].rstrip('/'),
+    base_url=href.split('/insight/')[0].rstrip('/'),
   )
+  print(dict(href=href, share_url=share_url))
+  print(href.split('?')[0].rstrip('/'))
 
   notification = {
     'action': 'show',
