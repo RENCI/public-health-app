@@ -60,7 +60,7 @@ def visualization_editor(control_values=None, show_controls=True):
   figure_container = html.Div(
     id='insight-visualization-figure',
     children=[chart.get_graph()],
-    style={'min-height': '70vh'},
+    style={'min-height': '45vh'},
   )
 
   if not show_controls:
@@ -72,6 +72,7 @@ def visualization_editor(control_values=None, show_controls=True):
         [dcc.Store('chart-extent-store'), figure_container],
         id='visualization-column',
         span=dict(base=12, xl=8, lg=7, md=8),
+        style={'display': 'flex', 'flexDirection': 'column'},
       ),
       dmc.GridCol(
         dmc.Stack(
