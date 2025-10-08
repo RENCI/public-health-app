@@ -439,6 +439,7 @@ class Chart:
       hovermode='x unified',
       height=total_height,
       title='Forecast values over time (by scenario)',
+      uirevision='df',
     )
 
     return self._fig
