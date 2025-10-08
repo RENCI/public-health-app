@@ -334,12 +334,12 @@ class Chart:
     FIXED_SPACING = 100  # Fixed spacing between subplots in pixels
 
     # Calculate total figure height accounting for fixed spacing
-    total_height = (SUBPLOT_HEIGHT * num_rows) + (FIXED_SPACING * (num_rows - 1))
+    chart_total_height = (SUBPLOT_HEIGHT * num_rows) + (FIXED_SPACING * (num_rows - 1))
 
     # Calculate vertical_spacing as a fraction of total height
     # This ensures the actual pixel spacing remains constant
     if num_rows > 1:
-      vertical_spacing = FIXED_SPACING / total_height
+      vertical_spacing = FIXED_SPACING / chart_total_height
     else:
       vertical_spacing = 0  # No spacing needed for single subplot
 
@@ -437,7 +437,7 @@ class Chart:
 
     self._fig.update_layout(
       hovermode='x unified',
-      height=total_height,
+      height=chart_total_height + 180,
       title='Forecast values over time (by scenario)',
       uirevision='df',
     )
