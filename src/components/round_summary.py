@@ -251,9 +251,10 @@ delete_modal = dmc.Modal(
 
 download_button = dmc.ActionIcon(
   DashIconify(icon='feather:download'),
-  id='round-download-button',
+  id='download-round-button',
   variant='subtle',
   size='lg',
+  loading=False,
 )
 
 
@@ -372,16 +373,27 @@ def handle_delete(delete_clicks, cancel_click, confirm_click, modal_data, custom
 
 
 @callback(
+  Output('download-round-button', 'loading', allow_duplicate=True),
+  Input('download-round-button', 'n_clicks'),
+  prevent_initial_call=True,
+)
+def show_loading(n_clicks):
+  if not n_clicks:
+    raise exceptions.PreventUpdate
+  return True
+
+@callback(
   Output('round-pdf-download', 'data'),
   Output('notification-container', 'sendNotifications', allow_duplicate=True),
-  Input('round-download-button', 'n_clicks'),
+  Output('download-round-button', 'loading'),
+  Input('download-round-button', 'n_clicks'),
   State('selected-round-store', 'data'),
   State('url', 'search'),
   prevent_initial_call=True,
 )
 def handle_click_download(n_clicks, round_number, search):
   if not n_clicks:
-    return no_update, no_update
+    return no_update, no_update, no_update
 
   try:
     if not round_number:
@@ -398,7 +410,7 @@ def handle_click_download(n_clicks, round_number, search):
     pdf = generate_round_pdf(this_round)
     filename = f'SMH-round-{round_number}_{slugified_name}.pdf'
 
-    return dcc.send_bytes(pdf, filename), no_update
+    return dcc.send_bytes(pdf, filename), no_update, False
 
   except Exception as error:
     print(f'Download failed: {error}')
@@ -408,4 +420,4 @@ def handle_click_download(n_clicks, round_number, search):
       'message': 'Download failed!',
       'color': 'crimson',
     }
-    return no_update, [notification]
+    return no_update, [notification], False

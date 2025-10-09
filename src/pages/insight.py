@@ -31,6 +31,7 @@ download_button = dmc.ActionIcon(
   variant='subtle',
   id='download-insight-button',
   size='lg',
+  loading=False,
 )
 
 toolbar = dmc.Flex(
@@ -73,9 +74,21 @@ layout = dmc.Container(
 
 
 @callback(
+  Output('download-insight-button', 'loading', allow_duplicate=True),
+  Input('download-insight-button', 'n_clicks'),
+  prevent_initial_call=True,
+)
+def show_loading(n_clicks):
+  if not n_clicks:
+    raise exceptions.PreventUpdate
+  return True
+
+
+@callback(
   Output('insight-view-figure-container', 'children'),
   Output('insight-view-title', 'children'),
   Output('insight-view-description', 'children'),
+  Output('download-insight-button', 'loading'),
   Input('url', 'pathname'),
   Input('url', 'search'),
   Input('custom-insights-store', 'data'),
@@ -100,6 +113,7 @@ def show_details(pathname, search, custom_insights):
       visualization_editor(control_values=controls, show_controls=False),
       insight.get('title', 'Untitled Insight'),
       insight.get('description', ''),
+      False,
     )
 
   # fallback
@@ -108,6 +122,7 @@ def show_details(pathname, search, custom_insights):
       dmc.Alert(f'Error loading insight: {e}', color='crimson', title='Insight Error'),
       'Error',
       '',
+      False,
     )
 
 
