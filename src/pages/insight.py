@@ -3,7 +3,7 @@ import uuid
 from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
-from dash import exceptions, html, Input, Output, callback, dcc, register_page, State, no_update
+from dash import exceptions, html, Input, Output, callback, clientside_callback, dcc, register_page, State, no_update
 from dash_iconify import DashIconify
 from src.data.rounds.round19 import get_insight
 from src.util.get_query_param import get_query_param
@@ -73,15 +73,18 @@ layout = dmc.Container(
 )
 
 
-@callback(
+clientside_callback(
+  """
+  function(n_clicks) {
+    if (!n_clicks) return false;  // initial render
+    return true;                  // show loading immediately on click
+  }
+  """,
   Output('download-insight-button', 'loading', allow_duplicate=True),
   Input('download-insight-button', 'n_clicks'),
   prevent_initial_call=True,
 )
-def show_loading(n_clicks):
-  if not n_clicks:
-    raise exceptions.PreventUpdate
-  return True
+
 
 
 @callback(

@@ -1,7 +1,7 @@
 import uuid
 
 import dash_mantine_components as dmc
-from dash import ALL, callback, ctx, dcc, exceptions, no_update, Input, Output, State
+from dash import ALL, callback, clientside_callback, ctx, dcc, exceptions, no_update, Input, Output, State
 from dash_iconify import DashIconify
 
 from src.util.time_ago import time_ago
@@ -372,15 +372,18 @@ def handle_delete(delete_clicks, cancel_click, confirm_click, modal_data, custom
   raise exceptions.PreventUpdate
 
 
-@callback(
+clientside_callback(
+  """
+  function(n_clicks) {
+    if (!n_clicks) return false;  // initial render
+    return true;                  // show loading immediately on click
+  }
+  """,
   Output('download-round-button', 'loading', allow_duplicate=True),
   Input('download-round-button', 'n_clicks'),
   prevent_initial_call=True,
 )
-def show_loading(n_clicks):
-  if not n_clicks:
-    raise exceptions.PreventUpdate
-  return True
+
 
 @callback(
   Output('round-pdf-download', 'data'),
@@ -393,7 +396,7 @@ def show_loading(n_clicks):
 )
 def handle_click_download(n_clicks, round_number, search):
   if not n_clicks:
-    return no_update, no_update, no_update
+    return no_update, no_update, False
 
   try:
     if not round_number:
