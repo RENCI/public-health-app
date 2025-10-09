@@ -10,6 +10,8 @@ from src.util.export.pdf import generate_round_pdf
 from src.util.format_timestamp import format_timestamp
 from src.util.slugify import slugify
 
+from src.components.tooltip import tooltip
+
 def tipped_text(text, tooltip=None, size='md'):
   return dmc.Tooltip(
     label=tooltip if tooltip else text,
@@ -266,7 +268,7 @@ def round_summary():
       dmc.Flex(
         [
           dmc.Title(id='round-title', order=1),
-          download_button,
+          tooltip(download_button, label='Download PDF'),
         ],
         justify='space-between',
         align='flex-end',

@@ -9,7 +9,9 @@ from src.data.rounds.round19 import get_insight
 from src.util.get_query_param import get_query_param
 from src.util.export.pdf import generate_insight_pdf
 from src.util.slugify import slugify
+
 from src.components.viz_editor import visualization_editor
+from src.components.tooltip import tooltip
 
 register_page(__name__, path_template='/insight', name='Insight Details')
 
@@ -35,7 +37,10 @@ download_button = dmc.ActionIcon(
 )
 
 toolbar = dmc.Flex(
-  children=[back_button, dmc.Group([download_button, explorer_button])],
+  children=[back_button, dmc.Group([
+    tooltip(download_button, label='Download PDF'),
+    tooltip(explorer_button, label='Explore this insight\'s data'),
+  ])],
   justify='space-between',
   align='center',
   mb=24,
