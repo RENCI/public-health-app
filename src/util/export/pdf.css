@@ -13,17 +13,14 @@ body {
 }
 .title { font-size: 1.25rem; margin: 0; }
 .subtitle { font-size: 0.9rem; font-style: italic; }
+h2 {
+  color: #666;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #ccc;
 }
-main {
-  h2 {
-    color: #666;
-    font-size: 1.1rem;
-    border-bottom: 1px solid #ccc;
-  }
-  figure {
-    margin: 0 0 1rem 0;
-    figcaption {
-      font-size: 85%;
-    }
+figure {
+  margin: 0 0 1rem 0;
+  figcaption {
+    font-size: 85%;
   }
 }
