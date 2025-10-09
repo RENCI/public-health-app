@@ -40,7 +40,6 @@ def html_to_pdf_bytes(html: str, header_html: str, footer_html: str) -> bytes:
     # generate the PDF (returns bytes)
     pdf_bytes = page.pdf(
       format='letter',
-      margin={'top': '1cm', 'bottom': '1cm', 'left': '1cm', 'right': '1cm'},
       print_background=True,
       display_header_footer=True,
       header_template=header_html,
@@ -71,7 +70,7 @@ def generate_round_pdf(round_dict):
   """ for i, insight in enumerate(insights))
 
   header_html = f"""
-    <header style="width: 100%; padding: 0 1in; height: 0.75in; background: azure; padding-bottom: 0.5rem;">
+    <header style="width: 100%; padding: 0.25in 1in 0 1in; height: 1in; background: azure; padding-bottom: 0.5rem;">
       <div style="height: 0.75in; display: flex; flex-direction: row; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #333; color: #333;">
         <div>
           <h1 style="font-size: 14pt; margin: 0;">Round {round_number}<br />Executive Summary Report</h1>
@@ -92,9 +91,11 @@ def generate_round_pdf(round_dict):
   """
 
   footer_html = f"""
-    <footer>
-      Page <span class="pageNumber"></span> of <span class="totalPages"></span>
-    </footer>
+    <div style="width: 100%; padding: 0 1in; display: flex; justify-content: space-between; font-size: 8pt; color: #555;">
+      <div><a href="https://covid19scenariomodelinghub.org/">https://covid19scenariomodelinghub.org/</a></div>
+      <div>Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>
+      <div>Round {round_number} Executive Summary Report</div>
+    </div>
   """
 
   page_html = wrap_template(main_html)
@@ -111,7 +112,7 @@ def generate_insight_pdf(insight):
   round_number = controls.get('round', '18')
 
   header_html = f"""
-    <header style="width: 100%; padding: 0 1in; height: 0.75in; background: azure; padding-bottom: 0.5rem;">
+    <header style="width: 100%; padding: 0 1in; height: 1in; background: azure; padding-bottom: 0.5rem;">
       <div style="height: 0.75in; display: flex; flex-direction: row; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #333; color: #333;">
         <div>
           <h1 style="font-size: 14pt; margin: 0;">Round {round_number} Insight Report:<br />{title}</h1>
@@ -131,9 +132,11 @@ def generate_insight_pdf(insight):
   """
 
   footer_html = f"""
-    <footer>
-      Page <span class="pageNumber"></span> of <span class="totalPages"></span>
-    </footer>
+    <div style="width: 100%; padding: 0 1in; display: flex; justify-content: space-between; font-size: 8pt; color: #555;">
+      <div><a href="https://covid19scenariomodelinghub.org/">https://covid19scenariomodelinghub.org/</a></div>
+      <div>Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>
+      <div>Round {round_number} Insight Report</div>
+    </div>
   """
 
   page_html = wrap_template(main_html)
