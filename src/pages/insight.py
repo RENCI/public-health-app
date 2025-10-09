@@ -1,7 +1,6 @@
 import uuid
 
 from urllib.parse import parse_qs
-from weasyprint import HTML
 
 import dash_mantine_components as dmc
 from dash import exceptions, html, Input, Output, callback, dcc, register_page, State, no_update
