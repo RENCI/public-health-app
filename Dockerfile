@@ -7,15 +7,25 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PORT=8050 \
     UV_PYTHON=python3.12.5
 
-# Install system dependencies (if needed)
+# Install system dependencies for building Python packages and WeasyPrint
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libglib2.0-0 \
+    libffi-dev \
+    libxml2 \
+    libxslt1.1 \
+    libjpeg62-turbo \
+    libfreetype6 \
+    shared-mime-info \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
 WORKDIR /app
 
-# Install Python dependencies
+# Copy and install Python dependencies
 COPY . .
 RUN uv venv
 RUN uv sync --locked --no-dev
@@ -24,4 +34,4 @@ RUN uv sync --locked --no-dev
 EXPOSE $PORT
 
 # Run the application with Gunicorn
-CMD ["uv", "run", "gunicorn", "-b", "0.0.0.0:8050", "app:app"]
+CMD ["uv", "run", "gunicorn", "-b", "0.0.0.0:8050", "app:app", "--timeout", "120"]
