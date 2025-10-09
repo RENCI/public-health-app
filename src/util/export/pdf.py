@@ -41,12 +41,12 @@ def generate_round_pdf(round_dict):
       <img src="https://placehold.co/650x300?text=Visualization" style="width: 100%;">
       <figcaption>Figure {i+1}. Visualization caption</figcaption>
     </figure>
-    <div>{insight['description']}</div>
+    <div>{md_to_html(insight['description'])}</div>
   """ for i, insight in enumerate(insights))
 
   body = f"""
     <header>
-      <div class="letterhead">
+      <div class="header-title">
         <h1 class="title">Round {round_number}<br />Executive Summary Report</h1>
         <div class="subtitle">Round completed: June 4, 2025</div>
       </div>
@@ -79,7 +79,7 @@ def generate_insight_pdf(insight):
 
   body = f"""
     <header>
-      <div class="letterhead">
+      <div class="header-title">
         <h1 class="title">Round {round_number}<br />Insight Report:<br />{title}</h1>
         <div class="subtitle">Round completed: June 4, 2025</div>
       </div>
