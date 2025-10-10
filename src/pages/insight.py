@@ -78,25 +78,10 @@ layout = dmc.Container(
 )
 
 
-clientside_callback(
-  """
-  function(n_clicks) {
-    if (!n_clicks) return false;  // initial render
-    return true;                  // show loading immediately on click
-  }
-  """,
-  Output('download-insight-button', 'loading', allow_duplicate=True),
-  Input('download-insight-button', 'n_clicks'),
-  prevent_initial_call=True,
-)
-
-
-
 @callback(
   Output('insight-view-figure-container', 'children'),
   Output('insight-view-title', 'children'),
   Output('insight-view-description', 'children'),
-  Output('download-insight-button', 'loading'),
   Input('url', 'pathname'),
   Input('url', 'search'),
   Input('custom-insights-store', 'data'),
@@ -121,7 +106,6 @@ def show_details(pathname, search, custom_insights):
       visualization_editor(control_values=controls, show_controls=False),
       insight.get('title', 'Untitled Insight'),
       insight.get('description', ''),
-      False,
     )
 
   # fallback
@@ -130,7 +114,6 @@ def show_details(pathname, search, custom_insights):
       dmc.Alert(f'Error loading insight: {e}', color='crimson', title='Insight Error'),
       'Error',
       '',
-      False,
     )
 
 
@@ -144,9 +127,23 @@ def add_back_link_href(search):
   return f'/explorer?starter={insight_id}'
 
 
+clientside_callback(
+  """
+  function(n_clicks) {
+    if (!n_clicks) return false;  // initial render
+    return true;                  // show loading immediately on click
+  }
+  """,
+  Output('download-insight-button', 'loading', allow_duplicate=True),
+  Input('download-insight-button', 'n_clicks'),
+  prevent_initial_call=True,
+)
+
+
 @callback(
   Output('insight-pdf-download', 'data'),
   Output('notification-container', 'sendNotifications', allow_duplicate=True),
+  Output('download-insight-button', 'loading'),
   Input('download-insight-button', 'n_clicks'),
   State('custom-insights-store', 'data'),
   State('url', 'search'),
@@ -154,7 +151,7 @@ def add_back_link_href(search):
 )
 def handle_click_download(n_clicks, custom_insights, search):
   if not n_clicks:
-    return no_update, no_update
+    return no_update, no_update, False
 
   try:
     insight_id = get_query_param(search, 'id')
@@ -171,7 +168,7 @@ def handle_click_download(n_clicks, custom_insights, search):
     pdf = generate_insight_pdf(insight)
     filename = f'SMH_{round_number}_{slugified_title}.pdf'
 
-    return dcc.send_bytes(pdf, filename), no_update
+    return dcc.send_bytes(pdf, filename), no_update, False
 
   except Exception as error:
     print(f'Download failed: {error}')
@@ -181,4 +178,4 @@ def handle_click_download(n_clicks, custom_insights, search):
       'message': 'Download failed!',
       'color': 'crimson',
     }
-    return no_update, [notification]
+    return no_update, [notification], False
