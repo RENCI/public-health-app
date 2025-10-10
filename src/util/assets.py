@@ -4,11 +4,12 @@ import mimetypes
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 
+
 def asset_uri(relative_path: str) -> str:
-  '''
+  """
   Return a data: URI for an asset inside assets/.
   Example: asset_uri('images/covid19-smh-logo.png')
-  '''
+  """
   full_path = os.path.join(PROJECT_ROOT, 'assets', relative_path)
   mime_type, _ = mimetypes.guess_type(full_path)
   mime_type = mime_type or 'application/octet-stream'

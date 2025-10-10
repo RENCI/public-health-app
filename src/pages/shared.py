@@ -107,7 +107,6 @@ def render_shared_insight(pathname, selected_round, custom_insights):
   title = state.get('title')
   description = state.get('description')
 
-
   return [
     banner,
     dmc.Title(title, order=1),
@@ -118,6 +117,7 @@ def render_shared_insight(pathname, selected_round, custom_insights):
     ),
     dcc.Markdown(description),
   ]
+
 
 @callback(
   Output('custom-insights-store', 'data'),

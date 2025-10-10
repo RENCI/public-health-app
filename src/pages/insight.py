@@ -33,9 +33,7 @@ loading_insight = [
       [
         dmc.Skeleton(h=600),
         dmc.Space(h=24),
-        dmc.Stack(
-          [dmc.Skeleton(h=30), dmc.Skeleton(h=30), dmc.Skeleton(h=30)]
-        ),
+        dmc.Stack([dmc.Skeleton(h=30), dmc.Skeleton(h=30), dmc.Skeleton(h=30)]),
       ]
     ),
     style=dict(margin='24px 0'),
@@ -70,10 +68,12 @@ download_button = dmc.ActionIcon(
 insight_toolbar = dmc.Flex(
   children=[
     back_button,
-    dmc.Group([
-      tooltip(download_button, label='Download PDF'),
-      tooltip(explorer_button, label="Explore this insight's data"),
-    ]),
+    dmc.Group(
+      [
+        tooltip(download_button, label='Download PDF'),
+        tooltip(explorer_button, label="Explore this insight's data"),
+      ]
+    ),
   ],
   justify='space-between',
   align='center',

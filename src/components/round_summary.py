@@ -1,17 +1,30 @@
 import uuid
 
 import dash_mantine_components as dmc
-from dash import ALL, callback, clientside_callback, ctx, dcc, exceptions, no_update, Input, Output, State
+from dash import (
+  ALL,
+  callback,
+  clientside_callback,
+  ctx,
+  dcc,
+  exceptions,
+  no_update,
+  Input,
+  Output,
+  State,
+)
 from dash_iconify import DashIconify
 
 from src.util.time_ago import time_ago
 from src.util.data import load_rounds
+from src.util.insight import generate_insight_share_url
 from src.util.export.pdf import generate_round_pdf
 
 from src.util.format_timestamp import format_timestamp
 from src.util.slugify import slugify
 
 from src.components.tooltip import tooltip
+
 
 def tipped_text(text, tooltip=None, size='md'):
   return dmc.Tooltip(
@@ -235,6 +248,7 @@ def custom_insight_button(item):
     ),
   )
 
+
 delete_modal = dmc.Modal(
   id='delete-confirmation-modal',
   title='Confirm Deletion',
@@ -321,7 +335,9 @@ def update_custom_insights_list(custom_insights, round_number):
     if str(insight.get('controls', {}).get('round')) == str(round_number)
   ]
 
-  return [custom_insight_button(insight) for insight in filtered_custom_insights] + [new_insight_prompt] or [no_insights_message]
+  return [custom_insight_button(insight) for insight in filtered_custom_insights] + [
+    new_insight_prompt
+  ] or [no_insights_message]
 
 
 @callback(

@@ -1,5 +1,6 @@
 import dash_mantine_components as dmc
 
+
 def tooltip(children=[], label='', position='bottom-end'):
   return dmc.Tooltip(
     label=label,
@@ -8,7 +9,7 @@ def tooltip(children=[], label='', position='bottom-end'):
     color='var(--mantine-color-dimmed)',
     withArrow=True,
     transitionProps=dict(
-      transition='fade', 
+      transition='fade',
       duration=250,
       timingFunction='ease',
     ),

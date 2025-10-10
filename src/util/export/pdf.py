@@ -28,21 +28,26 @@ def md_to_html(md_text: str) -> str:
 
 def generate_round_pdf(round_dict):
   round_number = round_dict.get('round_number') or '18'
-  
+
   summary_md = round_dict.get('report') or 'Report not found'
   summary_html = md_to_html(summary_md)
-  
-  insights = round_dict.get('insights') or []
-  insights_list_html = '<ul>' + ''.join(f'<li>{insight["summary"]}</li>' for insight in insights) + '</ul>'
 
-  insights_details_html = '<br />'.join(f"""
+  insights = round_dict.get('insights') or []
+  insights_list_html = (
+    '<ul>' + ''.join(f'<li>{insight["summary"]}</li>' for insight in insights) + '</ul>'
+  )
+
+  insights_details_html = '<br />'.join(
+    f"""
     <h2>{insight['title']}</h2>
     <figure>
       <img src="https://placehold.co/650x300?text=Visualization" style="width: 100%;">
-      <figcaption>Figure {i+1}. Visualization caption</figcaption>
+      <figcaption>Figure {i + 1}. Visualization caption</figcaption>
     </figure>
     <div>{md_to_html(insight['description'])}</div>
-  """ for i, insight in enumerate(insights))
+  """
+    for i, insight in enumerate(insights)
+  )
 
   body = f"""
     <header>
