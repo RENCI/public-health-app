@@ -1,11 +1,17 @@
+import uuid
+
 from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
-from dash import html, Input, Output, callback, dcc, no_update, register_page
+from dash import exceptions, html, Input, Output, callback, clientside_callback, dcc, register_page, State, no_update
 from dash_iconify import DashIconify
 from src.data.rounds.round19 import get_insight
 from src.util.get_query_param import get_query_param
+from src.util.export.pdf import generate_insight_pdf
+from src.util.slugify import slugify
+
 from src.components.viz_editor import visualization_editor
+from src.components.tooltip import tooltip
 
 register_page(__name__, path_template='/insight', name='Insight Details')
 
@@ -22,18 +28,19 @@ explorer_button = dcc.Link(
   id='explorer-button',
   href='#',
 )
-download_button = dcc.Link(
-  dmc.Button(
-    'Download',
-    leftSection=DashIconify(icon='feather:download'),
-    variant='outline',
-  ),
-  id='download-button',
-  href='#',
+download_button = dmc.ActionIcon(
+  DashIconify(icon='feather:download'),
+  variant='subtle',
+  id='download-insight-button',
+  size='lg',
+  loading=False,
 )
 
 toolbar = dmc.Flex(
-  children=[back_button, dmc.Group([download_button, explorer_button])],
+  children=[back_button, dmc.Group([
+    tooltip(download_button, label='Download PDF'),
+    tooltip(explorer_button, label='Explore this insight\'s data'),
+  ])],
   justify='space-between',
   align='center',
   mb=24,
@@ -65,6 +72,7 @@ layout = dmc.Container(
       id='insight-view-figure-container', style=dict(margin='24px 0'), children=loading_details
     ),
     dcc.Markdown(id='insight-view-description'),
+    dcc.Download(id='insight-pdf-download'),
   ],
   size=1200,
 )
@@ -81,7 +89,7 @@ layout = dmc.Container(
 def show_details(pathname, search, custom_insights):
   if pathname != '/insight':
     # prevent rendering insight view if we're heading to another page
-    return no_update, no_update, no_update
+    raise exceptions.PreventUpdate
 
   try:
     insight_id = get_query_param(search, 'id')
@@ -117,3 +125,57 @@ def add_back_link_href(search):
   query = parse_qs(search.lstrip('?'))
   insight_id = query.get('id', [None])[0]
   return f'/explorer?starter={insight_id}'
+
+
+clientside_callback(
+  """
+  function(n_clicks) {
+    if (!n_clicks) return false;  // initial render
+    return true;                  // show loading immediately on click
+  }
+  """,
+  Output('download-insight-button', 'loading', allow_duplicate=True),
+  Input('download-insight-button', 'n_clicks'),
+  prevent_initial_call=True,
+)
+
+
+@callback(
+  Output('insight-pdf-download', 'data'),
+  Output('notification-container', 'sendNotifications', allow_duplicate=True),
+  Output('download-insight-button', 'loading'),
+  Input('download-insight-button', 'n_clicks'),
+  State('custom-insights-store', 'data'),
+  State('url', 'search'),
+  prevent_initial_call=True,
+)
+def handle_click_download(n_clicks, custom_insights, search):
+  if not n_clicks:
+    return no_update, no_update, False
+
+  try:
+    insight_id = get_query_param(search, 'id')
+    if not insight_id:
+      raise ValueError('No insight ID in URL')
+
+    insight = get_insight(insight_id, custom_insights=custom_insights or [])
+    if not insight:
+      raise ValueError(f'Insight {insight_id} not found')
+
+    round_number = insight.get('controls', {}).get('round_number', '18')
+    slugified_title = slugify(insight.get('title', ''))
+
+    pdf = generate_insight_pdf(insight)
+    filename = f'SMH_{round_number}_{slugified_title}.pdf'
+
+    return dcc.send_bytes(pdf, filename), no_update, False
+
+  except Exception as error:
+    print(f'Download failed: {error}')
+    notification = {
+      'action': 'show',
+      'id': f'insight-pdf-download-failed-{uuid.uuid4()}',
+      'message': 'Download failed!',
+      'color': 'crimson',
+    }
+    return no_update, [notification], False

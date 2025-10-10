@@ -1,5 +1,6 @@
 id: seasonal-burden-and-trajectory
-title: We expect continued substantial burden of disease from COVID-19 in the US, with two periods of increased COVID-19, in late summer/early fall 2025 and winter 2025-26.
+title: Season Burden and Trajectory
+summary: We expect continued substantial burden of disease from COVID-19 in the US, with two periods of increased COVID-19, in late summer/early fall 2025 and winter 2025-26.
 description: >
   - **Two peaks similar to last winter’s peak** (~20,000 hospitalizations at peak) are projected for late August 2025 and January 2026.
   
@@ -11,6 +12,7 @@ template: default
 created_at: 2025-05-18T22:45:12Z
 updated_at: 2025-05-18T22:45:12Z
 controls:
+  round: '19'
   location: 'US'
   target: 'incident_hospitalization'
   models: []
