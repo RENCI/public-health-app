@@ -10,8 +10,8 @@
       dmc.Stack,
       { className: `round-option ${ checked ? 'selected' : 'unselected' }` },
       React.createElement(dmc.Group, { justify: 'space-between' }, [
-        React.createElement(dmc.Text, { size: 'md', className: 'round-option-label' }, option.label),
-        React.createElement(dmc.Text, { size: 'xs' }, `${ option.insights_count } insights`)
+        React.createElement(dmc.Text, { key: 'label', size: 'md', className: 'round-option-label' }, option.label),
+        React.createElement(dmc.Text, { key: 'count', size: 'xs' }, `${ option.insights_count } insights`)
       ]),
       React.createElement(dmc.Text, { size: 'sm' }, option.snippet),
     );
