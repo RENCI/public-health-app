@@ -12,7 +12,7 @@ import plotly.graph_objects as go
 from dash import dcc
 from plotly.subplots import make_subplots
 
-from src.components.enums import AgeGroup, DataType, Target, Uncertainty
+from src.components.enums import AgeGroup, CertaintyInterval, DataType, Target
 from src.constants import (
   get_locations,
   get_model_color_by_id,
@@ -136,11 +136,20 @@ class Annotation(ABC):
     )
 
   @staticmethod
-  def get_cache_key(type: str, label: str, value: float) -> str:
+  def get_cache_key(type: str, label: str, value: float | datetime) -> str:
     return f'annotation:{type}:{label}:{value}'
 
+  # Create a deterministic string representation of the chart parameters
+  def get_key(self) -> str:
+    key_components = [
+      str(self.type),
+      str(self.label),
+      str(self.value),
+    ]
+    return '|'.join(key_components)
+
   def __hash__(self):
-    return hash(self.value + self.label + self.type)
+    return hash(self.get_key())
 
   def __eq__(self, other):
     return (
@@ -149,6 +158,9 @@ class Annotation(ABC):
       and self.label == other.label
       and self.type == other.type
     )
+
+  def __str__(self):
+    return f'{self.label}: {self.value}, {self.type}'
 
 
 class HorizontalAnnotation(Annotation):
@@ -253,7 +265,7 @@ class ChartControls:
       [Annotation.from_dict(annotation) for annotation in annotations] if annotations else None
     )
     self.certainty_percent = (
-      Uncertainty.from_display_value(certainty_percent) if certainty_percent else None
+      CertaintyInterval.from_display_value(certainty_percent) if certainty_percent else None
     )
     self.zoom = Zoom(zoom['x'], zoom['y']) if zoom else Zoom()
 
@@ -263,21 +275,16 @@ class Chart:
 
   def __init__(self, plot_type: PlotType, controls: ChartControls):
     self.plot_type = plot_type
+    self.controls = controls
     self.x_start_date = datetime.strptime('2025-01-01', '%Y-%m-%d')
     self.x_axis = 'target_end_date'
     self.y_axis = 'value'
-    self.round_num = controls.round_num
-    self.scenarios = controls.scenarios
-    self.models = controls.models
-    self.location = controls.location
-    self.target = controls.target
-    self.age_group = controls.age_group
-    self.certainty_percent = controls.certainty_percent
-    self.annotations = controls.annotations
-    self.zoom = controls.zoom
     self._data_type = DataType.QUANTILE
     self._raw_df = Chart.collect_data(
-      self._data_type, self.round_num, self.location.name, self.target.input_value
+      self._data_type,
+      self.controls.round_num,
+      self.controls.location.name,
+      self.controls.target.input_value,
     )
     self._raw_df[self.x_axis] = pd.to_datetime(self._raw_df[self.x_axis])
     self._raw_df = self._raw_df.set_index(self.x_axis)
@@ -285,31 +292,45 @@ class Chart:
 
     self.refresh_fig()
 
+  @staticmethod
+  def get_key(plot_type: PlotType, controls: ChartControls) -> str:
+    """
+    Generate a unique string key from chart controls and plot type.
+    This creates a deterministic string representation that can be used as a dictionary key.
+    """
+    # Create a deterministic string representation of the chart parameters
+    key_components = [
+      str(plot_type),
+      str(controls.round_num),
+      str(sorted([s.name for s in controls.scenarios])),
+      str(sorted([m.name for m in controls.models])),
+      str(controls.location.name),
+      str(controls.target.input_value),
+      str(controls.age_group.input_value),
+      str(controls.certainty_percent.display_value if controls.certainty_percent else ''),
+      str(controls.zoom.x.min if controls.zoom.x.min else ''),
+      str(controls.zoom.x.max if controls.zoom.x.max else ''),
+      str(controls.zoom.y.min if controls.zoom.y.min else ''),
+      str(controls.zoom.y.max if controls.zoom.y.max else ''),
+      str(
+        sorted([a.get_key() for a in controls.annotations]) if controls.annotations else []
+      ),
+    ]
+    # Use a deterministic string key
+    return '|'.join(key_components)
+
   def __hash__(self):
-    return hash(
-      self.plot_type
-      + self.round_num
-      + self.scenarios
-      + self.models
-      + self.location
-      + self.target
-      + self.age_group
-      + self.certainty_percent
-      + (self.annotations.__hash__() if self.annotations else '')
-    )
+    """
+    Generate a unique hash for chart instances based on their parameters.
+    This creates a deterministic string representation that can be used as a key.
+    """
+    return hash(self.get_key(self.plot_type, self.controls))
 
   def __eq__(self, other):
     return (
       isinstance(other, Chart)
       and self.plot_type == other.plot_type
-      and self.round_num == other.round_num
-      and self.scenarios == other.scenarios
-      and self.models == other.models
-      and self.location == other.location
-      and self.target == other.target
-      and self.age_group == other.age_group
-      and self.certainty_percent == other.certainty_percent
-      and self.annotations == other.annotations
+      and self.controls == other.controls
     )
 
   def _create_empty_figure(self):
@@ -319,19 +340,24 @@ class Chart:
 
   def refresh_fig(self) -> go.Figure:
     # handle empty properties
-    if not (self.scenarios and self.models and self.location and self.target):
+    if not (
+      self.controls.scenarios
+      and self.controls.models
+      and self.controls.location
+      and self.controls.target
+    ):
       self._create_empty_figure()
       return self._fig
-    if not self.scenarios:
+    if not self.controls.scenarios:
       raise ValueError('Scenario is required to display chart.')
-    if not self.models:
+    if not self.controls.models:
       raise ValueError('Models are required to display chart.')
 
     # update layout
-    num_rows = len(self.scenarios)
+    num_rows = len(self.controls.scenarios)
     # Define fixed dimensions
     SUBPLOT_HEIGHT = 300  # Fixed height per subplot in pixels
-    FIXED_SPACING = 100  # Fixed spacing between subplots in pixels
+    FIXED_SPACING = 50  # Fixed spacing between subplots in pixels
 
     # Calculate total figure height accounting for fixed spacing
     chart_total_height = (SUBPLOT_HEIGHT * num_rows) + (FIXED_SPACING * (num_rows - 1))
@@ -346,9 +372,8 @@ class Chart:
     # start with the raw dataframe
     df = self._raw_df
 
-    # filter data to start from x_start_date and use given age group
-    # df = df.loc[[self.x_start_date :]]
-    df = df.query('age_group == @self.age_group.input_value')
+    # use given age group
+    df = df.query('age_group == @self.controls.age_group.input_value')
 
     # create boxplot if prudent
     if self.plot_type == PlotType.BOXPLOT:
@@ -360,24 +385,24 @@ class Chart:
       cols=1,
       vertical_spacing=vertical_spacing,
       row_heights=[1] * num_rows,
-      subplot_titles=[f'Scenario {s.name}' for s in self.scenarios],
+      subplot_titles=[f'Scenario {s.name}' for s in self.controls.scenarios],
     )
 
     # add traces for each scenario
-    for i, scenario in enumerate(self.scenarios, start=1):
+    for i, scenario in enumerate(self.controls.scenarios, start=1):
       scenario_df = df.query('scenario_id == @scenario.id')
 
-      # set up uncertainty intervals if necessary
-      should_add_uncertainty_intervals = (
-        self.certainty_percent
-        and self.certainty_percent.display_value in Uncertainty.display_values()
+      # decide whether to add certainty intervals
+      should_add_certainty_intervals = (
+        self.controls.certainty_percent
+        and self.controls.certainty_percent.display_value in CertaintyInterval.display_values()
       )
 
       # add traces for each model
-      for model in self.models:
-        # add uncertainty intervals if necessary
-        if should_add_uncertainty_intervals:
-          self._plot_uncertainty_intervals(scenario_df=scenario_df, model=model, row_num=i)
+      for model in self.controls.models:
+        # add certainty intervals if necessary
+        if should_add_certainty_intervals:
+          self._plot_certainty_interval(scenario_df=scenario_df, model=model, row_num=i)
 
         # add main line (0.5 quantile)
         primary_line_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
@@ -396,15 +421,14 @@ class Chart:
         )
 
       # load gold standard data (the actual data up to present day, not projections)
-      gold_std_df = Chart.collect_gold_std_data(self.round_num)
+      gold_std_df = Chart.collect_gold_std_data(self.controls.round_num)
       gold_std_df['time_value'] = pd.to_datetime(gold_std_df['time_value'])
       gold_std_df = gold_std_df.set_index('time_value')
-      gold_std_df = gold_std_df.query('age_group == @self.age_group.input_value')
-      gold_std_df = gold_std_df.query('geo_value_fullname == @self.location.name')
+      gold_std_df = gold_std_df.query('age_group == @self.controls.age_group.input_value')
+      gold_std_df = gold_std_df.query('geo_value_fullname == @self.controls.location.name')
 
       # filter gold standard data to start from x_start_date
       gold_std_df = gold_std_df.loc[self.x_start_date :]
-      # gold_std_df = gold_std_df.query('time_value >= @self.x_start_date')
 
       # add gold standard line
       self._fig.add_trace(
@@ -430,16 +454,16 @@ class Chart:
     self._fig.update_yaxes(matches='y', showspikes=True, spikemode='across')
 
     # update zoom ranges
-    if self.zoom.x.min is not None and self.zoom.x.max is not None:
-      self._fig.update_xaxes(range=[self.zoom.x.min, self.zoom.x.max])
-    if self.zoom.y.min is not None and self.zoom.y.max is not None:
-      self._fig.update_yaxes(range=[self.zoom.y.min, self.zoom.y.max])
+    if self.controls.zoom.x.min is not None and self.controls.zoom.x.max is not None:
+      self._fig.update_xaxes(range=[self.controls.zoom.x.min, self.controls.zoom.x.max])
+    if self.controls.zoom.y.min is not None and self.controls.zoom.y.max is not None:
+      self._fig.update_yaxes(range=[self.controls.zoom.y.min, self.controls.zoom.y.max])
 
     self._fig.update_layout(
       hovermode='x unified',
       height=chart_total_height + 180,
       title='Forecast values over time (by scenario)',
-      uirevision='df',
+      uirevision=self.__hash__(),
     )
 
     return self._fig
@@ -450,13 +474,119 @@ class Chart:
   def get_graph(self) -> dcc.Graph:
     return dcc.Graph(id='graph', figure=self._fig)
 
-  def get_data(self) -> pd.DataFrame:
+  def get_raw_dataframe(self) -> pd.DataFrame:
     return self._raw_df
 
-  def _plot_uncertainty_intervals(
+  def update_controls(self, controls: ChartControls) -> None:
+    """
+    Update the chart controls and refresh the figure without recreating the entire chart object.
+    This method updates the chart parameters and regenerates the figure with new data.
+    """
+    # Update the controls object
+    self.controls = controls
+
+    # Reload data if location or target changed
+    self._reload_data()
+
+    # Refresh the figure with new data and parameters
+    self.refresh_fig()
+
+  def _reload_data(self) -> None:
+    """
+    Reload data if location or target changed.
+    This is called by individual update methods when data-dependent fields change.
+    """
+    new_raw_df = Chart.collect_data(
+      self._data_type,
+      self.controls.round_num,
+      self.controls.location.name,
+      self.controls.target.input_value,
+    )
+    new_raw_df[self.x_axis] = pd.to_datetime(new_raw_df[self.x_axis])
+    new_raw_df = new_raw_df.set_index(self.x_axis)
+    self._raw_df = new_raw_df
+
+  def update_round_num(self, round_num: int) -> None:
+    """
+    Update the round number and reload data.
+    """
+    self.controls.round_num = round_num
+    self._reload_data()
+    self.refresh_fig()
+
+  def update_pathogen(self, pathogen: str) -> None:
+    """
+    Update the pathogen name.
+    """
+    self.controls.pathogen = pathogen
+    self.refresh_fig()
+
+  def update_scenarios(self, scenario_names: list[str]) -> None:
+    """
+    Update the scenarios list.
+    """
+    self.controls.scenarios = [Scenario(name=scenario_name) for scenario_name in scenario_names]
+    self.refresh_fig()
+
+  def update_models(self, model_names: list[str]) -> None:
+    """
+    Update the models list.
+    """
+    self.controls.models = [Model(model_name) for model_name in model_names]
+    self.refresh_fig()
+
+  def update_location(self, location_name: str) -> None:
+    """
+    Update the location and reload data.
+    """
+    self.controls.location = Location(location_name)
+    self._reload_data()
+    self.refresh_fig()
+
+  def update_target(self, target: str) -> None:
+    """
+    Update the target and reload data.
+    """
+    self.controls.target = Target.from_input_value(target)
+    self._reload_data()
+    self.refresh_fig()
+
+  def update_age_group(self, age_group: str) -> None:
+    """
+    Update the age group.
+    """
+    self.controls.age_group = AgeGroup.from_input_value(age_group)
+    self.refresh_fig()
+
+  def update_annotations(self, annotations: list[dict[str, Any]] | None) -> None:
+    """
+    Update the annotations list.
+    """
+    self.controls.annotations = (
+      [Annotation.from_dict(annotation) for annotation in annotations] if annotations else None
+    )
+    self.refresh_fig()
+
+  def update_certainty_percent(self, certainty_percent: str | None) -> None:
+    """
+    Update the certainty percentage.
+    """
+    self.controls.certainty_percent = (
+      CertaintyInterval.from_display_value(certainty_percent) if certainty_percent else None
+    )
+    self.refresh_fig()
+
+  def update_zoom(self, zoom: dict[str, dict[str, Any]] | None) -> None:
+    """
+    Update the zoom settings.
+    """
+    self.controls.zoom = Zoom(zoom['x'], zoom['y']) if zoom else Zoom()
+    self.refresh_fig()
+
+  def _plot_certainty_interval(
     self, scenario_df: pd.DataFrame, model: Model, row_num: int
   ) -> go.Figure:
-    for lower_q, upper_q in self.certainty_percent.get_bounds():
+    for lower_q, upper_q in self.controls.certainty_percent.get_bounds():
       lower_model = scenario_df.query('type_id == @lower_q and model_name == @model.id')
       upper_model = scenario_df.query('type_id == @upper_q and model_name == @model.id')
       self._fig.add_trace(
@@ -475,9 +605,9 @@ class Chart:
       )
 
   def _plot_annotations(self) -> go.Figure:
-    if not self.annotations:
+    if not self.controls.annotations:
       return
-    for annotation in self.annotations:
+    for annotation in self.controls.annotations:
       if isinstance(annotation, HorizontalAnnotation):
         self._fig.add_hline(
           y=annotation.value,

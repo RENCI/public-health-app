@@ -10,13 +10,29 @@ template: default
 created_at: 2025-05-18T22:45:12Z
 updated_at: 2025-05-18T22:45:12Z
 controls:
-  location: "US"
-  target: "incident_hospitalization"
-  models: []
-  scenarios: ["77", "78", "80"]
-  uncertainty: "95%"
+  location: US
+  target: incident_hospitalization
+  models: [Ensemble]
+  scenarios: [A-2023-10-27, B-2023-10-27]
+  certainty: "95%"
+  age_group: "0-130"
+  x_start_date: "2025-01-01"
+  x_axis: target_end_date
+  y_axis: value
+  round_num: 19
+  zoom:
+    x:
+      min: "2025-01-01"
+      max: "2026-06-30"
+    y:
+      min: 0
+      max: 65_000
   annotations:
-    - type: "horizontal"
-      value: 50000
-      label: "Some important value"
-      color: "#886622"
+    - type: vertical
+      value: "2025-10-01"
+      label: Some Policy change
+      color: "#993366"
+    - type: horizontal
+      value: 17_000
+      label: Value for seasonal-burden-and-trajectory insight
+      color: "#663399"

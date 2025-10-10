@@ -12,7 +12,7 @@ def chart(control_values={}):
   age_group = control_values.get('age_group', '0-130')
   location = control_values.get('location', 'US')
   target = control_values.get('target', 'incident_hospitalization')
-  uncertainty = control_values.get('uncertainty', 'None')
+  certainty = control_values.get('certainty', 'None')
   annotations = control_values.get('annotations', {})
 
   path = build_dataset_path(round_number=19, location=location, target=target)
@@ -81,9 +81,9 @@ def chart(control_values={}):
         col=1,
       )
 
-    # add uncertainty intervals
-    if uncertainty in conf_int_map:
-      for lower_q, upper_q in conf_int_map[uncertainty]:
+    # add certainty intervals
+    if certainty in conf_int_map:
+      for lower_q, upper_q in conf_int_map[certainty]:
         lower = scenario_df[scenario_df['type_id'] == lower_q]
         upper = scenario_df[scenario_df['type_id'] == upper_q]
 

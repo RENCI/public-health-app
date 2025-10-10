@@ -8,26 +8,29 @@ description: >
   - **The majority of hospitalization and death burden from COVID-19 is expected to occur in individuals 65+**:  56% of hospitalizations and 84% of deaths occur among 65+ in the high-risk vaccination scenario.
 image_url: assets/images/insight-preview/insight-5.png
 template: default
-created_at: 2025-05-18T22:45:12Z
-updated_at: 2025-05-18T22:45:12Z
+created_at: "2025-05-18T22:45:12Z"
+updated_at: "2025-05-18T22:45:12Z"
 controls:
-  location: "US"
-  target: "incident_hospitalization"
-  models: ["Ensemble"]
-  scenarios: ["A-2023-10-27", "B-2023-10-27"]
-  uncertainty: "95%"
+  location: US
+  target: incident_hospitalization
+  models: [Ensemble]
+  scenarios: [A-2023-10-27, B-2023-10-27]
+  certainty: "95%"
   age_group: "0-130"
+  x_start_date: "2025-01-01"
+  x_axis: target_end_date
+  y_axis: value
   round_num: 19
   zoom:
     x:
-      min: 2025-01-01
-      max: 2026-06-30
+      min: "2025-01-01"
+      max: "2026-06-30"
     y:
       min: 0
       max: 65_000
   annotations:
     - type: vertical
-      value: 2025-10-01
+      value: "2025-10-01"
       label: Some Policy change
       color: "#993366"
     - type: horizontal

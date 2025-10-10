@@ -3,21 +3,23 @@ from typing import Any
 import dash_mantine_components as dmc
 from dash import Input, Output, State, callback, dcc, exceptions, html
 
-from src.components.chart import Chart, ChartControls, PlotType
+from src.components.chart import ChartControls, PlotType
+from src.components.chart_instance_manager import ChartInstanceManager
 
 from .controls import (
   age_group_select,
   annotations_input,
+  certainty_select,
   location_select,
   models_select,
   scenarios_select,
   target_select,
-  uncertainty_select,
   zoom_control,
 )
 
-available_rounds = [19]
-current_round = 19
+# Global instance of the chart manager
+chart_manager = ChartInstanceManager()
+
 
 default_control_values = dict(
   scenarios=['A-2023-10-27', 'B-2023-10-27'],
@@ -25,7 +27,7 @@ default_control_values = dict(
   location='US',
   target='cumulative_hospitalization',
   age_group='0-130',
-  uncertainty='None',
+  certainty='None',
   zoom=None,
   annotations=None,
 )
@@ -39,7 +41,7 @@ def visualization_editor(control_values=None, show_controls=True):
   init_location = controls['location']
   init_target = controls['target']
   init_age_group = controls['age_group']
-  init_uncertainty = controls['uncertainty']
+  init_certainty = controls['certainty']
   init_zoom = controls['zoom']
   init_annotations = controls['annotations']
 
@@ -51,11 +53,13 @@ def visualization_editor(control_values=None, show_controls=True):
     location_name=init_location,
     age_group=init_age_group,
     target=init_target,
-    certainty_percent=init_uncertainty,
+    certainty_percent=init_certainty,
     zoom=init_zoom,
     annotations=init_annotations,
   )
-  chart = Chart(PlotType.LINE, figure_control_values)
+
+  # Get or create chart instance using the manager
+  chart = chart_manager.get_chart(figure_control_values, PlotType.LINE)
 
   figure_container = html.Div(
     id='insight-visualization-figure',
@@ -85,7 +89,7 @@ def visualization_editor(control_values=None, show_controls=True):
                   location_select(value=init_location),
                   target_select(value=init_target),
                   age_group_select(value=init_age_group),
-                  uncertainty_select(value=init_uncertainty),
+                  certainty_select(value=init_certainty),
                 ],
                 gap='sm',
               ),
@@ -117,7 +121,7 @@ def visualization_editor(control_values=None, show_controls=True):
   Input('location-select', 'value'),
   Input('target-select', 'value'),
   Input('age-group-select', 'value'),
-  Input('uncertainty-select', 'value'),
+  Input('certainty-select', 'value'),
   Input('zoom-store', 'data'),
   Input('annotations-store', 'data'),
   # State('round-number-store', 'value'),
@@ -129,7 +133,7 @@ def update_chart(
   location: str,
   target: str,
   age_group: str,
-  uncertainty: str,
+  certainty: str,
   zoom: dict[str, Any],
   annotations: list[dict[str, Any]] | None,
   # round_num: int,
@@ -143,16 +147,19 @@ def update_chart(
       location_name=location,
       target=target,
       age_group=age_group,
-      certainty_percent=uncertainty,
+      certainty_percent=certainty,
       zoom=zoom,
       annotations=annotations,
     )
-    chart = Chart(PlotType.LINE, chart_controls)
-    if not chart and not isinstance(chart, Chart):
-      raise Exception('Chart not found or is not a valid chart')
+
+    # Get or create chart instance using the manager
+    chart = chart_manager.get_chart(chart_controls, PlotType.LINE)
+
+    if not chart:
+      raise Exception('Chart not found')
     return [chart.get_graph()]  # must return a list here for the callback to work
   except Exception as e:
-    print(f'Error creating chart: {e}')
+    print(f'Error updating chart: {e}')
     import traceback
 
     traceback.print_exc()

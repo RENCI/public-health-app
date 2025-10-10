@@ -4,7 +4,7 @@ from .location_select import location_select
 from .models_select import models_select
 from .scenarios_select import scenarios_select
 from .target_select import target_select
-from .uncertainty_select import uncertainty_select
+from .certainty_select import certainty_select
 from .zoom_control import zoom_control
 
 __all__ = [
@@ -14,6 +14,6 @@ __all__ = [
   'models_select',
   'scenarios_select',
   'target_select',
-  'uncertainty_select',
+  'certainty_select',
   'zoom_control',
 ]

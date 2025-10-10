@@ -15,7 +15,7 @@ controls:
   target: "incident_hospitalization"
   models: []
   scenarios: ["77", "78", "80"]
-  uncertainty: "95%"
+  certainty: "95%"
   annotations:
     - type: "horizontal"
       value: 50000
