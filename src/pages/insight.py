@@ -1,21 +1,30 @@
+import uuid
+from urllib.parse import parse_qs
+
 import dash_mantine_components as dmc
-from dash import exceptions, html, Input, Output, callback, dcc, register_page
+from dash import (
+  exceptions,
+  html,
+  Input,
+  Output,
+  callback,
+  clientside_callback,
+  dcc,
+  register_page,
+  State,
+  no_update,
+)
 from dash_iconify import DashIconify
+
 from src.data.rounds.round19 import get_insight
+from src.util.export.pdf import generate_insight_pdf
+from src.util.slugify import slugify
 from src.components.viz_editor import visualization_editor
+from src.components.tooltip import tooltip
 
 register_page(__name__, path_template='/insight/<insight_id>', name='Insight Details')
 
 loading_insight = [
-  dmc.Flex(  # toolbar
-    children=[
-      dmc.Skeleton(h=36, w=200),
-      dmc.Group([dmc.Skeleton(h=36, w=36), dmc.Skeleton(h=36, w=110)]),
-    ],
-    justify='space-between',
-    align='center',
-    mb=24,
-  ),
   dmc.Title(id='insight-view-title', order=1, children=dmc.Skeleton(h=85)),
   dmc.Divider(my=24),
   html.Div(
@@ -25,24 +34,75 @@ loading_insight = [
         dmc.Skeleton(h=600),
         dmc.Space(h=24),
         dmc.Stack(
-          [
-            dmc.Skeleton(h=30),
-            dmc.Skeleton(h=30),
-            dmc.Skeleton(h=30),
-          ]
+          [dmc.Skeleton(h=30), dmc.Skeleton(h=30), dmc.Skeleton(h=30)]
         ),
       ]
     ),
     style=dict(margin='24px 0'),
   ),
   dcc.Markdown(id='insight-view-description'),
+  dcc.Download(id='insight-pdf-download'),
 ]
 
+back_button = dmc.Anchor(
+  '← Back to Round Overview',
+  id='back-to-insights-button',
+  href='/',
+)
+
+explorer_button = dcc.Link(
+  dmc.Button(
+    'Explore',
+    leftSection=DashIconify(icon='feather:arrow-up-right'),
+  ),
+  id='explorer-button',
+  href=f'#',
+)
+
+download_button = dmc.ActionIcon(
+  DashIconify(icon='feather:download'),
+  variant='subtle',
+  id='download-insight-button',
+  size='lg',
+  loading=False,
+)
+
+insight_toolbar = dmc.Flex(
+  children=[
+    back_button,
+    dmc.Group([
+      tooltip(download_button, label='Download PDF'),
+      tooltip(explorer_button, label="Explore this insight's data"),
+    ]),
+  ],
+  justify='space-between',
+  align='center',
+  mb=24,
+)
+
+
 layout = dmc.Container(
-  id='insight-view-container',
-  children=loading_insight,
+  children=[
+    insight_toolbar,
+    dmc.Box(
+      loading_insight,
+      id='insight-view-container',
+    ),
+  ],
   size=1200,
 )
+
+
+@callback(
+  Output('explorer-button', 'href'),
+  Input('url', 'pathname'),
+)
+def add_back_link_href(pathname):
+  insight_id = pathname.split('/insight/')[-1]
+  if not insight_id:
+    raise ValueError('No insight ID provided')
+
+  return f'/explorer?starter={insight_id}'
 
 
 @callback(
@@ -51,6 +111,7 @@ layout = dmc.Container(
   Input('custom-insights-store', 'data'),
 )
 def show_insight_details(pathname, custom_insights):
+  """Render the insight details page given /insight/<insight_id>"""
   if not pathname or not pathname.startswith('/insight/'):
     raise exceptions.PreventUpdate
 
@@ -65,34 +126,7 @@ def show_insight_details(pathname, custom_insights):
 
     controls = insight.get('controls', {})
 
-    back_button = dmc.Anchor(
-      '← Back to Round Overview',
-      id='back-to-insights-button',
-      href='/',
-    )
-
-    explorer_button = dcc.Link(
-      dmc.Button(
-        'Explore',
-        leftSection=DashIconify(icon='feather:arrow-up-right'),
-      ),
-      id='explorer-button',
-      href=f'/explorer?starter={insight_id}',
-    )
-
-    download_button = dcc.Link(
-      dmc.ActionIcon(DashIconify(icon='feather:download'), variant='subtle', size='lg'),
-      id='download-button',
-      href='#',
-    )
-
     return [
-      dmc.Flex(  # toolbar
-        children=[back_button, dmc.Group([download_button, explorer_button])],
-        justify='space-between',
-        align='center',
-        mb=24,
-      ),
       dmc.Title(insight.get('title', 'Untitled Insight'), order=1),
       dmc.Divider(my=24),
       html.Div(
@@ -100,6 +134,7 @@ def show_insight_details(pathname, custom_insights):
         style=dict(margin='24px 0'),
       ),
       dcc.Markdown(insight.get('description', '')),
+      dcc.Download(id='insight-pdf-download'),
     ]
 
   except Exception as e:
@@ -109,3 +144,60 @@ def show_insight_details(pathname, custom_insights):
       title='Insight Error',
       p='10rem',
     )
+
+
+clientside_callback(
+  """
+  function(n_clicks) {
+    if (!n_clicks) return false;  // initial render
+    return true;                  // show loading immediately on click
+  }
+  """,
+  Output('download-insight-button', 'loading', allow_duplicate=True),
+  Input('download-insight-button', 'n_clicks'),
+  prevent_initial_call=True,
+)
+
+
+@callback(
+  Output('insight-pdf-download', 'data'),
+  Output('notification-container', 'sendNotifications', allow_duplicate=True),
+  Output('download-insight-button', 'loading'),
+  Input('download-insight-button', 'n_clicks'),
+  State('custom-insights-store', 'data'),
+  State('url', 'pathname'),
+  prevent_initial_call=True,
+)
+def handle_click_download(n_clicks, custom_insights, pathname):
+  if not n_clicks:
+    return no_update, no_update, False
+
+  if not pathname or not pathname.startswith('/insight/'):
+    raise exceptions.PreventUpdate
+
+  try:
+    insight_id = pathname.split('/insight/')[-1]
+    if not insight_id:
+      raise ValueError('No insight ID provided')
+
+    insight = get_insight(insight_id, custom_insights=custom_insights or [])
+    if not insight:
+      raise ValueError(f'Insight {insight_id} not found')
+
+    round_number = insight.get('controls', {}).get('round_number', '18')
+    slugified_title = slugify(insight.get('title', ''))
+
+    pdf = generate_insight_pdf(insight)
+    filename = f'SMH_{round_number}_{slugified_title}.pdf'
+
+    return dcc.send_bytes(pdf, filename), no_update, False
+
+  except Exception as error:
+    print(f'Download failed: {error}')
+    notification = {
+      'action': 'show',
+      'id': f'insight-pdf-download-failed-{uuid.uuid4()}',
+      'message': 'Download failed!',
+      'color': 'crimson',
+    }
+    return no_update, [notification], False

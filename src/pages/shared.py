@@ -8,7 +8,6 @@ from dash_iconify import DashIconify
 from lzstring import LZString
 
 from src.util.insight import extract_controls_from_share_url
-from src.util.get_query_param import get_query_param
 
 from src.components.chart import chart
 from src.components.viz_editor import visualization_editor
@@ -128,7 +127,6 @@ def render_shared_insight(pathname, selected_round, custom_insights):
   State('url', 'pathname'),
   State('selected-round-store', 'data'),
   State('custom-insights-store', 'data'),
-  suppress_callback_exceptions=True,
   prevent_initial_call=True,
 )
 def save_shared_insight(save_clicks, pathname, selected_round, shared_insights):

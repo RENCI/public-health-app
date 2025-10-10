@@ -36,6 +36,14 @@ ruff format .   # formatting
 ```
 As a convenience, you can use the make target `make ruff` to do both simultaneously.
 
+## 🧾 PDF Generation
+
+We use [Weasyprint](https://doc.courtbouillon.org/weasyprint/stable/index.html) for generating PDFs.
+
+WeasyPrint depends on a few system libraries for handling layout, fonts, and CSS rendering.
+They are installed into the production build, and must be installed locally for PDF generation
+to function in your local development environment. See the [Weasyprint installation instructions](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#installation) for bootstrapping your system
+
 ## 📦 Production
 
 A Makefile exists to make building for production and deployment simpler.
