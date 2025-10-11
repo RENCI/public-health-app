@@ -39,8 +39,9 @@ no_insights_message = dmc.Card(
   dmc.Center(
     dmc.Stack(
       [
-        dmc.Text("You haven't added any insights for this round yet."),
-        dmc.Text('Start exploring the data and build your first custom insight!'),
+        dmc.Text("You haven't created any custom insights for this round yet."),
+        dmc.Text('Start exploring the data, and build your first custom insight!'),
+        dmc.Space(h=8),
         dmc.Anchor(
           dmc.Button(
             [
@@ -69,6 +70,7 @@ no_insights_message = dmc.Card(
     ),
     h=150,
   ),
+  withBorder=True,
   p=0,
 )
 
@@ -99,6 +101,7 @@ new_insight_prompt = dmc.Card(
     ],
     h=150,
   ),
+  withBorder=True,
 )
 
 
@@ -236,6 +239,7 @@ def custom_insight_button(item):
       ),
       view_button,
     ],
+    withBorder=True,
     style=dict(
       display='flex',
       gap='1rem',
@@ -291,8 +295,9 @@ def round_summary():
       ),
       dmc.Divider(),
       dmc.Box(id='round-overview'),
-      dmc.Title('Insights', order=2, my=16),
+      dmc.Title('Insights from the Modeling Hub', order=2, my=16),
       dmc.Stack(id='insights-list', gap='md'),
+      dmc.Title('Custom Insights', order=2, my=16),
       dmc.Stack(id='custom-insights-list', gap='md'),
       dcc.Download(id='round-pdf-download'),
     ],
@@ -337,7 +342,7 @@ def update_custom_insights_list(custom_insights, round_number):
 
   return [custom_insight_button(insight) for insight in filtered_custom_insights] + [
     new_insight_prompt
-  ] or [no_insights_message]
+  ] if len(filtered_custom_insights) else [no_insights_message]
 
 
 @callback(
