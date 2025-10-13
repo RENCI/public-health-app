@@ -1,11 +1,25 @@
 import uuid
 
 import dash_mantine_components as dmc
-from dash import ALL, Input, Output, State, callback, ctx, dcc, exceptions, no_update
+from dash import (
+  ALL,
+  Input,
+  Output,
+  State,
+  callback,
+  clientside_callback,
+  ctx,
+  dcc,
+  exceptions,
+  no_update,
+)
 from dash_iconify import DashIconify
 
+from src.components.tooltip import tooltip
 from src.util.data import load_rounds
+from src.util.export.pdf import generate_round_pdf
 from src.util.format_timestamp import format_timestamp
+from src.util.slugify import slugify
 from src.util.time_ago import time_ago
 
 
@@ -248,17 +262,34 @@ delete_modal = dmc.Modal(
   centered=True,
 )
 
+download_button = dmc.ActionIcon(
+  DashIconify(icon='feather:download'),
+  id='download-round-button',
+  variant='subtle',
+  size='lg',
+  loading=False,
+)
+
 
 def round_summary():
   return dmc.Stack(
     [
       delete_modal,
-      dmc.Title(id='round-title', order=1, my=24, style=dict(textAlign='center')),
+      dmc.Space(h=24),
+      dmc.Flex(
+        [
+          dmc.Title(id='round-title', order=1),
+          tooltip(download_button, label='Download PDF'),
+        ],
+        justify='space-between',
+        align='flex-end',
+      ),
       dmc.Divider(),
       dmc.Box(id='round-overview'),
       dmc.Title('Insights', order=2, my=16),
       dmc.Stack(id='insights-list', gap='md'),
       dmc.Stack(id='custom-insights-list', gap='md'),
+      dcc.Download(id='round-pdf-download'),
     ],
     gap='md',
   )
@@ -352,3 +383,57 @@ def handle_delete(delete_clicks, cancel_click, confirm_click, modal_data, custom
     return False, no_update, updated, [notification]
 
   raise exceptions.PreventUpdate
+
+
+clientside_callback(
+  """
+  function(n_clicks) {
+    if (!n_clicks) return false;  // initial render
+    return true;                  // show loading immediately on click
+  }
+  """,
+  Output('download-round-button', 'loading', allow_duplicate=True),
+  Input('download-round-button', 'n_clicks'),
+  prevent_initial_call=True,
+)
+
+
+@callback(
+  Output('round-pdf-download', 'data'),
+  Output('notification-container', 'sendNotifications', allow_duplicate=True),
+  Output('download-round-button', 'loading'),
+  Input('download-round-button', 'n_clicks'),
+  State('selected-round-store', 'data'),
+  State('url', 'search'),
+  prevent_initial_call=True,
+)
+def handle_click_download(n_clicks, round_number, search):
+  if not n_clicks:
+    return no_update, no_update, False
+
+  try:
+    if not round_number:
+      raise exceptions.PreventUpdate
+
+    rounds = load_rounds()
+    this_round = rounds.get(round_number)
+
+    if not this_round:
+      raise exceptions.PreventUpdate
+
+    slugified_name = slugify(this_round.get('name', ''))
+
+    pdf = generate_round_pdf(this_round)
+    filename = f'SMH-round-{round_number}_{slugified_name}.pdf'
+
+    return dcc.send_bytes(pdf, filename), no_update, False
+
+  except Exception as error:
+    print(f'Download failed: {error}')
+    notification = {
+      'action': 'show',
+      'id': f'round-pdf-download-failed-{uuid.uuid4()}',
+      'message': 'Download failed!',
+      'color': 'crimson',
+    }
+    return no_update, [notification], False

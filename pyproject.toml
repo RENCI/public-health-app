@@ -10,9 +10,12 @@ dependencies = [
     "dash-iconify>=0.1.2",
     "dash-mantine-components>=2.2.1",
     "gunicorn>=23.0.0",
+    "markdown>=3.9",
     "numpy>=2.3.2",
     "pandas>=2.3.2",
+    "python-slugify>=8.0.4",
     "pyyaml>=6.0.2",
+    "weasyprint>=66.0",
 ]
 
 [dependency-groups]
