@@ -31,9 +31,6 @@ app = Dash(
   pages_folder='src/pages',
 )
 
-# # store constants in app state for use in callbacks
-# app.constants = CONSTANTS
-
 app.title = 'ACCIDDA'
 app.layout = dmc.MantineProvider(
   theme=DEFAULT_THEME,
