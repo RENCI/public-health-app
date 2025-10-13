@@ -1,26 +1,17 @@
 import dash_mantine_components as dmc
 
-models = [
-  '3',
-  '6',
-  '7',
-  '12',
-  '15',
-  '29',
-  '30',
-  '31',
-  '32',
-  '33',
-  '34',
-]
+from src.constants import get_model_names
+
+models = [model_name for model_name in get_model_names()]
 options = [{'value': m, 'label': m} for m in models]
 
 
-def models_select(value=['18']):
+def models_select(value=['Ensemble']):
   return dmc.MultiSelect(
     label='Models',
     placeholder='',
     id='models-select',
     value=value,
+    required=True,
     data=options,
   )

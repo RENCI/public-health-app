@@ -1,0 +1,316 @@
+{
+  "pathogen": "covid",
+  "pathogen_display_name": "COVID-19",
+  "scenarios": [
+    {
+      "id": 77,
+      "name": "A-2023-10-27"
+    },
+    {
+      "id": 78,
+      "name": "B-2023-10-27"
+    },
+    {
+      "id": 79,
+      "name": "C-2023-10-27"
+    },
+    {
+      "id": 80,
+      "name": "D-2023-10-27"
+    },
+    {
+      "id": 81,
+      "name": "E-2023-10-27"
+    }
+  ],
+  "models": [
+    {
+      "id": 1,
+      "name": "Ensemble_LOP",
+      "color": "rgba(103, 72, 106, 1)"
+    },
+    {
+      "id": 2,
+      "name": "Ensemble_LOP_untrimmed",
+      "color": "rgba(136, 174, 225, 1)"
+    },
+    {
+      "id": 3,
+      "name": "Ensemble",
+      "color": "rgba(169, 169, 255, 1)"
+    },
+    {
+      "id": 4,
+      "name": "UT-ImmunoSEIRS",
+      "color": "rgba(163, 165, 0, 1)"
+    },
+    {
+      "id": 5,
+      "name": "NotreDame-FRED",
+      "color": "rgba(0, 191, 125, 1)"
+    },
+    {
+      "id": 6,
+      "name": "USC-SIkJalpha",
+      "color": "rgba(255, 103, 164, 1)"
+    },
+    {
+      "id": 7,
+      "name": "CU-RSV_SVIRS",
+      "color": "rgba(108, 218, 250, 1)"
+    },
+    {
+      "id": 8,
+      "name": "UVA-EpiHiperRSV",
+      "color": "rgba(0, 72, 251, 1)"
+    },
+    {
+      "id": 9,
+      "name": "NIH-RSV_WIN",
+      "color": "rgba(254, 110, 12, 1)"
+    },
+    {
+      "id": 10,
+      "name": "PSI-PROF",
+      "color": "rgba(226, 50, 7, 1)"
+    },
+    {
+      "id": 11,
+      "name": "NIH-RSV_MSIRS",
+      "color": "rgba(1, 100, 32, 1)"
+    },
+    {
+      "id": 12,
+      "name": "MOBS_NEU-GLEAM_RSV",
+      "color": "rgba(175, 128, 255, 1)"
+    },
+    {
+      "id": 13,
+      "name": "NIH-RSV_Phenomenological",
+      "color": "rgba(252, 209, 7, 1)"
+    },
+    {
+      "id": 14,
+      "name": "CEPH-MetaRSV",
+      "color": "rgba(139, 58, 58, 1)"
+    },
+    {
+      "id": 15,
+      "name": "JHU_UNC-flepiMoP",
+      "color": "rgba(1, 150, 200, 1)"
+    },
+    {
+      "id": 16,
+      "name": "Ensemble_LOP_all",
+      "color": "rgba(75, 75, 75, 1)"
+    },
+    {
+      "id": 17,
+      "name": "NIH-RSV_WIN_old",
+      "color": "rgba(170, 51, 106, 1)"
+    },
+    {
+      "id": 18,
+      "name": "UNCC-Hierbin",
+      "color": "rgba(170, 51, 106, 1)"
+    },
+    {
+      "id": 19,
+      "name": "UT-ImmunoSEIRS-2",
+      "color": "rgba(163, 165, 0, 1)"
+    },
+    {
+      "id": 20,
+      "name": "NotreDame-FRED-2",
+      "color": "rgba(0, 191, 125, 1)"
+    },
+    {
+      "id": 21,
+      "name": "USC-SIkJalpha-2",
+      "color": "rgba(255, 103, 164, 1)"
+    },
+    {
+      "id": 22,
+      "name": "CU-RSV_SVIRS-2",
+      "color": "rgba(108, 218, 250, 1)"
+    },
+    {
+      "id": 23,
+      "name": "UVA-EpiHiperRSV-2",
+      "color": "rgba(0, 72, 251, 1)"
+    },
+    {
+      "id": 24,
+      "name": "NIH-RSV_WIN-2",
+      "color": "rgba(254, 110, 12, 1)"
+    },
+    {
+      "id": 25,
+      "name": "PSI-PROF-2",
+      "color": "rgba(226, 50, 7, 1)"
+    },
+    {
+      "id": 26,
+      "name": "NIH-RSV_MSIRS-2",
+      "color": "rgba(1, 100, 32, 1)"
+    },
+    {
+      "id": 27,
+      "name": "MOBS_NEU-GLEAM_RSV-2",
+      "color": "rgba(175, 128, 255, 1)"
+    },
+    {
+      "id": 28,
+      "name": "NIH-RSV_Phenomenological-2",
+      "color": "rgba(252, 209, 7, 1)"
+    },
+    {
+      "id": 29,
+      "name": "CEPH-MetaRSV-2",
+      "color": "rgba(139, 58, 58, 1)"
+    },
+    {
+      "id": 30,
+      "name": "JHU_UNC-flepiMoP-2",
+      "color": "rgba(1, 150, 200, 1)"
+    },
+    {
+      "id": 31,
+      "name": "Ensemble_LOP_all-2",
+      "color": "rgba(75, 75, 75, 1)"
+    },
+    {
+      "id": 32,
+      "name": "UNCC-Hierbin-2",
+      "color": "rgba(170, 51, 106, 1)"
+    },
+    {
+      "id": 33,
+      "name": "UT-ImmunoSEIRS-3",
+      "color": "rgba(163, 165, 0, 1)"
+    },
+    {
+      "id": 34,
+      "name": "NotreDame-FRED-3",
+      "color": "rgba(0, 191, 125, 1)"
+    },
+    {
+      "id": 35,
+      "name": "USC-SIkJalpha-3",
+      "color": "rgba(255, 103, 164, 1)"
+    },
+    {
+      "id": 36,
+      "name": "CU-RSV_SVIRS-3",
+      "color": "rgba(108, 218, 250, 1)"
+    },
+    {
+      "id": 37,
+      "name": "UVA-EpiHiperRSV-3",
+      "color": "rgba(0, 72, 251, 1)"
+    },
+    {
+      "id": 38,
+      "name": "NIH-RSV_WIN-3",
+      "color": "rgba(254, 110, 12, 1)"
+    }
+  ],
+  "model_colors": {
+    "Ensemble_LOP": "rgba(103, 72, 106, 1)",
+    "Ensemble_LOP_untrimmed": "rgba(136, 174, 225, 1)",
+    "Ensemble": "rgba(169, 169, 255, 1)",
+    "UT-ImmunoSEIRS": "rgba(163, 165, 0, 1)",
+    "NotreDame-FRED": "rgba(0, 191, 125, 1)",
+    "USC-SIkJalpha": "rgba(255, 103, 164, 1)",
+    "CU-RSV_SVIRS": "rgba(108, 218, 250, 1)",
+    "UVA-EpiHiperRSV": "rgba(0, 72, 251, 1)",
+    "NIH-RSV_WIN": "rgba(254, 110, 12, 1)",
+    "PSI-PROF": "rgba(226, 50, 7, 1)",
+    "NIH-RSV_MSIRS": "rgba(1, 100, 32, 1)",
+    "MOBS_NEU-GLEAM_RSV": "rgba(175, 128, 255, 1)",
+    "NIH-RSV_Phenomenological": "rgba(252, 209, 7, 1)",
+    "CEPH-MetaRSV": "rgba(139, 58, 58, 1)",
+    "JHU_UNC-flepiMoP": "rgba(1, 150, 200, 1)",
+    "Ensemble_LOP_all": "rgba(75, 75, 75, 1)",
+    "UNCC-Hierbin": "rgba(170, 51, 106, 1)",
+    "UT-ImmunoSEIRS-2": "rgba(163, 165, 0, 1)",
+    "NotreDame-FRED-2": "rgba(0, 191, 125, 1)",
+    "USC-SIkJalpha-2": "rgba(255, 103, 164, 1)",
+    "CU-RSV_SVIRS-2": "rgba(108, 218, 250, 1)",
+    "UVA-EpiHiperRSV-2": "rgba(0, 72, 251, 1)",
+    "NIH-RSV_WIN-2": "rgba(254, 110, 12, 1)",
+    "PSI-PROF-2": "rgba(226, 50, 7, 1)",
+    "NIH-RSV_MSIRS-2": "rgba(1, 100, 32, 1)",
+    "MOBS_NEU-GLEAM_RSV-2": "rgba(175, 128, 255, 1)",
+    "NIH-RSV_Phenomenological-2": "rgba(252, 209, 7, 1)",
+    "CEPH-MetaRSV-2": "rgba(139, 58, 58, 1)",
+    "JHU_UNC-flepiMoP-2": "rgba(1, 150, 200, 1)",
+    "Ensemble_LOP_all-2": "rgba(75, 75, 75, 1)",
+    "UNCC-Hierbin-2": "rgba(170, 51, 106, 1)",
+    "UT-ImmunoSEIRS-3": "rgba(163, 165, 0, 1)",
+    "NotreDame-FRED-3": "rgba(0, 191, 125, 1)",
+    "USC-SIkJalpha-3": "rgba(255, 103, 164, 1)",
+    "CU-RSV_SVIRS-3": "rgba(108, 218, 250, 1)",
+    "UVA-EpiHiperRSV-3": "rgba(0, 72, 251, 1)",
+    "NIH-RSV_WIN-3": "rgba(254, 110, 12, 1)"
+  },
+  "pathogen_colors": {
+    "Combined": "rgba(116, 113, 174, 1)",
+    "Flu": "rgba(200, 166, 02, 1)",
+    "COVID-19": "rgba(102, 204, 238, 1)",
+    "RSV": "rgba(34, 136, 51, 1)"
+  },
+  "location_order": [
+    "Oregon",
+    "Idaho",
+    "Washington",
+    "Alaska",
+    "Hawaii",
+    "Arizona",
+    "California",
+    "Nevada",
+    "Colorado",
+    "Utah",
+    "Wyoming",
+    "South Dakota",
+    "Montana",
+    "North Dakota",
+    "Missouri",
+    "Kansas",
+    "Nebraska",
+    "Iowa",
+    "Louisiana",
+    "Texas",
+    "New Mexico",
+    "Arkansas",
+    "Oklahoma",
+    "Indiana",
+    "Illinois",
+    "Ohio",
+    "Wisconsin",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Alabama",
+    "Tennessee",
+    "Kentucky",
+    "Florida",
+    "Georgia",
+    "South Carolina",
+    "North Carolina",
+    "Virginia",
+    "West Virginia",
+    "District of Columbia",
+    "Maryland",
+    "Delaware",
+    "New Jersey",
+    "Pennsylvania",
+    "Connecticut",
+    "Rhode Island",
+    "Massachusetts",
+    "New York",
+    "New Hampshire",
+    "Vermont",
+    "Maine"
+  ]
+}

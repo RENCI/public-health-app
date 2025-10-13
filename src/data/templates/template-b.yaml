@@ -4,5 +4,5 @@ controls:
   - location_select
   - target_select
   - age_group_select
-  - uncertainty_select
+  - certainty_select
   - ensemble_select
