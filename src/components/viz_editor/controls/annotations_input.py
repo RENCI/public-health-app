@@ -181,11 +181,14 @@ def update_annotations(
     return stored
 
   # update stored annotations
-  for i in range(len(stored)):
-    stored[i]['type'] = types[i]
-    stored[i]['value'] = values[i]
-    stored[i]['label'] = labels[i]
-    stored[i]['color'] = colors[i]
+  if stored:
+    for i in range(len(stored)):
+      stored[i]['type'] = types[i]
+      stored[i]['value'] = values[i]
+      stored[i]['label'] = labels[i]
+      stored[i]['color'] = colors[i]
+  else:
+    stored = []
 
   # add new annotation
   if trigger == 'add-annotation-button':
