@@ -1,18 +1,15 @@
-import json
 import datetime
+import json
 import uuid
 
-from dash import dcc, html, Input, Output, State, callback, exceptions, register_page, no_update
 import dash_mantine_components as dmc
+from dash import Input, Output, State, callback, dcc, exceptions, html, register_page
 from dash_iconify import DashIconify
 from lzstring import LZString
 
-from src.util.insight import extract_controls_from_share_url
-
-from src.components.chart import chart
-from src.components.viz_editor import visualization_editor
 from src.components.tooltip import tooltip
-
+from src.components.viz_editor import visualization_editor
+from src.util.insight import extract_controls_from_share_url
 
 # this path gets used in util.insight.extract_controls_from_share_url,
 # so ensure that `encoded` there stays aligned with path_template here.
@@ -148,7 +145,7 @@ def save_shared_insight(save_clicks, pathname, selected_round, shared_insights):
   notification = {
     'action': 'show',
     'id': f'save-success-{uuid.uuid4()}',
-    'message': f'Saved to custom insights successfully!',
+    'message': 'Saved to custom insights successfully!',
     'color': 'limegreen',
   }
 
