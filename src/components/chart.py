@@ -312,9 +312,7 @@ class Chart:
       str(controls.zoom.x.max if controls.zoom.x.max else ''),
       str(controls.zoom.y.min if controls.zoom.y.min else ''),
       str(controls.zoom.y.max if controls.zoom.y.max else ''),
-      str(
-        sorted([a.get_key() for a in controls.annotations]) if controls.annotations else []
-      ),
+      str(sorted([a.get_key() for a in controls.annotations]) if controls.annotations else []),
     ]
     # Use a deterministic string key
     return '|'.join(key_components)
@@ -610,7 +608,7 @@ class Chart:
     for annotation in self.controls.annotations:
       if isinstance(annotation, HorizontalAnnotation):
         self._fig.add_hline(
-          y=annotation.value,
+          y=annotation.value or 0,
           line_dash='dot',
           line_color=annotation.color,
           line_width=1,
@@ -620,7 +618,11 @@ class Chart:
         # Convert date to timestamp in milliseconds, as there passing the datetime object directly and adding annotation_text causes a TypeError
         # See: https://github.com/plotly/plotly.py/issues/3065
         # Assuming date is in "YYYY-MM-DD" format
-        ms = datetime.strptime(annotation.value, "%Y-%m-%d").timestamp() * 1000
+        ms = (
+          datetime.strptime(annotation.value, '%Y-%m-%d').timestamp() * 1000
+          if annotation.value
+          else None
+        )
 
         self._fig.add_vline(
           x=ms,
