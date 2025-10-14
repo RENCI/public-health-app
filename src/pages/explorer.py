@@ -66,7 +66,7 @@ def update_back_button_href(search):
   starter = get_query_param(search, 'starter')
   if not starter:
     raise exceptions.PreventUpdate
-  return f'/insight?id={starter}' if starter else '/'
+  return f'/insight/{starter}' if starter else '/'
 
 
 @callback(

@@ -1,5 +1,4 @@
 import uuid
-from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
 from dash import (
@@ -20,16 +19,34 @@ from src.components.tooltip import tooltip
 from src.components.viz_editor import visualization_editor
 from src.data.rounds.round19 import get_insight
 from src.util.export.pdf import generate_insight_pdf
-from src.util.get_query_param import get_query_param
 from src.util.slugify import slugify
 
-register_page(__name__, path_template='/insight', name='Insight Details')
+register_page(__name__, path_template='/insight/<insight_id>', name='Insight Details')
+
+loading_insight = [
+  dmc.Title(id='insight-view-title', order=1, children=dmc.Skeleton(h=85)),
+  dmc.Divider(my=24),
+  html.Div(
+    id='insight-view-figure-container',
+    children=dmc.Stack(
+      [
+        dmc.Skeleton(h=600),
+        dmc.Space(h=24),
+        dmc.Stack([dmc.Skeleton(h=30), dmc.Skeleton(h=30), dmc.Skeleton(h=30)]),
+      ]
+    ),
+    style=dict(margin='24px 0'),
+  ),
+  dcc.Markdown(id='insight-view-description'),
+  dcc.Download(id='insight-pdf-download'),
+]
 
 back_button = dmc.Anchor(
   '← Back to Round Overview',
   id='back-to-insights-button',
   href='/',
 )
+
 explorer_button = dcc.Link(
   dmc.Button(
     'Explore',
@@ -38,6 +55,7 @@ explorer_button = dcc.Link(
   id='explorer-button',
   href='#',
 )
+
 download_button = dmc.ActionIcon(
   DashIconify(icon='feather:download'),
   variant='subtle',
@@ -46,7 +64,7 @@ download_button = dmc.ActionIcon(
   loading=False,
 )
 
-toolbar = dmc.Flex(
+insight_toolbar = dmc.Flex(
   children=[
     back_button,
     dmc.Group(
@@ -61,55 +79,45 @@ toolbar = dmc.Flex(
   mb=24,
 )
 
-loading_title = dmc.Skeleton(h=85)
-loading_chart = dmc.Skeleton(h=600)
-loading_description = dmc.Stack(
-  [
-    dmc.Skeleton(h=30),
-    dmc.Skeleton(h=30),
-    dmc.Skeleton(h=30),
-  ]
-)
-loading_details = dmc.Stack(
-  [
-    loading_chart,
-    dmc.Space(h=24),
-    loading_description,
-  ]
-)
 
 layout = dmc.Container(
-  [
-    toolbar,
-    dmc.Title(id='insight-view-title', order=1, children=loading_title),
-    dmc.Divider(my=24),
-    html.Div(
-      id='insight-view-figure-container', style=dict(margin='24px 0'), children=loading_details
+  children=[
+    insight_toolbar,
+    dmc.Box(
+      loading_insight,
+      id='insight-view-container',
     ),
-    dcc.Markdown(id='insight-view-description'),
-    dcc.Download(id='insight-pdf-download'),
   ],
   size=1200,
 )
 
 
 @callback(
-  Output('insight-view-figure-container', 'children'),
-  Output('insight-view-title', 'children'),
-  Output('insight-view-description', 'children'),
+  Output('explorer-button', 'href'),
   Input('url', 'pathname'),
-  Input('url', 'search'),
+)
+def add_back_link_href(pathname):
+  insight_id = pathname.split('/insight/')[-1]
+  if not insight_id:
+    raise ValueError('No insight ID provided')
+
+  return f'/explorer?starter={insight_id}'
+
+
+@callback(
+  Output('insight-view-container', 'children'),
+  Input('url', 'pathname'),
   Input('custom-insights-store', 'data'),
 )
-def show_details(pathname, search, custom_insights):
-  if pathname != '/insight':
-    # prevent rendering insight view if we're heading to another page
+def show_insight_details(pathname, custom_insights):
+  """Render the insight details page given /insight/<insight_id>"""
+  if not pathname or not pathname.startswith('/insight/'):
     raise exceptions.PreventUpdate
 
   try:
-    insight_id = get_query_param(search, 'id')
+    insight_id = pathname.split('/insight/')[-1]
     if not insight_id:
-      raise ValueError('No insight ID in URL')
+      raise ValueError('No insight ID provided')
 
     insight = get_insight(insight_id, custom_insights=custom_insights or [])
     if not insight:
@@ -117,29 +125,24 @@ def show_details(pathname, search, custom_insights):
 
     controls = insight.get('controls', {})
 
-    return (
-      visualization_editor(control_values=controls, show_controls=False),
-      insight.get('title', 'Untitled Insight'),
-      insight.get('description', ''),
-    )
+    return [
+      dmc.Title(insight.get('title', 'Untitled Insight'), order=1),
+      dmc.Divider(my=24),
+      html.Div(
+        visualization_editor(control_values=controls, show_controls=False),
+        style=dict(margin='24px 0'),
+      ),
+      dcc.Markdown(insight.get('description', '')),
+      dcc.Download(id='insight-pdf-download'),
+    ]
 
-  # fallback
   except Exception as e:
-    return (
-      dmc.Alert(f'Error loading insight: {e}', color='crimson', title='Insight Error'),
-      'Error',
-      '',
+    return dmc.Alert(
+      dmc.Text(f'Error loading insight: "{e}"'),
+      color='crimson',
+      title='Insight Error',
+      p='10rem',
     )
-
-
-@callback(
-  Output('explorer-button', 'href'),
-  Input('url', 'search'),
-)
-def add_back_link_href(search):
-  query = parse_qs(search.lstrip('?'))
-  insight_id = query.get('id', [None])[0]
-  return f'/explorer?starter={insight_id}'
 
 
 clientside_callback(
@@ -161,17 +164,20 @@ clientside_callback(
   Output('download-insight-button', 'loading'),
   Input('download-insight-button', 'n_clicks'),
   State('custom-insights-store', 'data'),
-  State('url', 'search'),
+  State('url', 'pathname'),
   prevent_initial_call=True,
 )
-def handle_click_download(n_clicks, custom_insights, search):
+def handle_click_download(n_clicks, custom_insights, pathname):
   if not n_clicks:
     return no_update, no_update, False
 
+  if not pathname or not pathname.startswith('/insight/'):
+    raise exceptions.PreventUpdate
+
   try:
-    insight_id = get_query_param(search, 'id')
+    insight_id = pathname.split('/insight/')[-1]
     if not insight_id:
-      raise ValueError('No insight ID in URL')
+      raise ValueError('No insight ID provided')
 
     insight = get_insight(insight_id, custom_insights=custom_insights or [])
     if not insight:
