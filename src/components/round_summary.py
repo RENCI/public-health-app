@@ -3,27 +3,25 @@ import uuid
 import dash_mantine_components as dmc
 from dash import (
   ALL,
+  Input,
+  Output,
+  State,
   callback,
   clientside_callback,
   ctx,
   dcc,
   exceptions,
   no_update,
-  Input,
-  Output,
-  State,
 )
 from dash_iconify import DashIconify
 
-from src.util.time_ago import time_ago
-from src.util.data import load_rounds
-from src.util.insight import generate_insight_share_url
-from src.util.export.pdf import generate_round_pdf
-
-from src.util.format_timestamp import format_timestamp
-from src.util.slugify import slugify
-
 from src.components.tooltip import tooltip
+from src.util.data import load_rounds
+from src.util.export.pdf import generate_round_pdf
+from src.util.format_timestamp import format_timestamp
+from src.util.insight import generate_insight_share_url
+from src.util.slugify import slugify
+from src.util.time_ago import time_ago
 
 
 def tipped_text(text, tooltip=None, size='md'):
@@ -46,7 +44,7 @@ no_insights_message = dmc.Card(
           dmc.Button(
             [
               'Build a custom insight',
-              dmc.Space(w=8),
+              ' ',
               DashIconify(icon='feather:arrow-right', width=20),
             ],
             variant='gradient',
@@ -81,7 +79,7 @@ new_insight_prompt = dmc.Card(
         dmc.Button(
           [
             'Build a new custom insight',
-            dmc.Space(w=8),
+            ' ',
             DashIconify(icon='feather:arrow-right', width=20),
           ],
           variant='gradient',
@@ -114,7 +112,7 @@ def insight_button(item):
 
   view_button = dmc.Anchor(
     dmc.Button(
-      ['View', dmc.Space(w=8), DashIconify(icon='feather:arrow-right', width=20)],
+      ['View', ' ', DashIconify(icon='feather:arrow-right', width=20)],
       variant='light',
       style=dict(
         textDecoration='none',
@@ -154,7 +152,6 @@ def insight_button(item):
 
 def custom_insight_button(item):
   created_at = item.get('created_at', None)
-  updated_at = item.get('updated_at', None)
 
   graphic = dmc.Image(
     src=item['image_url'], radius='sm', style=dict(width='125px', height='125px', objectFit='cover')
@@ -340,9 +337,11 @@ def update_custom_insights_list(custom_insights, round_number):
     if str(insight.get('controls', {}).get('round')) == str(round_number)
   ]
 
-  return [custom_insight_button(insight) for insight in filtered_custom_insights] + [
-    new_insight_prompt
-  ] if len(filtered_custom_insights) else [no_insights_message]
+  return (
+    [custom_insight_button(insight) for insight in filtered_custom_insights] + [new_insight_prompt]
+    if len(filtered_custom_insights)
+    else [no_insights_message]
+  )
 
 
 @callback(

@@ -1,6 +1,8 @@
 import dash_mantine_components as dmc
 
-scenarios = ['77', '78', '79', '80', '81']
+from src.constants import get_scenario_names
+
+scenarios = get_scenario_names()
 options = [{'value': c, 'label': c} for c in scenarios]
 
 
@@ -10,5 +12,6 @@ def scenarios_select(value=scenarios):
     placeholder='',
     id='scenarios-select',
     value=value,
+    required=True,
     data=options,
   )

@@ -93,8 +93,7 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   State('location-select', 'value'),
   State('target-select', 'value'),
   State('age-group-select', 'value'),
-  State('uncertainty-select', 'value'),
-  State('ensemble-select', 'value'),
+  State('certainty-select', 'value'),
   State('zoom-store', 'data'),
   State('annotations-store', 'data'),
   suppress_callback_exceptions=True,
@@ -111,8 +110,7 @@ def save_custom_insight(
   location,
   target,
   age_group,
-  uncertainty,
-  ensemble,
+  certainty,
   zoom,
   annotations,
 ):
@@ -130,8 +128,8 @@ def save_custom_insight(
   if title_error or desc_error:
     raise exceptions.PreventUpdate
 
-  now = datetime.datetime.utcnow().isoformat()
-  new_id = str(uuid.uuid4())
+  now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+  new_id = f'custom-{uuid.uuid4()}'
   new_item = dict(
     id=new_id,
     title=title.strip(),
@@ -146,8 +144,7 @@ def save_custom_insight(
       location=location,
       target=target,
       age_group=age_group,
-      uncertainty=uncertainty,
-      ensemble=ensemble,
+      certainty=certainty,
       zoom=zoom,
       annotations=annotations,
     ),

@@ -2,7 +2,6 @@
 *.ipynb
 
 ignore
-*.csv
 *.log
 .DS_Store
 

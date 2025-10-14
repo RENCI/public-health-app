@@ -1,6 +1,9 @@
 import dash_mantine_components as dmc
 
-age_ranges = ['0-0.99', '1-4', '5-64', '65-130', '0-130']
+from src.components.enums import AgeGroup
+
+age_ranges = list(AgeGroup)
+options = [{'value': a.input_value, 'label': a.display_value} for a in age_ranges]
 
 
 def age_group_select(value='0-130'):
@@ -9,5 +12,6 @@ def age_group_select(value='0-130'):
     placeholder='',
     id='age-group-select',
     value=value,
-    data=age_ranges,
+    required=True,
+    data=options,
   )

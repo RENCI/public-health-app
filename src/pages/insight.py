@@ -1,26 +1,25 @@
 import uuid
-from urllib.parse import parse_qs
 
 import dash_mantine_components as dmc
 from dash import (
-  exceptions,
-  html,
   Input,
   Output,
+  State,
   callback,
   clientside_callback,
   dcc,
-  register_page,
-  State,
+  exceptions,
+  html,
   no_update,
+  register_page,
 )
 from dash_iconify import DashIconify
 
+from src.components.tooltip import tooltip
+from src.components.viz_editor import visualization_editor
 from src.data.rounds.round19 import get_insight
 from src.util.export.pdf import generate_insight_pdf
 from src.util.slugify import slugify
-from src.components.viz_editor import visualization_editor
-from src.components.tooltip import tooltip
 
 register_page(__name__, path_template='/insight/<insight_id>', name='Insight Details')
 
@@ -54,7 +53,7 @@ explorer_button = dcc.Link(
     leftSection=DashIconify(icon='feather:arrow-up-right'),
   ),
   id='explorer-button',
-  href=f'#',
+  href='#',
 )
 
 download_button = dmc.ActionIcon(

@@ -1,29 +1,35 @@
-from dash import callback, dcc, exceptions, html, Input, Output, State
-import dash_mantine_components as dmc
-from .controls.scenarios_select import scenarios_select
-from .controls.location_select import location_select
-from .controls.target_select import target_select
-from .controls.age_group_select import age_group_select
-from .controls.uncertainty_select import uncertainty_select
-from .controls.ensemble_select import ensemble_select
-from .controls.models_select import models_select
-from .controls.zoom_control import zoom_control
-from .controls.annotations_input import annotations_input
-from src.components.chart import chart
+from typing import Any
 
-available_rounds = [19]
-current_round = 19
+import dash_mantine_components as dmc
+from dash import Input, Output, State, callback, dcc, exceptions, html
+
+from src.components.chart import ChartControls, PlotType
+from src.components.chart_instance_manager import ChartInstanceManager
+
+from .controls import (
+  age_group_select,
+  annotations_input,
+  certainty_select,
+  location_select,
+  models_select,
+  scenarios_select,
+  target_select,
+  zoom_control,
+)
+
+# Global instance of the chart manager
+chart_manager = ChartInstanceManager()
+
 
 default_control_values = dict(
-  scenarios=['77', '78', '79', '80', '81'],
-  models=[],
+  scenarios=['A-2023-10-27', 'B-2023-10-27'],
+  models=['Ensemble'],
   location='US',
   target='cumulative_hospitalization',
   age_group='0-130',
-  uncertainty='None',
-  ensemble='Ensemble',
-  zoom={},
-  annotations={},
+  certainty='None',
+  zoom=None,
+  annotations=None,
 )
 
 
@@ -35,26 +41,30 @@ def visualization_editor(control_values=None, show_controls=True):
   init_location = controls['location']
   init_target = controls['target']
   init_age_group = controls['age_group']
-  init_uncertainty = controls['uncertainty']
-  init_ensemble = controls['ensemble']
+  init_certainty = controls['certainty']
   init_zoom = controls['zoom']
   init_annotations = controls['annotations']
 
-  figure_control_values = dict(
-    scenarios=init_scenarios,
-    models=init_models,
-    location=init_location,
-    target=init_target,
+  figure_control_values = ChartControls(
+    round_num=19,
+    pathogen='covid',
+    scenario_names=init_scenarios,
+    model_names=init_models,
+    location_name=init_location,
     age_group=init_age_group,
-    uncertainty=init_uncertainty,
-    ensemble=init_ensemble,
+    target=init_target,
+    certainty_percent=init_certainty,
     zoom=init_zoom,
     annotations=init_annotations,
   )
 
+  # Get or create chart instance using the manager
+  chart = chart_manager.get_chart(figure_control_values, PlotType.LINE)
+
   figure_container = html.Div(
     id='insight-visualization-figure',
-    children=chart(control_values=figure_control_values),
+    children=[chart.get_graph()],
+    style={'min-height': '45vh'},
   )
 
   if not show_controls:
@@ -66,6 +76,7 @@ def visualization_editor(control_values=None, show_controls=True):
         [dcc.Store('chart-extent-store'), figure_container],
         id='visualization-column',
         span=dict(base=12, xl=8, lg=7, md=8),
+        style={'display': 'flex', 'flexDirection': 'column'},
       ),
       dmc.GridCol(
         dmc.Stack(
@@ -78,8 +89,7 @@ def visualization_editor(control_values=None, show_controls=True):
                   location_select(value=init_location),
                   target_select(value=init_target),
                   age_group_select(value=init_age_group),
-                  uncertainty_select(value=init_uncertainty),
-                  ensemble_select(value=init_ensemble),
+                  certainty_select(value=init_certainty),
                 ],
                 gap='sm',
               ),
@@ -111,28 +121,54 @@ def visualization_editor(control_values=None, show_controls=True):
   Input('location-select', 'value'),
   Input('target-select', 'value'),
   Input('age-group-select', 'value'),
-  Input('uncertainty-select', 'value'),
+  Input('certainty-select', 'value'),
   Input('zoom-store', 'data'),
   Input('annotations-store', 'data'),
+  # State('round-number-store', 'value'),
   prevent_initial_call=True,
 )
-def update_chart(scenarios, models, location, target, age_group, uncertainty, zoom, annotations):
-  control_values = dict(
-    scenarios=scenarios,
-    models=models,
-    location=location,
-    target=target,
-    age_group=age_group,
-    uncertainty=uncertainty,
-    zoom=zoom,
-    annotations=annotations,
-  )
-  return chart(control_values=control_values)
+def update_chart(
+  scenario_names: list[str],
+  model_names: list[str],
+  location: str,
+  target: str,
+  age_group: str,
+  certainty: str,
+  zoom: dict[str, Any],
+  annotations: list[dict[str, Any]] | None,
+  # round_num: int,
+):
+  try:
+    chart_controls = ChartControls(
+      round_num=19,
+      pathogen='covid',
+      scenario_names=scenario_names,
+      model_names=model_names,
+      location_name=location,
+      target=target,
+      age_group=age_group,
+      certainty_percent=certainty,
+      zoom=zoom,
+      annotations=annotations,
+    )
+
+    # Get or create chart instance using the manager
+    chart = chart_manager.get_chart(chart_controls, PlotType.LINE)
+
+    if not chart:
+      raise Exception('Chart not found')
+    return [chart.get_graph()]  # must return a list here for the callback to work
+  except Exception as e:
+    print(f'Error updating chart: {e}')
+    import traceback
+
+    traceback.print_exc()
+    return html.Div(f'Error loading chart: {str(e)}', style={'color': 'red'})
 
 
 @callback(
   Output('chart-extent-store', 'data'),
-  Input('chart-figure', 'relayoutData'),
+  Input('graph', 'relayoutData'),
 )
 def sync_zoom_store(relayout):
   if not relayout:
