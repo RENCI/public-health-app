@@ -617,8 +617,13 @@ class Chart:
           annotation_text=annotation.label,
         )
       elif isinstance(annotation, VerticalAnnotation):
+        # Convert date to timestamp in milliseconds, as there passing the datetime object directly and adding annotation_text causes a TypeError
+        # See: https://github.com/plotly/plotly.py/issues/3065
+        # Assuming date is in "YYYY-MM-DD" format
+        ms = datetime.strptime(annotation.value, "%Y-%m-%d").timestamp() * 1000
+
         self._fig.add_vline(
-          x=annotation.value,
+          x=ms,
           line_dash='dot',
           line_color=annotation.color,
           line_width=1,
