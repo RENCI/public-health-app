@@ -455,9 +455,7 @@ class Chart:
     if self.controls.zoom.x.min is not None and self.controls.zoom.x.max is not None:
       self._fig.update_xaxes(range=[self.controls.zoom.x.min, self.controls.zoom.x.max])
     if self.controls.zoom.y.min is not None and self.controls.zoom.y.max is not None:
-      self._fig.update_yaxes(range=[self.controls.zoom.y.min, self.controls.zoom.y.max])
-
-    print(self.controls)
+      self._fig.update_yaxes(range=[self.controls.zoom.y.min, self.controls.zoom.y.max], title_text=self.controls.target.display_value)
 
     self._fig.update_layout(
       hovermode='x unified',
