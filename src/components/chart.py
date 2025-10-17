@@ -457,10 +457,12 @@ class Chart:
     if self.controls.zoom.y.min is not None and self.controls.zoom.y.max is not None:
       self._fig.update_yaxes(range=[self.controls.zoom.y.min, self.controls.zoom.y.max])
 
+    print(self.controls.target)
+
     self._fig.update_layout(
       hovermode='x unified',
       height=chart_total_height + 180,
-      title='Forecast values over time (by scenario)',
+      title=f'{self.controls.target.display_value} over time (by scenario)',
       uirevision=self.__hash__(),
     )
 
