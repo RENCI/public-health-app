@@ -11,6 +11,7 @@ template: default
 created_at: "2025-05-18T22:45:12Z"
 updated_at: "2025-05-18T22:45:12Z"
 controls:
+  plot_type: "boxplot"
   location: US
   target: incident_hospitalization
   models: [Ensemble]

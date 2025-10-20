@@ -36,6 +36,7 @@ default_control_values = dict(
 def visualization_editor(control_values=None, show_controls=True):
   controls = {**default_control_values, **(control_values or {})}
 
+  init_round_num = controls['round_num']
   init_scenarios = controls['scenarios']
   init_models = controls['models']
   init_location = controls['location']
@@ -46,7 +47,7 @@ def visualization_editor(control_values=None, show_controls=True):
   init_annotations = controls['annotations']
 
   figure_control_values = ChartControls(
-    round_num=19,
+    round_num=init_round_num,
     pathogen='covid',
     scenario_names=init_scenarios,
     model_names=init_models,

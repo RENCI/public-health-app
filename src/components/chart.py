@@ -243,17 +243,22 @@ class Zoom:
 class ChartControls:
   def __init__(
     self,
-    round_num: int,
-    pathogen: str,
-    scenario_names: list[str],
-    model_names: list[str],
-    location_name: str,
-    target: str,
+    plot_type: str = 'line',
+    round_num: int = 19,
+    pathogen: str = 'covid',
+    scenario_names: list[str] = ['A-2023-10-27', 'B-2023-10-27'],
+    model_names: list[str] = ['Ensemble'],
+    location_name: str = 'US',
+    target: str = 'incident_hospitalization',
     age_group: str = '0-130',
+    x_start_date: str = '2025-01-01',
+    x_axis: str = 'target_end_date',
+    y_axis: str = 'value',
     zoom: dict[str, dict[str, Any]] | None = None,
     annotations: list[dict[str, Any]] | None = None,
     certainty_percent: str | None = None,
   ):
+    self.plot_type = PlotType(plot_type)
     self.round_num = round_num
     self.pathogen = pathogen
     self.scenarios = [Scenario(name=scenario_name) for scenario_name in scenario_names]
@@ -261,6 +266,9 @@ class ChartControls:
     self.location = Location(location_name)
     self.target = Target.from_input_value(target)
     self.age_group = AgeGroup.from_input_value(age_group)
+    self.x_start_date = datetime.strptime(x_start_date, '%Y-%m-%d')
+    self.x_axis = x_axis
+    self.y_axis = y_axis
     self.annotations = (
       [Annotation.from_dict(annotation) for annotation in annotations] if annotations else None
     )
@@ -276,9 +284,9 @@ class Chart:
   def __init__(self, plot_type: PlotType, controls: ChartControls):
     self.plot_type = plot_type
     self.controls = controls
-    self.x_start_date = datetime.strptime('2025-01-01', '%Y-%m-%d')
-    self.x_axis = 'target_end_date'
-    self.y_axis = 'value'
+    self.x_start_date = self.controls.x_start_date
+    self.x_axis = self.controls.x_axis
+    self.y_axis = self.controls.y_axis
     self._data_type = DataType.QUANTILE
     self._raw_df = Chart.collect_data(
       self._data_type,
