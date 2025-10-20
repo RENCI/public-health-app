@@ -2,6 +2,10 @@
 
 ## 🚧 Development
 
+**Note: The `$` at the start of a line in any block of shell code is the terminal prompt; do not include the `$` at the start of the commands.**
+
+Setup steps:
+
 1. clone this repo & move into project dir
 2. install uv [here](https://docs.astral.sh/uv/getting-started/installation/) (I recommend the standalone install script)
 3. create virtual environment and install deps, `uv sync`
@@ -42,7 +46,58 @@ We use [Weasyprint](https://doc.courtbouillon.org/weasyprint/stable/index.html) 
 
 WeasyPrint depends on a few system libraries for handling layout, fonts, and CSS rendering.
 They are installed into the production build, and must be installed locally for PDF generation
-to function in your local development environment. See the [Weasyprint installation instructions](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#installation) for bootstrapping your system
+to function in your local development environment. See the [Weasyprint installation instructions](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#installation) for bootstrapping your system.
+
+On Mac you must follow these steps, which include things beyond the official installation instructions:
+
+1. Install weasyprint and other necessary libraries using homebrew
+
+   ```sh
+   $ brew install weasyprint pango gdk-pixbuf libffi
+   ```
+
+2. Create symlinks to library directories
+
+   ```sh
+   $ sudo ln -s /opt/homebrew/opt/glib/lib/libgobject-2.0.0.dylib /usr/local/lib/gobject-2.0
+   $ sudo ln -s /opt/homebrew/opt/pango/lib/libpango-1.0.dylib /usr/local/lib/pango-1.0
+   $ sudo ln -s /opt/homebrew/opt/harfbuzz/lib/libharfbuzz.dylib /usr/local/lib/harfbuzz
+   $ sudo ln -s /opt/homebrew/opt/fontconfig/lib/libfontconfig.1.dylib /usr/local/lib/fontconfig-1
+   $ sudo ln -s /opt/homebrew/opt/pango/lib/libpangoft2-1.0.dylib /usr/local/lib/pangoft2-1.0
+   ```
+
+3. Use the following .vscode/launch.json file to run the debugger in vscode. These lines in particular are key:
+
+   ```json
+   "python": ".venv/bin/python",
+   "program": "app.py",
+   ...
+   "DYLD_FALLBACK_LIBRARY_PATH": "/opt/local/lib:/usr/local/lib"
+   ```
+
+   .vscode/launch.json
+   ```json
+   {
+      "version": "0.2.0",
+      "configurations": [
+         {
+            "name": "public-health-app",
+            "type": "debugpy",
+            "request": "launch",
+            "python": ".venv/bin/python",
+            "program": "app.py",
+            "env": {
+               "FLASK_APP": "app.py",
+               "FLASK_DEBUG": "1",
+               "DYLD_FALLBACK_LIBRARY_PATH": "/opt/local/lib:/usr/local/lib"
+            },
+            "args": [],
+            "jinja": false,
+            "autoStartBrowser": false
+         },
+      ]
+   }
+   ```
 
 ## 📦 Production
 

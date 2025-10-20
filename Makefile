@@ -34,6 +34,9 @@ format: ## ℹ︎ Run formatter
 
 ruff: lint format ## 🔀 Run linter and formatter
 
+dev: ## 🏃‍♂️ Run locally using uv
+	@uv run python app.py
+
 test: ## 🧪 Run tests
 	@uv run pytest .
 
