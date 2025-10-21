@@ -75,7 +75,7 @@ def visualization_editor(control_values=None, show_controls=True):
       dmc.GridCol(
         [dcc.Store('chart-extent-store'), figure_container],
         id='visualization-column',
-        span=dict(base=12, xl=8, lg=7),
+        span=dict(base=12, xl=8),
         style={'display': 'flex', 'flexDirection': 'column'},
       ),
       dmc.GridCol(
@@ -106,7 +106,7 @@ def visualization_editor(control_values=None, show_controls=True):
           gap='md',
         ),
         id='controls-column',
-        span=dict(base=12, xl=4, lg=5),
+        span=dict(base=12, xl=4),
       ),
     ],
     mb=12,
