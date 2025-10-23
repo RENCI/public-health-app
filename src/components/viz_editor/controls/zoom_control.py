@@ -27,10 +27,22 @@ def zoom_control(value=None):
       dmc.Divider(),
       dmc.Grid(
         [
-          dmc.GridCol(dmc.DateInput(id='zoom-x-min', label='X min', value=x_min), span=dict(base=12, md=6, sm=6)),
-          dmc.GridCol(dmc.DateInput(id='zoom-x-max', label='X max', value=x_max), span=dict(base=12, md=6, sm=6)),
-          dmc.GridCol(dmc.NumberInput(id='zoom-y-min', label='Y min', value=y_min, step=100), span=dict(base=12, md=6, sm=6)),
-          dmc.GridCol(dmc.NumberInput(id='zoom-y-max', label='Y max', value=y_max, step=100), span=dict(base=12, md=6, sm=6)),
+          dmc.GridCol(
+            dmc.DateInput(id='zoom-x-min', label='X min', value=x_min),
+            span=dict(base=12, md=6, sm=6),
+          ),
+          dmc.GridCol(
+            dmc.DateInput(id='zoom-x-max', label='X max', value=x_max),
+            span=dict(base=12, md=6, sm=6),
+          ),
+          dmc.GridCol(
+            dmc.NumberInput(id='zoom-y-min', label='Y min', value=y_min, step=100),
+            span=dict(base=12, md=6, sm=6),
+          ),
+          dmc.GridCol(
+            dmc.NumberInput(id='zoom-y-max', label='Y max', value=y_max, step=100),
+            span=dict(base=12, md=6, sm=6),
+          ),
         ],
       ),
     ]

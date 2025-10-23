@@ -8,7 +8,7 @@ from src.components.chart_instance_manager import ChartInstanceManager
 
 from .controls import (
   age_group_select,
-  annotations_input,
+  annotations_control,
   certainty_select,
   location_select,
   models_select,
@@ -99,7 +99,7 @@ def visualization_editor(control_values=None, show_controls=True):
               variant='soft',
             ),
             dmc.Card(
-              annotations_input(value=init_annotations),
+              annotations_control(value=init_annotations),
               variant='soft',
             ),
           ],
