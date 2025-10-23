@@ -36,31 +36,45 @@ default_control_values = dict(
 def visualization_editor(control_values=None, show_controls=True):
   controls = {**default_control_values, **(control_values or {})}
 
-  init_round_num = controls['round_num']
-  init_scenarios = controls['scenarios']
-  init_models = controls['models']
-  init_location = controls['location']
-  init_target = controls['target']
-  init_age_group = controls['age_group']
-  init_certainty = controls['certainty']
-  init_zoom = controls['zoom']
-  init_annotations = controls['annotations']
+  init_plot_type: str = controls['plot_type']
+  init_round_num: int = controls['round_num']
+  init_scenarios: list[str] = controls['scenarios']
+  init_models: list[str] = controls['models']
+  init_location: str = controls['location']
+  init_target: str = controls['target']
+  init_age_group: str = controls['age_group']
+  if 'x_start_date' in controls:
+    init_x_start_date: str | None = controls['x_start_date']
+  else:
+    init_x_start_date = None
+  init_x_axis: str = controls['x_axis']
+  init_y_axis: str = controls['y_axis']
+  init_certainty: str | None = controls['certainty']
+  init_zoom: dict[str, dict[str, Any]] | None = controls['zoom']
+  init_annotations: list[dict[str, Any]] | None = controls['annotations']
 
   figure_control_values = ChartControls(
-    round_num=init_round_num,
-    pathogen='covid',
-    scenario_names=init_scenarios,
-    model_names=init_models,
-    location_name=init_location,
-    age_group=init_age_group,
-    target=init_target,
-    certainty_percent=init_certainty,
+    init_plot_type,
+    init_round_num,
+    init_scenarios,
+    init_models,
+    init_location,
+    init_target,
+    init_age_group,
+    init_x_axis,
+    init_y_axis,
+    x_start_date=init_x_start_date,
     zoom=init_zoom,
     annotations=init_annotations,
+    certainty_percent=init_certainty,
+  )
+
+  chart_controls_store = (
+    dcc.Store(id='chart-controls-store', storage_type='local', data=figure_control_values),
   )
 
   # Get or create chart instance using the manager
-  chart = chart_manager.get_chart(figure_control_values, PlotType.LINE)
+  chart = chart_manager.get_chart(figure_control_values)
 
   figure_container = html.Div(
     id='insight-visualization-figure',
@@ -74,7 +88,7 @@ def visualization_editor(control_values=None, show_controls=True):
   return dmc.Grid(
     children=[
       dmc.GridCol(
-        [dcc.Store('chart-extent-store'), figure_container],
+        [chart_controls_store, dcc.Store('chart-extent-store'), figure_container],
         id='visualization-column',
         span=dict(base=12, xl=8),
         style={'display': 'flex', 'flexDirection': 'column'},
@@ -116,44 +130,34 @@ def visualization_editor(control_values=None, show_controls=True):
 
 @callback(
   Output('insight-visualization-figure', 'children'),
-  Input('scenarios-select', 'value'),
-  Input('models-select', 'value'),
-  Input('location-select', 'value'),
-  Input('target-select', 'value'),
-  Input('age-group-select', 'value'),
-  Input('certainty-select', 'value'),
-  Input('zoom-store', 'data'),
-  Input('annotations-store', 'data'),
+  Input('chart-controls-store', 'data'),
   # State('round-number-store', 'value'),
   prevent_initial_call=True,
 )
-def update_chart(
-  scenario_names: list[str],
-  model_names: list[str],
-  location: str,
-  target: str,
-  age_group: str,
-  certainty: str,
-  zoom: dict[str, Any],
-  annotations: list[dict[str, Any]] | None,
+def update_chart_figure(
+  controls: dict[str, Any],
   # round_num: int,
 ):
   try:
     chart_controls = ChartControls(
-      round_num=19,
+      plot_type=controls['plot_type'],
+      round_num=controls['round_num'],
       pathogen='covid',
-      scenario_names=scenario_names,
-      model_names=model_names,
-      location_name=location,
-      target=target,
-      age_group=age_group,
-      certainty_percent=certainty,
-      zoom=zoom,
-      annotations=annotations,
+      scenario_names=controls['scenarios'],
+      model_names=controls['models'],
+      location_name=controls['location'],
+      target=controls['target'],
+      age_group=controls['age_group'],
+      x_axis=controls['x_axis'],
+      y_axis=controls['y_axis'],
+      x_start_date=controls['x_start_date'],
+      certainty_percent=controls['certainty'],
+      zoom=controls['zoom'],
+      annotations=controls['annotations'],
     )
 
     # Get or create chart instance using the manager
-    chart = chart_manager.get_chart(chart_controls, PlotType.LINE)
+    chart = chart_manager.get_chart(chart_controls)
 
     if not chart:
       raise Exception('Chart not found')
@@ -167,34 +171,78 @@ def update_chart(
 
 
 @callback(
-  Output('chart-extent-store', 'data'),
+  Output('chart-controls-store', 'data'),
+  Input('scenarios-select', 'value'),
+  Input('models-select', 'value'),
+  Input('location-select', 'value'),
+  Input('target-select', 'value'),
+  Input('age-group-select', 'value'),
+  Input('certainty-select', 'value'),
+  Input('zoom-store', 'value'),
+  Input('annotations-store', 'value'),
   Input('graph', 'relayoutData'),
+  State('chart-controls-store', 'data'),
 )
-def sync_zoom_store(relayout):
-  if not relayout:
+def update_chart_controls(
+  scenarios,
+  models,
+  location,
+  target,
+  age_group,
+  certainty,
+  zoom,
+  annotations,
+  relayout,
+  current_chart_controls: dict[str, Any],
+):
+  if not (
+    scenarios
+    and models
+    and location
+    and target
+    and age_group
+    and certainty
+    and zoom
+    and annotations
+    and relayout
+    and current_chart_controls
+  ):
     raise exceptions.PreventUpdate
-  return dict(
+
+  new_zoom = dict(
     x={'min': relayout.get('xaxis.range[0]'), 'max': relayout.get('xaxis.range[1]')},
     y={'min': relayout.get('yaxis.range[0]'), 'max': relayout.get('yaxis.range[1]')},
   )
-
-
-@callback(
-  Output('zoom-x-min', 'value'),
-  Output('zoom-x-max', 'value'),
-  Output('zoom-y-min', 'value'),
-  Output('zoom-y-max', 'value'),
-  Input('use-chart-zoom-button', 'n_clicks'),
-  State('chart-extent-store', 'data'),
-  prevent_initial_call=True,
-)
-def apply_current_zoom(n_clicks, current_zoom):
-  if not n_clicks or not current_zoom:
-    raise exceptions.PreventUpdate
-
-  return (
-    current_zoom['x'].get('min'),
-    current_zoom['x'].get('max'),
-    current_zoom['y'].get('min'),
-    current_zoom['y'].get('max'),
+  new_chart_controls = dict(
+    scenarios=scenarios,
+    models=models,
+    location=location,
+    target=target,
+    age_group=age_group,
+    certainty=certainty,
+    zoom=new_zoom,
+    annotations=annotations,
   )
+  return {**current_chart_controls, **new_chart_controls}
+
+
+# TODO: Add this back in when we have a way to sync the zoom store with the chart controls store
+# @callback(
+#   Output('zoom-x-min', 'value'),
+#   Output('zoom-x-max', 'value'),
+#   Output('zoom-y-min', 'value'),
+#   Output('zoom-y-max', 'value'),
+#   Input('use-chart-zoom-button', 'n_clicks'),
+#   State('chart-extent-store', 'data'),
+#   prevent_initial_call=True,
+# )
+# def apply_current_zoom(n_clicks, current_zoom):
+#   if not n_clicks or not current_zoom:
+#     raise exceptions.PreventUpdate
+
+#   return (
+#     current_zoom['x'].get('min'),
+#     current_zoom['x'].get('max'),
+#     current_zoom['y'].get('min'),
+#     current_zoom['y'].get('max'),
+#   )

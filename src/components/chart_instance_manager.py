@@ -15,25 +15,24 @@ class ChartInstanceManager:
     """
 
   @lru_cache(maxsize=100)
-  def _create_chart(self, plot_type: PlotType, controls: ChartControls) -> Chart:
+  def _create_chart(self, controls: ChartControls) -> Chart:
     """
     Create a chart instance. This method is cached by @lru_cache.
     """
-    return Chart(plot_type, controls)
+    return Chart.create(controls)
 
-  def get_chart(self, controls: ChartControls, plot_type: PlotType = PlotType.LINE) -> Chart:
+  def get_chart(self, controls: ChartControls) -> Chart:
     """
     Get or create a chart instance with LRU caching.
 
     Args:
       controls: Chart configuration parameters
-      plot_type: Type of plot to create
 
     Returns:
       Chart object (either cached or newly created)
     """
     # Get chart from LRU cache
-    chart = self._create_chart(plot_type, controls)
+    chart = self._create_chart(controls)
 
     # Update the chart with current controls (in case they changed)
     chart.update_controls(controls)
