@@ -28,6 +28,15 @@ def annotation_color_input(value='#222222'):
     label='Color',
     value=value,
     format='hex',
+    swatches=[
+      '#222222',
+      '#663399',
+      '#993366',
+      '#ff0000',
+      '#00abc7',
+      '#00ff00',
+      '#ff9900',
+    ],
   )
 
 
