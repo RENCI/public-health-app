@@ -436,7 +436,7 @@ class Chart:
     return self._fig
 
   def get_graph(self) -> dcc.Graph:
-    return dcc.Graph(id='graph', figure=self._fig)
+    return dcc.Graph(id='my-graph', figure=self._fig)
 
   def get_raw_dataframe(self) -> pd.DataFrame:
     return self._raw_df
@@ -482,28 +482,24 @@ class Chart:
     """
     self.controls.round_num = round_num
     self._reload_data()
-    self.refresh_fig()
 
   def update_pathogen(self, pathogen: str) -> None:
     """
     Update the pathogen name.
     """
     self.controls.pathogen = pathogen
-    self.refresh_fig()
 
   def update_scenarios(self, scenario_names: list[str]) -> None:
     """
     Update the scenarios list.
     """
     self.controls.scenarios = [Scenario(name=scenario_name) for scenario_name in scenario_names]
-    self.refresh_fig()
 
   def update_models(self, model_names: list[str]) -> None:
     """
     Update the models list.
     """
     self.controls.models = [Model(model_name) for model_name in model_names]
-    self.refresh_fig()
 
   def update_location(self, location_name: str) -> None:
     """
@@ -511,7 +507,6 @@ class Chart:
     """
     self.controls.location = Location(location_name)
     self._reload_data()
-    self.refresh_fig()
 
   def update_target(self, target: str) -> None:
     """
@@ -519,14 +514,12 @@ class Chart:
     """
     self.controls.target = Target.from_input_value(target)
     self._reload_data()
-    self.refresh_fig()
 
   def update_age_group(self, age_group: str) -> None:
     """
     Update the age group.
     """
     self.controls.age_group = AgeGroup.from_input_value(age_group)
-    self.refresh_fig()
 
   def update_annotations(self, annotations: list[dict[str, Any]] | None) -> None:
     """
@@ -535,7 +528,6 @@ class Chart:
     self.controls.annotations = (
       [Annotation.from_dict(annotation) for annotation in annotations] if annotations else None
     )
-    self.refresh_fig()
 
   def update_certainty_percent(self, certainty_percent: str | None) -> None:
     """
@@ -544,14 +536,12 @@ class Chart:
     self.controls.certainty_percent = (
       CertaintyInterval.from_display_value(certainty_percent) if certainty_percent else None
     )
-    self.refresh_fig()
 
   def update_zoom(self, zoom: dict[str, dict[str, Any]] | None) -> None:
     """
     Update the zoom settings.
     """
     self.controls.zoom = Zoom(zoom['x'], zoom['y']) if zoom else Zoom()
-    self.refresh_fig()
 
   def _plot_certainty_interval(
     self, scenario_df: pd.DataFrame, model: Model, row_num: int
