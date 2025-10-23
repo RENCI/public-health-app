@@ -10,16 +10,18 @@ def annotation_type_icon(
   """Return an inline SVG icon (raw HTML)."""
   margin = 3  # px
   if orientation == 'horizontal':
-    path = f'M{margin},{size/2} L{size-margin},{size/2}'
+    path = f'M{margin},{size / 2} L{size - margin},{size / 2}'
   else:
-    path = f'M{size/2},{margin} L{size/2},{size-margin}'
+    path = f'M{size / 2},{margin} L{size / 2},{size - margin}'
   svg = f"""
   <svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 {size} {size}">
     <rect x="0" y="0" width="{size}" height="{size}" stroke="none" stroke-width="0" fill="#9992" rx="6" />
     <path d="{path}" stroke="{color}" stroke-width="3" fill="none" stroke-dasharray="5 2" />
   </svg>
   """
-  return dcc.Markdown(svg, dangerously_allow_html=True, style=dict(height='32px', aspectRatio='1 / 1'))
+  return dcc.Markdown(
+    svg, dangerously_allow_html=True, style=dict(height='32px', aspectRatio='1 / 1')
+  )
 
 
 def annotation_color_input(value='#222222'):

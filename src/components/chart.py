@@ -420,7 +420,10 @@ class Chart:
     if self.controls.zoom.x.min is not None and self.controls.zoom.x.max is not None:
       self._fig.update_xaxes(range=[self.controls.zoom.x.min, self.controls.zoom.x.max])
     if self.controls.zoom.y.min is not None and self.controls.zoom.y.max is not None:
-      self._fig.update_yaxes(range=[self.controls.zoom.y.min, self.controls.zoom.y.max], title_text=self.controls.target.display_value)
+      self._fig.update_yaxes(
+        range=[self.controls.zoom.y.min, self.controls.zoom.y.max],
+        title_text=self.controls.target.display_value,
+      )
 
     self._fig.update_layout(
       hovermode='x unified',
@@ -443,7 +446,7 @@ class Chart:
 
   def get_title(self) -> str:
     return f'{self.controls.target.display_value} over time (by scenario)'
-  
+
   def get_subtitle(self) -> str:
     return f'Pathogen: {self.controls.pathogen} | Location: {self.controls.location.name} | Age group: {self.controls.age_group.display_value}'
 

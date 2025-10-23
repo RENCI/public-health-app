@@ -323,7 +323,12 @@ def update_round_summary(round_number, pathname):
   report = this_round.get('report') or '...'
   insights = this_round.get('insights') or []
   methods = this_round.get('methods') or '...'
-  return f'Round {round_number}', dcc.Markdown(report), [insight_button(i) for i in insights], dcc.Markdown(methods)
+  return (
+    f'Round {round_number}',
+    dcc.Markdown(report),
+    [insight_button(i) for i in insights],
+    dcc.Markdown(methods),
+  )
 
 
 @callback(
