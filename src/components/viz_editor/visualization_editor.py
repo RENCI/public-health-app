@@ -8,7 +8,7 @@ from src.components.chart_instance_manager import ChartInstanceManager
 
 from .controls import (
   age_group_select,
-  annotations_input,
+  annotations_control,
   certainty_select,
   location_select,
   models_select,
@@ -76,23 +76,22 @@ def visualization_editor(control_values=None, show_controls=True):
       dmc.GridCol(
         [dcc.Store('chart-extent-store'), figure_container],
         id='visualization-column',
-        span=dict(base=12, xl=8, lg=7, md=8),
+        span=dict(base=12, xl=8),
         style={'display': 'flex', 'flexDirection': 'column'},
       ),
       dmc.GridCol(
         dmc.Stack(
           [
             dmc.Card(
-              dmc.Stack(
+              dmc.Grid(
                 [
-                  scenarios_select(value=init_scenarios),
-                  models_select(value=init_models),
-                  location_select(value=init_location),
-                  target_select(value=init_target),
-                  age_group_select(value=init_age_group),
-                  certainty_select(value=init_certainty),
+                  dmc.GridCol(scenarios_select(value=init_scenarios), span=dict(base=12)),
+                  dmc.GridCol(models_select(value=init_models), span=dict(base=12)),
+                  dmc.GridCol(location_select(value=init_location), span=dict(base=12, sm=6)),
+                  dmc.GridCol(target_select(value=init_target), span=dict(base=12, sm=6)),
+                  dmc.GridCol(age_group_select(value=init_age_group), span=dict(base=12, sm=6)),
+                  dmc.GridCol(certainty_select(value=init_certainty), span=dict(base=12, sm=6)),
                 ],
-                gap='sm',
               ),
               variant='soft',
             ),
@@ -101,14 +100,14 @@ def visualization_editor(control_values=None, show_controls=True):
               variant='soft',
             ),
             dmc.Card(
-              annotations_input(value=init_annotations),
+              annotations_control(value=init_annotations),
               variant='soft',
             ),
           ],
           gap='md',
         ),
         id='controls-column',
-        span=dict(base=12, xl=4, lg=5, md=4),
+        span=dict(base=12, xl=4),
       ),
     ],
     mb=12,

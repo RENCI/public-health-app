@@ -177,41 +177,6 @@ class VerticalAnnotation(Annotation):
     super().__init__(value, label, color, 'vertical')
 
 
-class PlotTitle:
-  def __init__(
-    self,
-    pathogen: str,
-    scenario: Scenario,
-    models: list[Model],
-    location: Location,
-    age_group: AgeGroup,
-  ):
-    self.pathogen = pathogen
-    self.scenario = scenario
-    self.location = location
-    self.age_group = age_group
-
-  def __str__(self):
-    return (
-      f'{self.pathogen} Scenario {self.scenario}'
-      + f'{(self.age_group.display_value + " ") if self.age_group else ""} in {self.location}'
-    )
-
-  def __hash__(self):
-    return hash(
-      self.pathogen + self.scenario.name + self.location.name + self.age_group.input_value
-    )
-
-  def __eq__(self, other):
-    return (
-      isinstance(other, PlotTitle)
-      and self.pathogen == other.pathogen
-      and self.scenario == other.scenario
-      and self.location == other.location
-      and self.age_group == other.age_group
-    )
-
-
 class PlotType(StrEnum):
   LINE = 'line'
   BOXPLOT = 'boxplot'
@@ -463,12 +428,16 @@ class Chart:
     if self.controls.zoom.x.min is not None and self.controls.zoom.x.max is not None:
       self._fig.update_xaxes(range=[self.controls.zoom.x.min, self.controls.zoom.x.max])
     if self.controls.zoom.y.min is not None and self.controls.zoom.y.max is not None:
-      self._fig.update_yaxes(range=[self.controls.zoom.y.min, self.controls.zoom.y.max])
+      self._fig.update_yaxes(
+        range=[self.controls.zoom.y.min, self.controls.zoom.y.max],
+        title_text=self.controls.target.display_value,
+      )
 
     self._fig.update_layout(
       hovermode='x unified',
       height=chart_total_height + 180,
-      title='Forecast values over time (by scenario)',
+      title=self.get_title(),
+      title_subtitle_text=self.get_subtitle(),
       uirevision=self.__hash__(),
     )
 
@@ -482,6 +451,12 @@ class Chart:
 
   def get_raw_dataframe(self) -> pd.DataFrame:
     return self._raw_df
+
+  def get_title(self) -> str:
+    return f'{self.controls.target.display_value} over time (by scenario)'
+
+  def get_subtitle(self) -> str:
+    return f'Pathogen: {self.controls.pathogen} | Location: {self.controls.location.name} | Age group: {self.controls.age_group.display_value}'
 
   def update_controls(self, controls: ChartControls) -> None:
     """

@@ -297,6 +297,8 @@ def round_summary():
       dmc.Title('Custom Insights', order=2, my=16),
       dmc.Stack(id='custom-insights-list', gap='md'),
       dcc.Download(id='round-pdf-download'),
+      dmc.Title('Methods', order=2, my=16),
+      dmc.ScrollArea(id='round-methods', h=250),
     ],
     gap='md',
   )
@@ -306,6 +308,7 @@ def round_summary():
   Output('round-title', 'children'),
   Output('round-overview', 'children'),
   Output('insights-list', 'children'),
+  Output('round-methods', 'children'),
   Input('selected-round-store', 'data'),
   Input('url', 'pathname'),
 )
@@ -319,7 +322,13 @@ def update_round_summary(round_number, pathname):
 
   report = this_round.get('report') or '...'
   insights = this_round.get('insights') or []
-  return f'Round {round_number}', dcc.Markdown(report), [insight_button(i) for i in insights]
+  methods = this_round.get('methods') or '...'
+  return (
+    f'Round {round_number}',
+    dcc.Markdown(report),
+    [insight_button(i) for i in insights],
+    dcc.Markdown(methods),
+  )
 
 
 @callback(

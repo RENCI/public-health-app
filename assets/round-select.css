@@ -9,10 +9,6 @@
   --option-hover-bg-color: color-mix(in hsl, var(--option-bg-color), #999 10%);
 
   height: min-content;
-  padding: 0;
-  border: 0;
-  background-color: color-mix(in hsl, var(--option-bg-color), transparent 20%); /* kinda see-thru dropdown tray */
-  backdrop-filter: blur(3px); /* with glass effect  */
   .mantine-ScrollArea-content {
     display: flex;
     flex-direction: column;
