@@ -111,7 +111,7 @@ def visualization_editor(control_values=None, show_controls=True):
           graph,
         ],
         id='visualization-column',
-        span=dict(base=12, xl=8),
+        span=dict(base=12, xl=8, lg=7),
         style={'display': 'flex', 'flexDirection': 'column'},
       ),
       dmc.GridCol(
@@ -125,7 +125,9 @@ def visualization_editor(control_values=None, show_controls=True):
                   dmc.GridCol(location_select(value=init_location_name), span=dict(base=12, sm=6)),
                   dmc.GridCol(target_select(value=init_target), span=dict(base=12, sm=6)),
                   dmc.GridCol(age_group_select(value=init_age_group), span=dict(base=12, sm=6)),
-                  dmc.GridCol(certainty_select(value=init_certainty_percent), span=dict(base=12, sm=6)),
+                  dmc.GridCol(
+                    certainty_select(value=init_certainty_percent), span=dict(base=12, sm=6)
+                  ),
                 ],
               ),
               variant='soft',
@@ -142,7 +144,7 @@ def visualization_editor(control_values=None, show_controls=True):
           gap='md',
         ),
         id='controls-column',
-        span=dict(base=12, xl=4),
+        span=dict(base=12, xl=4, lg=5),
       ),
     ],
     mb=12,
