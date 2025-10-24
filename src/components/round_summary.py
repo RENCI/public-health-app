@@ -276,11 +276,11 @@ download_button = dmc.ActionIcon(
   loading=False,
 )
 
-def round_heading(round_number: str, round_name: str):
-  print(dict(round_number=round_number))
+def round_heading(number: str, date: str, name: str):
   return dmc.Stack([
-    dmc.Title(f'Round {round_number}', order=1, style=dict(fontSize='var(--mantine-h2-font-size'), c='dimmed'),
-    dmc.Title(round_name, order=2, style=dict(fontSize='var(--mantine-h1-font-size')),
+    dmc.Title(f'Round {number}', order=1, style=dict(fontSize='var(--mantine-h2-font-size'), c='dimmed'),
+    dmc.Title(name, order=2, style=dict(fontSize='var(--mantine-h1-font-size')),
+    dmc.Text(f'Date completed: {date}', c='dimmed', style=dict(fontStyle='italic')),
   ], gap=0)
 
 
@@ -328,12 +328,17 @@ def update_round_summary(round_number, pathname):
     return f'Round {round_number}', 'No data.', []
 
   round_name = this_round.get('name')
+  round_date = this_round.get('date')
 
   report = this_round.get('report') or '...'
   insights = this_round.get('insights') or []
   methods = this_round.get('methods') or '...'
   return (
-    round_heading(round_number, round_name),
+    round_heading(
+      number=round_number,
+      date=round_date,
+      name=round_name,
+    ),
     dcc.Markdown(report),
     [insight_button(i) for i in insights],
     dcc.Markdown(methods),
