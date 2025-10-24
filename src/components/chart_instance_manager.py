@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from src.components.chart import Chart, ChartControls, PlotType
+from src.components.chart import Chart, ChartControls
 
 
 class ChartInstanceManager:

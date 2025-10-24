@@ -12,12 +12,12 @@ template: default
 created_at: "2025-05-18T22:45:12Z"
 updated_at: "2025-05-18T22:45:12Z"
 controls:
-  plot_type: "line"
-  location: US
+  plot_type: line
+  location_name: US
   target: incident_hospitalization
-  models: [Ensemble]
-  scenarios: [A-2023-10-27, B-2023-10-27]
-  certainty: "95%"
+  model_names: [Ensemble]
+  scenario_names: [A-2023-10-27, B-2023-10-27]
+  certainty_percent: "95%"
   age_group: "0-130"
   x_start_date: "2025-01-01"
   x_axis: target_end_date

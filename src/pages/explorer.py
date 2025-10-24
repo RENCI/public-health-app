@@ -27,7 +27,7 @@ reset_button = dmc.Button(
 )
 
 insight_toolbar = dmc.Flex(
-  children=[back_button, dmc.Group([reset_button])],
+  [back_button, dmc.Group(reset_button)],
   justify='space-between',
   align='center',
   mb=24,

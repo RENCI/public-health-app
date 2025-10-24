@@ -8,7 +8,6 @@ from typing import Any, Self
 
 import pandas as pd
 import plotly.graph_objects as go
-from dash import dcc
 from plotly.subplots import make_subplots
 
 from src.components.enums import AgeGroup, CertaintyInterval, DataType, Target
@@ -140,11 +139,7 @@ class Annotation(ABC):
 
   # Create a deterministic string representation of the chart parameters
   def get_key(self) -> str:
-    key_components = [
-      str(self.type),
-      str(self.label),
-      str(self.value),
-    ]
+    key_components = [str(self.type), str(self.label), str(self.value)]
     return '|'.join(key_components)
 
   def __hash__(self):
@@ -312,9 +307,6 @@ class Chart(ABC):
 
   def get_fig(self) -> go.Figure:
     return self._fig
-
-  def get_graph(self) -> dcc.Graph:
-    return dcc.Graph(id=f'graph-{self.__hash__()}', figure=self._fig)
 
   def get_raw_dataframe(self) -> pd.DataFrame:
     return self._raw_df
@@ -496,10 +488,7 @@ class LineChart(Chart):
     return hash(self.get_key(self.controls))
 
   def __eq__(self, other):
-    return (
-      isinstance(other, LineChart)
-      and self.controls == other.controls
-    )
+    return isinstance(other, LineChart) and self.controls == other.controls
 
   def refresh_fig(self) -> go.Figure:
     # handle empty properties
@@ -533,11 +522,6 @@ class LineChart(Chart):
 
     # use given age group
     df = df.query('age_group == @self.controls.age_group.input_value')
-
-    # create boxplot if prudent
-    if self.controls.plot_type == PlotType.BOXPLOT:
-      self._fig.add_trace(go.Box(y='Ensemble', x=df[self.controls.x_axis]))
-      return self._fig
 
     # otherwise,create subplots
     self._fig = make_subplots(
@@ -617,10 +601,8 @@ class LineChart(Chart):
     if self.controls.zoom.x.min is not None and self.controls.zoom.x.max is not None:
       self._fig.update_xaxes(range=[self.controls.zoom.x.min, self.controls.zoom.x.max])
     if self.controls.zoom.y.min is not None and self.controls.zoom.y.max is not None:
-      self._fig.update_yaxes(
-        range=[self.controls.zoom.y.min, self.controls.zoom.y.max],
-        title_text=self.controls.target.display_value,
-      )
+      self._fig.update_yaxes(range=[self.controls.zoom.y.min, self.controls.zoom.y.max])
+    self._fig.update_yaxes(title_text=self.controls.target.display_value)
 
     self._fig.update_layout(
       hovermode='x unified',
@@ -634,9 +616,6 @@ class LineChart(Chart):
 
   def get_fig(self) -> go.Figure:
     return self._fig
-
-  def get_graph(self) -> dcc.Graph:
-    return dcc.Graph(id='graph', figure=self._fig)
 
   def get_raw_dataframe(self) -> pd.DataFrame:
     return self._raw_df
@@ -690,6 +669,21 @@ class LineChart(Chart):
         col=1,
       )
 
+  def _reload_data(self):
+    """
+    Reload data, for example if a variable changed, e.g. round number, location, target, etc.
+    This is called by individual update methods when data-dependent fields change.
+    """
+    new_raw_df = Chart.collect_data(
+      self.controls.data_type,
+      self.controls.round_num,
+      self.controls.location.name,
+      self.controls.target.input_value,
+    )
+    new_raw_df[self.controls.x_axis] = pd.to_datetime(new_raw_df[self.controls.x_axis])
+    new_raw_df = new_raw_df.set_index(self.controls.x_axis)
+    self._raw_df = new_raw_df
+
 
 class BoxplotChart(Chart):
   """Chart class for displaying boxplot visualizations"""
@@ -702,12 +696,12 @@ class BoxplotChart(Chart):
       self.controls.location.name,
       'incident_hospitalization',
     )
-    self._second_raw_df = Chart.collect_data(
-      self.controls.data_type,
-      self.controls.round_num,
-      self.controls.location.name,
-      'incident_death',
-    )
+    # self._second_raw_df = Chart.collect_data(
+    #   self.controls.data_type,
+    #   self.controls.round_num,
+    #   self.controls.location.name,
+    #   'incident_death',
+    # )
     self._fig = go.Figure()
 
     self.refresh_fig()
@@ -720,10 +714,7 @@ class BoxplotChart(Chart):
     return hash(self.get_key(self.controls))
 
   def __eq__(self, other):
-    return (
-      isinstance(other, BoxplotChart)
-      and self.controls == other.controls
-    )
+    return isinstance(other, BoxplotChart) and self.controls == other.controls
 
   def refresh_fig(self) -> go.Figure:
     # handle empty properties
@@ -743,24 +734,23 @@ class BoxplotChart(Chart):
       rows=num_rows,
       cols=num_cols,
       vertical_spacing=0.1,
-      subplot_titles=[f'Scenario {s.name}' for s in self.controls.scenarios],
-      specs=[[{'secondary_y': True}]],
+      specs=[[{'secondary_y': False}, {'secondary_y': True}] for _ in range(num_rows)],
     )
 
     # start with the raw dataframe
     df = self._raw_df
-    second_df = self._second_raw_df
+    # second_df = self._second_raw_df
     # filter for given age group
     df = df.query('age_group == @self.controls.age_group.input_value')
-    second_df = second_df.query('age_group == @self.controls.age_group.input_value')
+    # second_df = second_df.query('age_group == @self.controls.age_group.input_value')
     # filter for ensemble model, specifically
     ensemble_model_id = get_model_id('Ensemble')
     df = df.query('model_name == @ensemble_model_id')
-    second_df = second_df.query('model_name == @ensemble_model_id')
+    # second_df = second_df.query('model_name == @ensemble_model_id')
 
     for i, scenario in enumerate(self.controls.scenarios, start=1):
       scenario_df = df.query('scenario_id == @scenario.id')
-      second_scenario_df = second_df.query('scenario_id == @scenario.id')
+      # second_scenario_df = second_df.query('scenario_id == @scenario.id')
       self._fig.add_trace(
         go.Box(
           y=scenario_df[self.controls.y_axis],
@@ -772,7 +762,7 @@ class BoxplotChart(Chart):
       )
       self._fig.add_trace(
         go.Box(
-          y=second_scenario_df[self.controls.y_axis],
+          y=scenario_df[self.controls.y_axis],
           marker_color=get_model_color_by_id(ensemble_model_id),
         ),
         row=i,
@@ -788,14 +778,16 @@ class BoxplotChart(Chart):
     for row in range(1, num_rows + 1):
       y_axis_num = f'y{row}'
       for col in range(1, num_cols + 1):
+        # Only set y-axis title for second column (secondary_y=True)
+        y_axis_title = f'Scenario {self.controls.scenarios[row - 1].name}' if col == 2 else None
         self._fig.update_yaxes(
           showspikes=True,
           spikemode='across',
           matches=y_axis_num,
           row=row,
           col=col,
-          title_text=f'Scenario {self.controls.scenarios[row - 1].name}',
-          secondary_y=col == 2,
+          title_text=y_axis_title,
+          secondary_y=(col == 2),
         )
 
     # update zoom ranges
@@ -824,8 +816,6 @@ class BoxplotChart(Chart):
       self.controls.location.name,
       self.controls.target.input_value,
     )
-    new_raw_df[self.controls.x_axis] = pd.to_datetime(new_raw_df[self.controls.x_axis])
-    new_raw_df = new_raw_df.set_index(self.controls.x_axis)
     self._raw_df = new_raw_df
 
   def update_certainty_percent(self, certainty_percent: str | None):

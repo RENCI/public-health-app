@@ -318,13 +318,13 @@ def update_round_summary(round_number, pathname):
   rounds = load_rounds()
   this_round = rounds.get(round_number)
   if not this_round:
-    return f'Round {round_number}', 'No data.', []
+    return dmc.Text(f'Round {round_number}'), dmc.Text('No data.'), [], []
 
   report = this_round.get('report') or '...'
   insights = this_round.get('insights') or []
   methods = this_round.get('methods') or '...'
   return (
-    f'Round {round_number}',
+    dmc.Text(f'Round {round_number}'),
     dcc.Markdown(report),
     [insight_button(i) for i in insights],
     dcc.Markdown(methods),

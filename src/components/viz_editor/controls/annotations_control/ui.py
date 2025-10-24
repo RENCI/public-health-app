@@ -1,7 +1,8 @@
-import dash_mantine_components as dmc
-from dash_iconify import DashIconify
 from datetime import datetime
-from dash import dcc, html
+
+import dash_mantine_components as dmc
+from dash import dcc
+from dash_iconify import DashIconify
 
 
 def annotation_type_icon(
@@ -15,8 +16,8 @@ def annotation_type_icon(
     path = f'M{size / 2},{margin} L{size / 2},{size - margin}'
   svg = f"""
   <svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 {size} {size}">
-    <rect x="0" y="0" width="{size}" height="{size}" stroke="none" stroke-width="0" fill="#9992" rx="6" />
-    <path d="{path}" stroke="{color}" stroke-width="3" fill="none" stroke-dasharray="5 2" />
+    <rect x="0" y="0" width="{size}" height="{size}" stroke="none" strokeWidth="0" fill="#9992" rx="6" />
+    <path d="{path}" stroke="{color}" strokeWidth="3" fill="none" strokeDasharray="5 2" />
   </svg>
   """
   return dcc.Markdown(
