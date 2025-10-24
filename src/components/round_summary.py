@@ -276,6 +276,13 @@ download_button = dmc.ActionIcon(
   loading=False,
 )
 
+def round_heading(round_number: str, round_name: str):
+  print(dict(round_number=round_number))
+  return dmc.Stack([
+    dmc.Title(f'Round {round_number}', order=1, style=dict(fontSize='var(--mantine-h2-font-size'), c='dimmed'),
+    dmc.Title(round_name, order=2, style=dict(fontSize='var(--mantine-h1-font-size')),
+  ], gap=0)
+
 
 def round_summary():
   return dmc.Stack(
@@ -284,7 +291,7 @@ def round_summary():
       dmc.Space(h=24),
       dmc.Flex(
         [
-          dmc.Title(id='round-title', order=1),
+          dmc.Box(id='round-heading'),
           tooltip(download_button, label='Download PDF'),
         ],
         justify='space-between',
@@ -292,12 +299,12 @@ def round_summary():
       ),
       dmc.Divider(),
       dmc.Box(id='round-overview'),
-      dmc.Title('Insights from the Modeling Hub', order=2, my=16),
+      dmc.Title('Insights from the Modeling Hub', order=3, my=16),
       dmc.Stack(id='insights-list', gap='md'),
-      dmc.Title('Custom Insights', order=2, my=16),
+      dmc.Title('Custom Insights', order=3, my=16),
       dmc.Stack(id='custom-insights-list', gap='md'),
       dcc.Download(id='round-pdf-download'),
-      dmc.Title('Methods', order=2, my=16),
+      dmc.Title('Methods', order=3, my=16),
       dmc.ScrollArea(id='round-methods', h=250),
     ],
     gap='md',
@@ -305,7 +312,7 @@ def round_summary():
 
 
 @callback(
-  Output('round-title', 'children'),
+  Output('round-heading', 'children'),
   Output('round-overview', 'children'),
   Output('insights-list', 'children'),
   Output('round-methods', 'children'),
@@ -320,11 +327,13 @@ def update_round_summary(round_number, pathname):
   if not this_round:
     return f'Round {round_number}', 'No data.', []
 
+  round_name = this_round.get('name')
+
   report = this_round.get('report') or '...'
   insights = this_round.get('insights') or []
   methods = this_round.get('methods') or '...'
   return (
-    f'Round {round_number}',
+    round_heading(round_number, round_name),
     dcc.Markdown(report),
     [insight_button(i) for i in insights],
     dcc.Markdown(methods),
