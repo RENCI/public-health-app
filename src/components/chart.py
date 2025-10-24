@@ -355,59 +355,7 @@ class Chart:
     for i, scenario in enumerate(self.controls.scenarios, start=1):
       scenario_df = df.query('scenario_id == @scenario.id')
 
-      # decide whether to add certainty intervals
-      should_add_certainty_intervals = (
-        self.controls.certainty_percent
-        and self.controls.certainty_percent.display_value in CertaintyInterval.display_values()
-      )
-
-      # add traces for each model
-      for model in self.controls.models:
-        # add certainty intervals if necessary
-        if should_add_certainty_intervals:
-          self._plot_certainty_interval(scenario_df=scenario_df, model=model, row_num=i)
-
-        # add main line (0.5 quantile)
-        primary_line_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
-        self._fig.add_trace(
-          go.Scatter(
-            x=primary_line_data.index,
-            y=primary_line_data[self.y_axis],
-            mode='lines',
-            name=f'Model {model.name}',
-            legendgroup=f'Model {model.name}',
-            showlegend=(i == 1),
-            line=dict(color=model.color),
-          ),
-          row=i,
-          col=1,
-        )
-
-      # load gold standard data (the actual data up to present day, not projections)
-      gold_std_df = Chart.collect_gold_std_data(self.controls.round_num)
-      gold_std_df['time_value'] = pd.to_datetime(gold_std_df['time_value'])
-      gold_std_df = gold_std_df.set_index('time_value')
-      gold_std_df = gold_std_df.query('age_group == @self.controls.age_group.input_value')
-      gold_std_df = gold_std_df.query('geo_value_fullname == @self.controls.location.name')
-
-      # filter gold standard data to start from x_start_date
-      gold_std_df = gold_std_df.loc[self.x_start_date :]
-
-      # add gold standard line
-      self._fig.add_trace(
-        go.Scatter(
-          x=gold_std_df.index,
-          y=gold_std_df['value'],
-          mode='lines',
-          name='Gold standard',
-          line=dict(color='black', dash='dot'),
-          marker=dict(symbol='diamond'),
-          legendgroup='Gold standard',
-          showlegend=(i == 1),
-        ),
-        row=i,
-        col=1,
-      )
+      self._plot_subplot_traces(scenario_df=scenario_df, subplot_row_num=i)
 
     # plot annotations
     self._plot_annotations()
@@ -556,8 +504,65 @@ class Chart:
     self.controls.zoom = Zoom(zoom['x'], zoom['y']) if zoom else Zoom()
     self.refresh_fig()
 
+  def _plot_subplot_traces(self, scenario_df: pd.DataFrame, subplot_row_num: int) -> go.Figure:
+    # decide whether to add certainty intervals
+    should_add_certainty_intervals = (
+      self.controls.certainty_percent
+      and self.controls.certainty_percent.display_value in CertaintyInterval.display_values()
+    )
+
+    # add traces for each model
+    for model in self.controls.models:
+      # add certainty intervals if necessary
+      if should_add_certainty_intervals:
+        self._plot_certainty_interval(
+          scenario_df=scenario_df, model=model, subplot_row_num=subplot_row_num
+        )
+
+      # add main line (0.5 quantile)
+      primary_line_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
+      self._fig.add_trace(
+        go.Scatter(
+          x=primary_line_data.index,
+          y=primary_line_data[self.y_axis],
+          mode='lines',
+          name=f'Model {model.name}',
+          legendgroup=f'Model {model.name}',
+          showlegend=(subplot_row_num == 1),
+          line=dict(color=model.color),
+        ),
+        row=subplot_row_num,
+        col=1,
+      )
+
+    # load gold standard data (the actual data up to present day, not projections)
+    gold_std_df = Chart.collect_gold_std_data(self.controls.round_num)
+    gold_std_df['time_value'] = pd.to_datetime(gold_std_df['time_value'])
+    gold_std_df = gold_std_df.set_index('time_value')
+    gold_std_df = gold_std_df.query('age_group == @self.controls.age_group.input_value')
+    gold_std_df = gold_std_df.query('geo_value_fullname == @self.controls.location.name')
+
+    # filter gold standard data to start from x_start_date
+    gold_std_df = gold_std_df.loc[self.x_start_date :]
+
+    # add gold standard line
+    self._fig.add_trace(
+      go.Scatter(
+        x=gold_std_df.index,
+        y=gold_std_df['value'],
+        mode='lines',
+        name='Gold standard',
+        line=dict(color='black', dash='dot'),
+        marker=dict(symbol='diamond'),
+        legendgroup='Gold standard',
+        showlegend=(subplot_row_num == 1),
+      ),
+      row=subplot_row_num,
+      col=1,
+    )
+
   def _plot_certainty_interval(
-    self, scenario_df: pd.DataFrame, model: Model, row_num: int
+    self, scenario_df: pd.DataFrame, model: Model, subplot_row_num: int
   ) -> go.Figure:
     for lower_q, upper_q in self.controls.certainty_percent.get_bounds():
       lower_model = scenario_df.query('type_id == @lower_q and model_name == @model.id')
@@ -573,7 +578,7 @@ class Chart:
           hoverinfo='skip',
           showlegend=False,
         ),
-        row=row_num,
+        row=subplot_row_num,
         col=1,
       )
 
