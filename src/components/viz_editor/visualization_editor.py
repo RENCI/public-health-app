@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 from dash import Input, Output, State, callback, dcc, exceptions, html
 
 from src.components.chart import ChartControls
-from src.components.chart_instance_manager import ChartInstanceManager
+from src.components.chart.chart_instance_manager import ChartInstanceManager
 
 from .controls import (
   age_group_select,

@@ -6,6 +6,9 @@ from typing import Any, Optional
 
 import pandas as pd
 
+from src.components.enums import CertaintyInterval
+from src.util.colors import replace_opacity
+
 # Global variable to store loaded constants
 _CONSTANTS: Optional[dict[str, Any]] = None
 _LOCATIONS: Optional[dict[str, tuple[str, int, int]]] = None
@@ -151,3 +154,26 @@ def get_location_data(location: str) -> tuple[str, int, int]:
 def get_location_order() -> list[str]:
   """Get the ordered list of locations."""
   return get_constants().get('location_order', [])
+
+
+def get_certainty_interval_opacities() -> dict[CertaintyInterval, float]:
+  """Get the opacity mappings for certainty intervals."""
+  return {
+    CertaintyInterval.NINETY_FIVE_PERCENT: 0.2,
+    CertaintyInterval.NINETY_PERCENT: 0.3,
+    CertaintyInterval.EIGHTY_PERCENT: 0.4,
+    CertaintyInterval.FIFTY_PERCENT: 0.5,
+  }
+
+
+def get_certainty_interval_opacity(certainty_interval: CertaintyInterval) -> float:
+  """Get the opacity for a specific certainty interval."""
+  return get_certainty_interval_opacities()[certainty_interval]
+
+
+def get_model_color_with_certainty_interval(
+  model_color: str,
+  certainty_interval: CertaintyInterval = CertaintyInterval.NINETY_FIVE_PERCENT,
+) -> str:
+  """Get the model color with the opacity for a specific certainty interval. Defaults to 95%."""
+  return replace_opacity(model_color, get_certainty_interval_opacity(certainty_interval))

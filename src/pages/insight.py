@@ -14,12 +14,12 @@ from dash import (
   register_page,
 )
 from dash_iconify import DashIconify
+from slugify import slugify
 
 from src.components.tooltip import tooltip
 from src.components.viz_editor import visualization_editor
 from src.data.rounds.round19 import get_insight
 from src.util.export.pdf import generate_insight_pdf
-from src.util.slugify import slugify
 
 register_page(__name__, path_template='/insight/<insight_id>', name='Insight Details')
 

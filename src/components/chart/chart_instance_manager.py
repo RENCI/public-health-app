@@ -1,6 +1,8 @@
 from functools import lru_cache
 
-from src.components.chart import Chart, ChartControls
+from src.components.chart import create_chart
+from src.components.chart.chart import Chart
+from src.components.chart.chart_controls import ChartControls
 
 
 class ChartInstanceManager:
@@ -19,7 +21,7 @@ class ChartInstanceManager:
     """
     Create a chart instance. This method is cached by @lru_cache.
     """
-    return Chart.create(controls)
+    return create_chart(controls)
 
   def get_chart(self, controls: ChartControls) -> Chart:
     """

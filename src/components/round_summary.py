@@ -14,13 +14,13 @@ from dash import (
   no_update,
 )
 from dash_iconify import DashIconify
+from slugify import slugify
 
 from src.components.tooltip import tooltip
 from src.util.data import load_rounds
 from src.util.export.pdf import generate_round_pdf
 from src.util.format_timestamp import format_timestamp
 from src.util.insight import generate_insight_share_url
-from src.util.slugify import slugify
 from src.util.time_ago import time_ago
 
 
