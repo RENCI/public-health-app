@@ -44,9 +44,8 @@ no_insights_message = dmc.Card(
           dmc.Button(
             [
               'Build a custom insight',
-              ' ',
-              DashIconify(icon='feather:arrow-right', width=20),
             ],
+            leftSection=DashIconify(icon='feather:arrow-up-right', width=20),
             variant='gradient',
             gradient={'from': 'lime', 'to': 'teal', 'deg': 120},
             style=dict(
@@ -112,7 +111,8 @@ def insight_button(item):
 
   view_button = dmc.Anchor(
     dmc.Button(
-      ['View', ' ', DashIconify(icon='feather:arrow-right', width=20)],
+      'View',
+      rightSection=DashIconify(icon='feather:arrow-right', width=20),
       variant='light',
       style=dict(
         textDecoration='none',
@@ -268,36 +268,40 @@ delete_modal = dmc.Modal(
   centered=True,
 )
 
-download_button = dmc.ActionIcon(
-  DashIconify(icon='feather:download'),
+download_button = dmc.Button(
+  'PDF',
+  leftSection=DashIconify(icon='feather:download'),
   id='download-round-button',
-  variant='subtle',
-  size='lg',
+  variant='light',
+  size='xs',
   loading=False,
 )
 
 def round_heading(number: str, date: str, name: str):
   return dmc.Stack([
     dmc.Title(f'Round {number}', order=1, style=dict(fontSize='var(--mantine-h2-font-size'), c='dimmed'),
-    dmc.Title(name, order=2, style=dict(fontSize='var(--mantine-h1-font-size')),
-    dmc.Text(f'Date completed: {date}', c='dimmed', style=dict(fontStyle='italic')),
+    dmc.Flex([
+      dmc.Text(name, style=dict(fontSize='var(--mantine-h1-font-size'), fw=700),
+      dmc.Text(f'Date completed: {date}', c='dimmed', span=True, style=dict(fontStyle='italic')),
+    ], justify='space-between', align='flex-end'),
   ], gap=0)
+
+round_toolbar = dmc.Card([
+  dmc.Flex(
+    dmc.Flex([download_button], gap='xs'),
+    justify='flex-end',
+    align='center',
+  )], variant='soft', p='xs', mb=24)
 
 
 def round_summary():
   return dmc.Stack(
     [
       delete_modal,
-      dmc.Space(h=24),
-      dmc.Flex(
-        [
-          dmc.Box(id='round-heading'),
-          tooltip(download_button, label='Download PDF'),
-        ],
-        justify='space-between',
-        align='flex-end',
-      ),
-      dmc.Divider(),
+      dmc.Space(h=16),
+      dmc.Box(id='round-heading'),
+      round_toolbar,
+      dmc.Title('Round Summary', order=3),
       dmc.Box(id='round-overview'),
       dmc.Title('Insights from the Modeling Hub', order=3, my=16),
       dmc.Stack(id='insights-list', gap='md'),
