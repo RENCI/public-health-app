@@ -16,6 +16,7 @@ from dash import (
 from dash_iconify import DashIconify
 
 from src.components.tooltip import tooltip
+from src.components.toolbar import toolbar
 from src.components.viz_editor import visualization_editor
 from src.data.rounds.round19 import get_insight
 from src.util.data import load_rounds
@@ -60,15 +61,10 @@ explorer_button = dmc.Anchor(
 )
 
 
-insight_toolbar = dmc.Card([
-  dmc.Flex(
-    children=[
-      back_button,
-      dmc.Flex([download_button, explorer_button], gap='xs'),
-    ],
-    justify='space-between',
-    align='center',
-  )], variant='soft', p='xs', mt=16, mb=24)
+insight_toolbar = toolbar(
+  left=[back_button],
+  right=[download_button, explorer_button]
+)
 
 
 loading_insight = [

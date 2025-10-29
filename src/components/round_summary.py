@@ -16,6 +16,7 @@ from dash import (
 from dash_iconify import DashIconify
 
 from src.components.tooltip import tooltip
+from src.components.toolbar import toolbar
 from src.util.data import load_rounds
 from src.util.export.pdf import generate_round_pdf
 from src.util.format_timestamp import format_timestamp
@@ -286,12 +287,9 @@ def round_heading(number: str, date: str, name: str):
     ], justify='space-between', align='flex-end'),
   ], gap=0)
 
-round_toolbar = dmc.Card([
-  dmc.Flex(
-    dmc.Flex([download_button], gap='xs'),
-    justify='flex-end',
-    align='center',
-  )], variant='soft', p='xs', mb=24)
+round_toolbar = toolbar(
+  right=[download_button]
+)
 
 
 def round_summary():
@@ -311,7 +309,7 @@ def round_summary():
       dmc.Title('Methods', order=3, my=16),
       dmc.ScrollArea(id='round-methods', h=250),
     ],
-    gap='md',
+    gap=0,
   )
 
 
