@@ -29,6 +29,10 @@
   .round-option-label {
     font-weight: bold;
   }
+  .round-option-sublabel {
+    font-weight: normal;
+    font-style: italic;
+  }
   &::before {
     content: "";
     position: absolute;

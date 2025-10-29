@@ -10,6 +10,7 @@ options = [
     value=n,
     round_number=rounds[n]['round_number'],
     label=f'Round {rounds[n]["round_number"]}',
+    sublabel=f'Round completed: {rounds[n]["date"]}',
     snippet=rounds[n]['name'],
     insights_count=len(rounds[n].get('insights')),
   )

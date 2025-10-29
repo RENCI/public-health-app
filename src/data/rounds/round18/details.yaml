@@ -1,5 +1,6 @@
 round_number: 18
 name: "Round does not contain data"
+date: June 4, 2024
 report: >
   In the 18th Round of COVID-19 scenario projections, the US COVID-19 Scenario
   Modeling Hub aimed to estimate the impact Quis aliquip culpa nostrud officia
@@ -8,3 +9,5 @@ report: >
   dolor voluptate commodo sit veniam. Lorem ipsum exercitation duis enim aliquip
   cillum id in qui nulla amet. Mollit dolor ut consectetur qui reprehenderit sunt
   adipisicing labore sit.
+methods: |
+  placeholder

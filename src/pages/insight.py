@@ -16,16 +16,61 @@ from dash import (
 from dash_iconify import DashIconify
 
 from src.components.tooltip import tooltip
+from src.components.toolbar import toolbar
 from src.components.viz_editor import visualization_editor
 from src.data.rounds.round19 import get_insight
+from src.util.data import load_rounds
 from src.util.export.pdf import generate_insight_pdf
 from src.util.slugify import slugify
 
 register_page(__name__, path_template='/insight/<insight_id>', name='Insight Details')
 
+
+back_button = dmc.Anchor(
+  dmc.Button(
+    'Round Summary',
+    leftSection=DashIconify(icon='feather:chevron-left'),
+    variant='light',
+    size='xs',
+  ),
+  id='back-to-insights-button',
+  href='/',
+)
+
+
+download_button = dmc.Button(
+  'PDF',
+  leftSection=DashIconify(icon='feather:download'),
+  id='download-insight-button',
+  variant='light',
+  size='xs',
+  loading=False,
+)
+
+
+explorer_button = dmc.Anchor(
+  dmc.Button(
+    'Explore',
+    leftSection=DashIconify(icon='feather:arrow-up-right'),
+    variant='gradient',
+    size='xs',
+    gradient={'from': 'lime', 'to': 'teal', 'deg': 120},
+  ),
+  id='explorer-button',
+  href='#',
+)
+
+
+insight_toolbar = toolbar(
+  left=[back_button],
+  right=[download_button, explorer_button]
+)
+
+
 loading_insight = [
-  dmc.Title(id='insight-view-title', order=1, children=dmc.Skeleton(h=85)),
-  dmc.Divider(my=24),
+  dmc.Space(h=16),
+  dmc.Title(id='insight-view-title', order=1, children=dmc.Skeleton(h=82)),
+  insight_toolbar,
   html.Div(
     id='insight-view-figure-container',
     children=dmc.Stack(
@@ -41,48 +86,19 @@ loading_insight = [
   dcc.Download(id='insight-pdf-download'),
 ]
 
-back_button = dmc.Anchor(
-  '← Back to Round Overview',
-  id='back-to-insights-button',
-  href='/',
-)
 
-explorer_button = dcc.Link(
-  dmc.Button(
-    'Explore',
-    leftSection=DashIconify(icon='feather:arrow-up-right'),
-  ),
-  id='explorer-button',
-  href='#',
-)
-
-download_button = dmc.ActionIcon(
-  DashIconify(icon='feather:download'),
-  variant='subtle',
-  id='download-insight-button',
-  size='lg',
-  loading=False,
-)
-
-insight_toolbar = dmc.Flex(
-  children=[
-    back_button,
-    dmc.Group(
-      [
-        tooltip(download_button, label='Download PDF'),
-        tooltip(explorer_button, label="Explore this insight's data"),
-      ]
-    ),
-  ],
-  justify='space-between',
-  align='center',
-  mb=24,
-)
+def insight_heading(round_number: str, round_date: str, round_name: str):
+  return dmc.Stack([
+    dmc.Text(f'Round {round_number}', style=dict(fontSize='var(--mantine-h3-font-size'), c='dimmed', fw=700, mb=8),
+    dmc.Flex([
+      dmc.Text(round_name, style=dict(fontSize='var(--mantine-h2-font-size'), fw=700),
+      dmc.Text(f'Date completed: {round_date}', c='dimmed', style=dict(fontStyle='italic')),
+    ], justify='space-between', align='flex-end'),
+  ], gap=0)
 
 
 layout = dmc.Container(
   children=[
-    insight_toolbar,
     dmc.Box(
       loading_insight,
       id='insight-view-container',
@@ -123,12 +139,24 @@ def show_insight_details(pathname, custom_insights):
     if not insight:
       raise ValueError(f'Insight {insight_id} not found')
 
+
     controls = insight.get('controls', {})
+    round_number = str(controls['round_num'])
+
+    rounds = load_rounds()
+    this_round = rounds.get(round_number)
+    if not this_round:
+      raise exceptions.PreventUpdate
 
     return [
-      dmc.Title(insight.get('title', 'Untitled Insight'), order=1),
-      dmc.Text(insight.get('summary', 'Summary not found')),
-      dmc.Divider(my=24),
+      dmc.Space(h=16),
+      insight_heading(
+        round_number=round_number,
+        round_date=this_round.get('date'),
+        round_name=this_round.get('name'),
+      ),
+      insight_toolbar,
+      dmc.Title(f'Insight: {insight.get('title', 'Untitled Insight')}', order=1),
       html.Div(
         visualization_editor(control_values=controls, show_controls=False),
         style=dict(margin='24px 0'),
