@@ -1,3 +1,4 @@
+from datetime import datetime
 import uuid
 
 import dash_mantine_components as dmc
@@ -79,6 +80,30 @@ insight_toolbar = dmc.Flex(
   mb=24,
 )
 
+def annotations_list(annotations: list):
+  value_annotations = [dmc.ListItem(
+    dmc.Text([
+      dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
+      f'{annotation["value"]:,}',
+    ]), c=annotation['color'])
+    for annotation in annotations if annotation['type'] == 'horizontal'
+  ]
+  date_annotations = [dmc.ListItem(
+    dmc.Text([
+      dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
+      f'{datetime.fromisoformat(annotation["value"]).strftime("%B %-d, %Y")}',
+    ]), c=annotation['color'])
+    for annotation in annotations if annotation['type'] == 'vertical'
+  ]
+  
+  return dmc.Stack([
+    dmc.Title('Annotations', order=2),
+    dmc.Title('Notable Values', order=3),
+    dmc.List(value_annotations),
+    dmc.Title('Notable Dates', order=3),
+    dmc.List(date_annotations)
+  ])
+
 
 layout = dmc.Container(
   children=[
@@ -120,10 +145,12 @@ def show_insight_details(pathname, custom_insights):
       raise ValueError('No insight ID provided')
 
     insight = get_insight(insight_id, custom_insights=custom_insights or [])
+
     if not insight:
       raise ValueError(f'Insight {insight_id} not found')
 
     controls = insight.get('controls', {})
+    annotations = controls['annotations'] or []
 
     return [
       dmc.Title(insight.get('title', 'Untitled Insight'), order=1),
@@ -132,6 +159,8 @@ def show_insight_details(pathname, custom_insights):
         visualization_editor(control_values=controls, show_controls=False),
         style=dict(margin='24px 0'),
       ),
+      annotations_list(annotations),
+      dmc.Title('Description', order=2, my=12),
       dcc.Markdown(insight.get('description', '')),
       dcc.Download(id='insight-pdf-download'),
     ]
