@@ -3,6 +3,7 @@ import uuid
 
 import dash_mantine_components as dmc
 from dash import (
+  ALL,
   Input,
   Output,
   State,
@@ -109,17 +110,21 @@ def annotations_list(annotations: list):
     dmc.Text([
       dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
       f'{datetime.fromisoformat(annotation["value"]).strftime("%B %-d, %Y")}',
-    ]), c=annotation['color'])
-    for annotation in annotations if annotation['type'] == 'vertical'
-  ]
+    ], id=annotation['label']),
+    c=annotation['color'],
+    id={'type': 'annotation-item', 'id': annotation['label']},
+    style=dict(cursor='pointer'),
+  ) for annotation in annotations if annotation['type'] == 'vertical']
 
   value_annotations = [dmc.ListItem(
     dmc.Text([
       dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
       f'{annotation["value"]:,}',
-    ]), c=annotation['color'])
-    for annotation in annotations if annotation['type'] == 'horizontal'
-  ]
+    ], id=annotation['label']),
+    c=annotation['color'],
+    id={'type': 'annotation-item', 'id': annotation['label']},
+    style=dict(cursor='pointer'),
+  ) for annotation in annotations if annotation['type'] == 'horizontal']
 
   if len(value_annotations) > 0:
     annotations_list.extend([
@@ -133,11 +138,12 @@ def annotations_list(annotations: list):
       dmc.List(date_annotations)
     ])
   
-  return dmc.Stack(annotations_list)
+  return dmc.Stack(annotations_list, id='annotations-list-container')
 
 
 layout = dmc.Container(
   children=[
+    dmc.Box(id='dummy-output'),
     dmc.Box(
       loading_insight,
       id='insight-view-container',
@@ -273,3 +279,29 @@ def handle_click_download(n_clicks, custom_insights, pathname):
       'color': 'crimson',
     }
     return no_update, [notification], False
+
+
+# clientside_callback(
+#   """
+#   function(children, id_list) {
+#     id_list.forEach(id => {
+#       const element = document.getElementById(id);
+#       console.log(id, element);
+#       if (element && !element._hasListener) {
+#         element.addEventListener('mouseenter', () => {
+#           console.log('hover', item);
+#         });
+#         element.addEventListener('mouseleave', () => {
+#           console.log('leave', item);
+#         });
+#         element._hasListener = true;
+#       }
+#     });
+#     return null;
+#   }
+#   """,
+#   Output('dummy-output', 'children'),
+#   Input('annotations-list-container', 'children'),
+#   State({'type': 'annotation-item', 'id': ALL}, 'id'),
+#   prevent_initial_call=True,
+# )

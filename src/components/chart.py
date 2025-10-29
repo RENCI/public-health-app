@@ -588,6 +588,7 @@ class Chart:
           line_color=annotation.color,
           line_width=1,
           annotation_text=annotation.label,
+          name=annotation.label,
         )
       elif isinstance(annotation, VerticalAnnotation):
         # Convert date to timestamp in milliseconds, as there passing the datetime object directly and adding annotation_text causes a TypeError
@@ -605,6 +606,7 @@ class Chart:
           line_color=annotation.color,
           line_width=1,
           annotation_text=annotation.label,
+          name=annotation.label,
         )
       else:
         raise ValueError(f'Invalid annotation type: {annotation.type}')
