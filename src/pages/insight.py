@@ -162,7 +162,7 @@ def show_insight_details(pathname, custom_insights):
         visualization_editor(control_values=controls, show_controls=False),
         style=dict(margin='24px 0'),
       ),
-      dcc.Markdown(insight.get('description', '')),
+      dcc.Markdown(insight.get('description', ''), dangerously_allow_html=True),
       dcc.Download(id='insight-pdf-download'),
     ]
 

@@ -7,6 +7,12 @@ description: >
   - **648,000 cumulative hospitalizations (95% PI 241,000–778,000) and 40,000 deaths (95% PI 25,000-59,000)** due to COVID-19 projected from April 27, 2025 to April 25, 2026 in the high-risk vaccination scenario (i.e., booster vaccination only among individuals aged 65+ or otherwise at high risk for elevated severity).
 
   - **The majority of hospitalization and death burden from COVID-19 is expected to occur in individuals 65+**:  56% of hospitalizations and 84% of deaths occur among 65+ in the high-risk vaccination scenario.
+
+
+  Note that all values after <div style='display: inline-block; height: 1.5em; width: 1px; border-left: 1px dashed #993366; vertical-align: middle;' /> *Some Policy change* are...
+
+
+  Also note the interesting value at <span style='font-style: italic; border-bottom: 1px dashed #663399;' children='Value for seasonal-burden-and-trajectory insight.' />
 image_url: assets/images/insight-preview/insight-5.png
 template: default
 created_at: "2025-05-18T22:45:12Z"
