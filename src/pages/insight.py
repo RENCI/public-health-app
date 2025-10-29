@@ -157,6 +157,7 @@ def show_insight_details(pathname, custom_insights):
       ),
       insight_toolbar,
       dmc.Title(f'Insight: {insight.get('title', 'Untitled Insight')}', order=1),
+      dmc.Text(insight.get('summary', 'Summary not found')),
       html.Div(
         visualization_editor(control_values=controls, show_controls=False),
         style=dict(margin='24px 0'),
