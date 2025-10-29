@@ -16,6 +16,7 @@ from dash import (
 from dash_iconify import DashIconify
 
 from src.components.tooltip import tooltip
+from src.components.toolbar import toolbar
 from src.util.data import load_rounds
 from src.util.export.pdf import generate_round_pdf
 from src.util.format_timestamp import format_timestamp
@@ -44,9 +45,8 @@ no_insights_message = dmc.Card(
           dmc.Button(
             [
               'Build a custom insight',
-              ' ',
-              DashIconify(icon='feather:arrow-right', width=20),
             ],
+            leftSection=DashIconify(icon='feather:arrow-up-right', width=20),
             variant='gradient',
             gradient={'from': 'lime', 'to': 'teal', 'deg': 120},
             style=dict(
@@ -109,10 +109,12 @@ def insight_button(item):
   )
 
   title = dmc.Text(item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left'))
+  summary = dmc.Text(item['summary'], c='dimmed')
 
   view_button = dmc.Anchor(
     dmc.Button(
-      ['View', ' ', DashIconify(icon='feather:arrow-right', width=20)],
+      'View',
+      rightSection=DashIconify(icon='feather:arrow-right', width=20),
       variant='light',
       style=dict(
         textDecoration='none',
@@ -130,7 +132,7 @@ def insight_button(item):
     [
       graphic,
       dmc.Stack(
-        [title],
+        [title, summary],
         align='flex-start',
         style=dict(flex=1, overflow='hidden'),
       ),
@@ -268,12 +270,26 @@ delete_modal = dmc.Modal(
   centered=True,
 )
 
-download_button = dmc.ActionIcon(
-  DashIconify(icon='feather:download'),
+download_button = dmc.Button(
+  'PDF',
+  leftSection=DashIconify(icon='feather:download'),
   id='download-round-button',
-  variant='subtle',
-  size='lg',
+  variant='light',
+  size='xs',
   loading=False,
+)
+
+def round_heading(number: str, date: str, name: str):
+  return dmc.Stack([
+    dmc.Title(f'Round {number}', order=1, style=dict(fontSize='var(--mantine-h2-font-size'), c='dimmed'),
+    dmc.Flex([
+      dmc.Text(name, style=dict(fontSize='var(--mantine-h1-font-size'), fw=700),
+      dmc.Text(f'Date completed: {date}', c='dimmed', span=True, style=dict(fontStyle='italic')),
+    ], justify='space-between', align='flex-end'),
+  ], gap=0)
+
+round_toolbar = toolbar(
+  right=[download_button]
 )
 
 
@@ -281,31 +297,25 @@ def round_summary():
   return dmc.Stack(
     [
       delete_modal,
-      dmc.Space(h=24),
-      dmc.Flex(
-        [
-          dmc.Title(id='round-title', order=1),
-          tooltip(download_button, label='Download PDF'),
-        ],
-        justify='space-between',
-        align='flex-end',
-      ),
-      dmc.Divider(),
+      dmc.Space(h=16),
+      dmc.Box(id='round-heading'),
+      round_toolbar,
+      dmc.Title('Round Summary', order=3),
       dmc.Box(id='round-overview'),
-      dmc.Title('Insights from the Modeling Hub', order=2, my=16),
+      dmc.Title('Insights from the Modeling Hub', order=3, my=16),
       dmc.Stack(id='insights-list', gap='md'),
-      dmc.Title('Custom Insights', order=2, my=16),
+      dmc.Title('Custom Insights', order=3, my=16),
       dmc.Stack(id='custom-insights-list', gap='md'),
       dcc.Download(id='round-pdf-download'),
-      dmc.Title('Methods', order=2, my=16),
+      dmc.Title('Methods', order=3, my=16),
       dmc.ScrollArea(id='round-methods', h=250),
     ],
-    gap='md',
+    gap=0,
   )
 
 
 @callback(
-  Output('round-title', 'children'),
+  Output('round-heading', 'children'),
   Output('round-overview', 'children'),
   Output('insights-list', 'children'),
   Output('round-methods', 'children'),
@@ -320,11 +330,18 @@ def update_round_summary(round_number, pathname):
   if not this_round:
     return f'Round {round_number}', 'No data.', []
 
+  round_name = this_round.get('name')
+  round_date = this_round.get('date')
+
   report = this_round.get('report') or '...'
   insights = this_round.get('insights') or []
   methods = this_round.get('methods') or '...'
   return (
-    f'Round {round_number}',
+    round_heading(
+      number=round_number,
+      date=round_date,
+      name=round_name,
+    ),
     dcc.Markdown(report),
     [insight_button(i) for i in insights],
     dcc.Markdown(methods),

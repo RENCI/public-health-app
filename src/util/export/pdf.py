@@ -1,7 +1,9 @@
 import os
 import markdown
 from weasyprint import HTML
+
 from src.util.assets import asset_uri
+from src.util.data import load_rounds
 
 LOGO_URI = asset_uri('images/covid19-smh-logo.png')
 
@@ -28,6 +30,7 @@ def md_to_html(md_text: str) -> str:
 
 def generate_round_pdf(round_dict):
   round_number = round_dict.get('round_number') or '18'
+  date = round_dict.get('date') or '...'
 
   summary_md = round_dict.get('report') or 'Report not found'
   summary_html = md_to_html(summary_md)
@@ -53,7 +56,7 @@ def generate_round_pdf(round_dict):
     <header>
       <div class="header-title">
         <h1 class="title">Round {round_number}<br />Executive Summary Report</h1>
-        <div class="subtitle">Round completed: June 4, 2025</div>
+        <div class="subtitle">Round completed: {date}</div>
       </div>
       <img src="{LOGO_URI}" alt="SMH Logo" class="header-smh-logo" />
     </header>
@@ -82,11 +85,15 @@ def generate_insight_pdf(insight):
   controls = insight.get('controls', {})
   round_number = controls.get('round', '18')
 
+  rounds = load_rounds()
+  this_round = rounds.get(round_number)
+  round_date = this_round.get('date', '...')
+
   body = f"""
     <header>
       <div class="header-title">
         <h1 class="title">Round {round_number}<br />Insight Report:<br />{title}</h1>
-        <div class="subtitle">Round completed: June 4, 2025</div>
+        <div class="subtitle">Round completed: {round_date}</div>
       </div>
       <img src="{LOGO_URI}" alt="SMH Logo" class="header-smh-logo" />
     </header>

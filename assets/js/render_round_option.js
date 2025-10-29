@@ -14,6 +14,7 @@
         React.createElement(dmc.Text, { key: 'count', size: 'xs' }, `${ option.insights_count } insights`)
       ]),
       React.createElement(dmc.Text, { size: 'sm' }, option.snippet),
+      React.createElement(dmc.Text, { key: 'label', size: 'sm', c: 'dimmed', className: 'round-option-sublabel' }, option.sublabel),
     );
   };
 })();

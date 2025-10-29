@@ -10,6 +10,7 @@ from dash import (
 )
 from dash_iconify import DashIconify
 
+from src.components.toolbar import toolbar
 from src.components.save_insight_form import save_insight_form
 from src.components.viz_editor import visualization_editor
 from src.data.rounds.round19 import get_insight
@@ -17,20 +18,28 @@ from src.util.get_query_param import get_query_param
 
 register_page(__name__, path_template='/explorer', name='Insight Explorer')
 
-back_button = dmc.Anchor('← Abandon Changes', href='/', id='back-button')
+back_button = dmc.Anchor(
+  dmc.Button(
+    'Abandon Changes',
+    leftSection=DashIconify(icon='feather:chevron-left'),
+    variant='light',
+    size='xs',
+  ),
+  id='back-button',
+  href='/',
+)
 
 reset_button = dmc.Button(
   'Reset to Original',
   id='reset-button',
   leftSection=DashIconify(icon='feather:refresh-ccw'),
-  variant='outline',
+  variant='light',
+  size='xs'
 )
 
-insight_toolbar = dmc.Flex(
-  children=[back_button, dmc.Group([reset_button])],
-  justify='space-between',
-  align='center',
-  mb=24,
+insight_toolbar = toolbar(
+  left=[back_button],
+  right=[reset_button],
 )
 
 
