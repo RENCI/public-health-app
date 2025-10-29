@@ -81,13 +81,13 @@ insight_toolbar = dmc.Flex(
 )
 
 def annotations_list(annotations: list):
-  value_annotations = [dmc.ListItem(
-    dmc.Text([
-      dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
-      f'{annotation["value"]:,}',
-    ]), c=annotation['color'])
-    for annotation in annotations if annotation['type'] == 'horizontal'
+  if len(annotations) == 0:
+    return dmc.Box('')
+
+  annotations_list = [
+    dmc.Title('Annotations', order=2),
   ]
+
   date_annotations = [dmc.ListItem(
     dmc.Text([
       dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
@@ -95,14 +95,28 @@ def annotations_list(annotations: list):
     ]), c=annotation['color'])
     for annotation in annotations if annotation['type'] == 'vertical'
   ]
+
+  value_annotations = [dmc.ListItem(
+    dmc.Text([
+      dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
+      f'{annotation["value"]:,}',
+    ]), c=annotation['color'])
+    for annotation in annotations if annotation['type'] == 'horizontal'
+  ]
+
+  if len(value_annotations) > 0:
+    annotations_list.extend([
+      dmc.Title('Notable Values', order=3),
+      dmc.List(value_annotations),
+    ])
+
+  if len(date_annotations) > 0:
+    annotations_list.extend([
+      dmc.Title('Notable Dates', order=3),
+      dmc.List(date_annotations)
+    ])
   
-  return dmc.Stack([
-    dmc.Title('Annotations', order=2),
-    dmc.Title('Notable Values', order=3),
-    dmc.List(value_annotations),
-    dmc.Title('Notable Dates', order=3),
-    dmc.List(date_annotations)
-  ])
+  return dmc.Stack(annotations_list)
 
 
 layout = dmc.Container(
