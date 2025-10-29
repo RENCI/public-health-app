@@ -109,6 +109,7 @@ def insight_button(item):
   )
 
   title = dmc.Text(item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left'))
+  summary = dmc.Text(item['summary'], c='dimmed')
 
   view_button = dmc.Anchor(
     dmc.Button(
@@ -130,7 +131,7 @@ def insight_button(item):
     [
       graphic,
       dmc.Stack(
-        [title],
+        [title, summary],
         align='flex-start',
         style=dict(flex=1, overflow='hidden'),
       ),

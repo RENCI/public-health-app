@@ -127,6 +127,7 @@ def show_insight_details(pathname, custom_insights):
 
     return [
       dmc.Title(insight.get('title', 'Untitled Insight'), order=1),
+      dmc.Text(insight.get('summary', 'Summary not found')),
       dmc.Divider(my=24),
       html.Div(
         visualization_editor(control_values=controls, show_controls=False),
