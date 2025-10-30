@@ -22,6 +22,7 @@ from src.data.rounds.round19 import get_insight
 from src.util.data import load_rounds
 from src.util.export.pdf import generate_insight_pdf
 from src.util.slugify import slugify
+import re
 
 register_page(__name__, path_template='/insight/<insight_id>', name='Insight Details')
 
@@ -148,6 +149,10 @@ def show_insight_details(pathname, custom_insights):
     if not this_round:
       raise exceptions.PreventUpdate
 
+    # Clean description by removing <pdfonly> tags
+    description_md = insight.get('description', '')
+    description_md = re.sub(r'<pdfonly>.*?</pdfonly>', '', description_md, flags=re.DOTALL | re.IGNORECASE)
+
     return [
       dmc.Space(h=16),
       insight_heading(
@@ -162,7 +167,7 @@ def show_insight_details(pathname, custom_insights):
         visualization_editor(control_values=controls, show_controls=False),
         style=dict(margin='24px 0'),
       ),
-      dcc.Markdown(insight.get('description', ''), dangerously_allow_html=True),
+      dcc.Markdown(description_md, dangerously_allow_html=True),
       dcc.Download(id='insight-pdf-download'),
     ]
 
