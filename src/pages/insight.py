@@ -1,3 +1,4 @@
+import os
 import uuid
 
 import dash_mantine_components as dmc
@@ -16,7 +17,7 @@ from dash import (
 from dash_iconify import DashIconify
 
 from src.components.tooltip import tooltip
-from src.components.toolbar import toolbar
+from src.components.toolbar import toolbar, toolbar_button
 from src.components.viz_editor import visualization_editor
 from src.data.rounds.round19 import get_insight
 from src.util.data import load_rounds
@@ -27,33 +28,25 @@ register_page(__name__, path_template='/insight/<insight_id>', name='Insight Det
 
 
 back_button = dmc.Anchor(
-  dmc.Button(
-    'Round Summary',
-    leftSection=DashIconify(icon='feather:chevron-left'),
-    variant='light',
-    size='xs',
-  ),
+  toolbar_button('Round Summary', icon=DashIconify(icon='feather:chevron-left')),
   id='back-to-insights-button',
   href='/',
 )
 
 
-download_button = dmc.Button(
+download_button = toolbar_button(
   'PDF',
-  leftSection=DashIconify(icon='feather:download'),
+  icon=DashIconify(icon='feather:download'),
   id='download-insight-button',
-  variant='light',
-  size='xs',
   loading=False,
 )
 
 
 explorer_button = dmc.Anchor(
-  dmc.Button(
+  toolbar_button(
     'Explore',
-    leftSection=DashIconify(icon='feather:arrow-up-right'),
+    icon=DashIconify(icon='feather:arrow-up-right'),
     variant='gradient',
-    size='xs',
     gradient={'from': 'lime', 'to': 'teal', 'deg': 120},
   ),
   id='explorer-button',
@@ -61,9 +54,21 @@ explorer_button = dmc.Anchor(
 )
 
 
+def view_yaml_button():
+  # DASH_ENV=production is set in the Dockerfile,
+  # but this can be tested by starting the app with
+  # `export DASH_ENV=production && uv run python app.py`.
+  if os.environ.get('DASH_ENV') != 'production':
+    return toolbar_button(
+      'YAML',
+      icon=DashIconify(icon='feather:list'),
+    )
+  return ''
+
+
 insight_toolbar = toolbar(
   left=[back_button],
-  right=[download_button, explorer_button]
+  right=[view_yaml_button(), download_button, explorer_button]
 )
 
 
