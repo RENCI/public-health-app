@@ -9,10 +9,10 @@ description: >
   - **The majority of hospitalization and death burden from COVID-19 is expected to occur in individuals 65+**:  56% of hospitalizations and 84% of deaths occur among 65+ in the high-risk vaccination scenario.
 
 
-  Note that all values after <div style='display: inline-block; height: 1.5em; width: 1px; border-left: 1px dashed #993366; vertical-align: middle;' /> *Some Policy change* are...
+  Note that all values after <div class='vertical-annotation' style='border-color: #993366;' children='Some Policy change' /> are...
 
 
-  Also note the interesting value at <span style='font-style: italic; border-bottom: 1px dashed #663399;' children='Value for seasonal-burden-and-trajectory insight.' />
+  Also note the interesting value at <span class='horizontal-annotation' style='border-color: #663399;' children='Value for seasonal-burden-and-trajectory insight' />.
 image_url: assets/images/insight-preview/insight-5.png
 template: default
 created_at: "2025-05-18T22:45:12Z"
