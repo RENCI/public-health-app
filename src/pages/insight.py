@@ -114,10 +114,9 @@ def annotations_list(annotations: list):
       ],
       id=annotation['label'],
       c=annotation['color'],
-      className='chart-annotation-text vertical',
+      className=f'chart-annotation-text vertical {annotation['label']}',
     ),
     id={'type': 'annotation-item', 'id': annotation['label']},
-    style=dict(cursor='pointer'),
   ) for annotation in annotations if annotation['type'] == 'vertical']
 
   value_annotations = [dmc.ListItem(
@@ -128,10 +127,9 @@ def annotations_list(annotations: list):
       ],
       id=annotation['label'],
       c=annotation['color'],
-      className='chart-annotation-text horizontal',
+      className=f'chart-annotation-text horizontal {annotation['label']}',
     ),
     id={'type': 'annotation-item', 'id': annotation['label']},
-    style=dict(cursor='pointer'),
   ) for annotation in annotations if annotation['type'] == 'horizontal']
 
   if len(value_annotations) > 0:
@@ -219,7 +217,7 @@ def show_insight_details(pathname, custom_insights):
       ),
       dmc.Stack(annotations_list(annotations), id='annotations-list-container'),
       dmc.Title('Description', order=2, my=12),
-      dcc.Markdown(insight.get('description', '')),
+      dcc.Markdown(insight.get('description', ''), dangerously_allow_html=True),
       dcc.Download(id='insight-pdf-download'),
     ]
 
