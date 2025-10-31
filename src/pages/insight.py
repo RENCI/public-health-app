@@ -102,43 +102,51 @@ def annotations_list(annotations: list):
   if len(annotations) == 0:
     return dmc.Box('')
 
-  annotations_list = [
+  list_items = [
     dmc.Title('Annotations', order=2),
   ]
 
   date_annotations = [dmc.ListItem(
-    dmc.Text([
-      dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
-      f'{datetime.fromisoformat(annotation["value"]).strftime("%B %-d, %Y")}',
-    ], id=annotation['label']),
-    c=annotation['color'],
+    dmc.Text(
+      children=[
+        dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
+        f'{datetime.fromisoformat(annotation["value"]).strftime("%B %-d, %Y")}',
+      ],
+      id=annotation['label'],
+      c=annotation['color'],
+      className='chart-annotation-text vertical',
+    ),
     id={'type': 'annotation-item', 'id': annotation['label']},
     style=dict(cursor='pointer'),
   ) for annotation in annotations if annotation['type'] == 'vertical']
 
   value_annotations = [dmc.ListItem(
-    dmc.Text([
-      dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
-      f'{annotation["value"]:,}',
-    ], id=annotation['label']),
-    c=annotation['color'],
+    dmc.Text(
+      children=[
+        dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
+        f'{annotation["value"]:,}',
+      ],
+      id=annotation['label'],
+      c=annotation['color'],
+      className='chart-annotation-text horizontal',
+    ),
     id={'type': 'annotation-item', 'id': annotation['label']},
     style=dict(cursor='pointer'),
   ) for annotation in annotations if annotation['type'] == 'horizontal']
 
   if len(value_annotations) > 0:
-    annotations_list.extend([
+    list_items.extend([
       dmc.Title('Notable Values', order=3),
       dmc.List(value_annotations),
     ])
 
   if len(date_annotations) > 0:
-    annotations_list.extend([
+    list_items.extend([
       dmc.Title('Notable Dates', order=3),
       dmc.List(date_annotations)
     ])
   
-  return dmc.Stack(annotations_list, id='annotations-list-container')
+  return list_items
 
 
 layout = dmc.Container(
@@ -209,7 +217,7 @@ def show_insight_details(pathname, custom_insights):
         visualization_editor(control_values=controls, show_controls=False),
         style=dict(margin='24px 0'),
       ),
-      annotations_list(annotations),
+      dmc.Stack(annotations_list(annotations), id='annotations-list-container'),
       dmc.Title('Description', order=2, my=12),
       dcc.Markdown(insight.get('description', '')),
       dcc.Download(id='insight-pdf-download'),
@@ -222,6 +230,22 @@ def show_insight_details(pathname, custom_insights):
       title='Insight Error',
       p='10rem',
     )
+
+
+clientside_callback(
+  """
+  function() {
+    if (typeof window.attachAnnotationListeners === 'function') {
+      window.attachAnnotationListeners();
+    }
+    return null;
+  }
+  """,
+  Output('dummy-output', 'children'),
+  Input('insight-view-container', 'children'),  # just fires when container renders
+  prevent_initial_call=True,
+)
+
 
 
 clientside_callback(
@@ -280,28 +304,3 @@ def handle_click_download(n_clicks, custom_insights, pathname):
     }
     return no_update, [notification], False
 
-
-# clientside_callback(
-#   """
-#   function(children, id_list) {
-#     id_list.forEach(id => {
-#       const element = document.getElementById(id);
-#       console.log(id, element);
-#       if (element && !element._hasListener) {
-#         element.addEventListener('mouseenter', () => {
-#           console.log('hover', item);
-#         });
-#         element.addEventListener('mouseleave', () => {
-#           console.log('leave', item);
-#         });
-#         element._hasListener = true;
-#       }
-#     });
-#     return null;
-#   }
-#   """,
-#   Output('dummy-output', 'children'),
-#   Input('annotations-list-container', 'children'),
-#   State({'type': 'annotation-item', 'id': ALL}, 'id'),
-#   prevent_initial_call=True,
-# )
