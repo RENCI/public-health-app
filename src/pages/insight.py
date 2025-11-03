@@ -1,3 +1,4 @@
+import markdown
 from datetime import datetime
 import uuid
 
@@ -114,7 +115,8 @@ def annotations_list(annotations: list):
       ],
       id=annotation['label'],
       c=annotation['color'],
-      className=f'chart-annotation-text vertical {annotation['label']}',
+      className=f'annotation-ref vertical {annotation['label']}',
+      **{'data-annotation-ref': slugify(annotation['label'])}
     ),
     id={'type': 'annotation-item', 'id': annotation['label']},
   ) for annotation in annotations if annotation['type'] == 'vertical']
@@ -127,7 +129,8 @@ def annotations_list(annotations: list):
       ],
       id=annotation['label'],
       c=annotation['color'],
-      className=f'chart-annotation-text horizontal {annotation['label']}',
+      className=f'annotation-ref horizontal {annotation['label']}',
+      **{'data-annotation-ref': slugify(annotation['label'])}
     ),
     id={'type': 'annotation-item', 'id': annotation['label']},
   ) for annotation in annotations if annotation['type'] == 'horizontal']
@@ -217,7 +220,10 @@ def show_insight_details(pathname, custom_insights):
       ),
       dmc.Stack(annotations_list(annotations), id='annotations-list-container'),
       dmc.Title('Description', order=2, my=12),
-      dcc.Markdown(insight.get('description', ''), dangerously_allow_html=True),
+      dcc.Markdown(
+        markdown.markdown(insight.get('description', ''), extensions=['extra']),
+        dangerously_allow_html=True
+      ),
       dcc.Download(id='insight-pdf-download'),
     ]
 
@@ -240,8 +246,7 @@ clientside_callback(
   }
   """,
   Output('dummy-output', 'children'),
-  Input('insight-view-container', 'children'),  # just fires when container renders
-  prevent_initial_call=True,
+  Input('insight-view-container', 'children'),
 )
 
 
