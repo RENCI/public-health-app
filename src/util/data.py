@@ -34,7 +34,6 @@ def load_rounds():
       continue
 
     round_number = dirname.replace('round', '')
-    round_date = dirname.replace('date', '')
     rounds_path = os.path.join(ROUNDS_DIR, dirname)
     details_path = os.path.join(rounds_path, 'details.yaml')
     insights_path = os.path.join(rounds_path, 'insights')
@@ -42,17 +41,15 @@ def load_rounds():
     details = {}
     if os.path.exists(details_path):
       with open(details_path, 'r') as f:
-        details: dict = yaml.safe_load(f) or {}
+        details = yaml.safe_load(f) or {}
 
     insights = load_insights(insights_path)
 
     rounds[round_number] = dict(
       round_number=int(round_number),
       name=details.get('name'),
-      date=details.get('date'),
       report=details.get('report', ''),
       insights=insights,
-      methods=details.get('methods', ''),
     )
 
   return rounds
