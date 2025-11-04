@@ -41,13 +41,13 @@ def load_rounds():
     details = {}
     if os.path.exists(details_path):
       with open(details_path, 'r') as f:
-        details = yaml.safe_load(f) or {}
+        details: dict = yaml.safe_load(f) or {}
 
     insights = load_insights(insights_path)
 
     rounds[round_number] = dict(
       round_number=int(round_number),
-      name=details.get('name'),
+      name=details.get('name', ''),
       report=details.get('report', ''),
       insights=insights,
       methods=details.get('methods', ''),

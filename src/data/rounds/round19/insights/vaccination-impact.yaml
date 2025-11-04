@@ -14,23 +14,26 @@ controls:
   plot_type: boxplot
   location_name: US
   target: incident_hospitalization
-  model_names: [Ensemble]
-  scenario_names: [A-2023-10-27, B-2023-10-27]
+  model_names: ["Ensemble"]
+  scenario_names: ["A-2023-10-27", "B-2023-10-27"]
+  scenario_variables:
+    - name: Vaccination Strategy
+      options: ["High risk", "All ages"]
+      selected_option: High risk
   certainty_percent: "95%"
   age_group: "0-130"
   x_start_date: "2025-01-01"
-  x_axis: target_end_date
   y_axis: value
   round_num: 19
-  zoom:
-    x:
-      min: "2025-01-01"
-      max: "2026-06-30"
-    y:
-      min: 0
-      max: 65_000
-  annotations:
-    - type: horizontal
-      value: 19_000
-      label: Value for vaccination-impact insight
-      color: "#886622"
+  # zoom:
+  #   x:
+  #     min: "2025-01-01"
+  #     max: "2026-06-30"
+  #   y:
+  #     min: 0
+  #     max: 65_000
+  # annotations:
+  # - type: horizontal
+  #   value: 19_000
+  #   label: Value for vaccination-impact insight
+  #   color: "#886622"

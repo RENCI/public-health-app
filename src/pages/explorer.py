@@ -76,6 +76,7 @@ def update_back_button_href(search):
   State('custom-insights-store', 'data'),
 )
 def render_or_reset_explorer(reset_clicks, search, custom_insights):
+
   starter_id = get_query_param(search, 'starter')
 
   return insight_editor(starter_id, custom_insights)

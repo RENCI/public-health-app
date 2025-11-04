@@ -4,6 +4,7 @@
 ignore
 *.log
 .DS_Store
+.ruff_cache/
 
 # Environments
 .env

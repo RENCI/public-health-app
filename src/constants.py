@@ -11,7 +11,7 @@ from src.util.colors import replace_opacity
 
 # Global variable to store loaded constants
 _CONSTANTS: Optional[dict[str, Any]] = None
-_LOCATIONS: Optional[dict[str, tuple[str, int, int]]] = None
+_LOCATIONS: Optional[dict[str, tuple[str, str, int]]] = None
 
 
 def load_constants() -> None:
@@ -39,7 +39,7 @@ def load_locations() -> None:
     locations_dict = {
       record['location_name']: (
         record['abbreviation'],
-        record['location'],
+        record['location_id'],
         record['population'],
       )
       for record in locations
@@ -63,6 +63,9 @@ def get_locations() -> dict[str, tuple[str, int, int]]:
     load_locations()
   return _LOCATIONS
 
+def get_location_data(location_name: str) -> tuple[str, int, int]:
+  location_data = get_locations().get(location_name.lower().capitalize(), ('', '', 0))
+  return (location_data[0], int(location_data[1]), int(location_data[2]))
 
 # Convenience functions for common access patterns
 def get_pathogen() -> str:

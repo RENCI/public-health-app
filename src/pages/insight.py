@@ -104,45 +104,46 @@ def add_back_link_href(pathname):
   return f'/explorer?starter={insight_id}'
 
 
+def update_insight_view_error_handler(err):
+  import traceback
+
+  print(traceback.print_exception(err))
+  return dmc.Alert(
+    dmc.Text('Error loading insight.'),
+    color='crimson',
+    title='Insight Error',
+    p='10rem',
+  )
+
+
 @callback(
   Output('insight-view-container', 'children'),
   Input('url', 'pathname'),
   Input('custom-insights-store', 'data'),
+  error_handler=update_insight_view_error_handler,
 )
 def show_insight_details(pathname, custom_insights):
   """Render the insight details page given /insight/<insight_id>"""
-  if not pathname or not pathname.startswith('/insight/'):
-    raise exceptions.PreventUpdate
+  insight_id = pathname.split('/insight/')[-1]
+  if not insight_id:
+    raise ValueError('No insight ID provided')
 
-  try:
-    insight_id = pathname.split('/insight/')[-1]
-    if not insight_id:
-      raise ValueError('No insight ID provided')
+  insight = get_insight(insight_id, custom_insights=custom_insights or [])
+  if not insight:
+    raise ValueError(f'Insight {insight_id} not found')
 
-    insight = get_insight(insight_id, custom_insights=custom_insights or [])
-    if not insight:
-      raise ValueError(f'Insight {insight_id} not found')
+  controls = insight.get('controls', {})
 
-    controls = insight.get('controls', {})
-
-    return [
-      dmc.Title(insight.get('title', 'Untitled Insight'), order=1),
-      dmc.Divider(my=24),
-      html.Div(
-        visualization_editor(control_values=controls, show_controls=False),
-        style=dict(margin='24px 0'),
-      ),
-      dcc.Markdown(insight.get('description', '')),
-      dcc.Download(id='insight-pdf-download'),
-    ]
-
-  except Exception as e:
-    return dmc.Alert(
-      dmc.Text(f'Error loading insight: "{e}"'),
-      color='crimson',
-      title='Insight Error',
-      p='10rem',
-    )
+  return [
+    dmc.Title(insight.get('title', 'Untitled Insight'), order=1),
+    dmc.Divider(my=24),
+    html.Div(
+      visualization_editor(control_values=controls, show_controls=False),
+      style=dict(margin='24px 0'),
+    ),
+    dcc.Markdown(insight.get('description', '')),
+    dcc.Download(id='insight-pdf-download'),
+  ]
 
 
 clientside_callback(
@@ -170,9 +171,6 @@ clientside_callback(
 def handle_click_download(n_clicks, custom_insights, pathname):
   if not n_clicks:
     return no_update, no_update, False
-
-  if not pathname or not pathname.startswith('/insight/'):
-    raise exceptions.PreventUpdate
 
   try:
     insight_id = pathname.split('/insight/')[-1]

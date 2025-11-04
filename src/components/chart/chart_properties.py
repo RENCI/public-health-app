@@ -1,5 +1,5 @@
 from abc import ABC
-from dataclasses import asdict
+from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 from typing import Any, Self
@@ -8,52 +8,47 @@ from src.constants import (
   get_locations,
   get_model_color_by_id,
   get_model_id,
-  get_model_name,
   get_scenario_id,
-  get_scenario_name,
 )
 
 
+@dataclass
 class Scenario:
-  def __init__(self, id: int | None = None, name: str | None = None):
-    if id:
-      self.id = id
-      self.name = get_scenario_name(id)
-    elif name:
-      self.id = get_scenario_id(name)
-      self.name = name
-    else:
-      raise ValueError('Scenario must be initialized with either scenario_id or scenario_name')
-    self.variables = ['']  # TODO: add variables
+  id: str
+  name: str
+  description: str
 
-  def __str__(self):
-    return f'{self.name}'
-
-  def __hash__(self):
-    return hash(self.name)
-
-  def __eq__(self, other):
-    return isinstance(other, Scenario) and self.name == other.name
+  def __init__(self, name: str):
+    self.name = name.lower().capitalize()
+    self.id = get_scenario_id(self.name)
+    self.description = ''
 
 
+@dataclass
+class ScenarioVariable:
+  name: str
+  options: list[str]
+  selected_option: str
+
+
+@dataclass
 class Model:
-  def __init__(self, model_id_or_name: int | str):
-    if isinstance(model_id_or_name, int):
-      self.id = model_id_or_name
-      self.name = get_model_name(self.id)
-    else:
-      self.id = get_model_id(model_id_or_name)
-      self.name = model_id_or_name
+  # Override __init__ to get the model id and color
+  def __init__(self, model_name: str):
+    self.name = model_name
+    self.id = get_model_id(model_name)
     self.color = get_model_color_by_id(self.id)
 
-  def __hash__(self):
-    return hash(self.name)
 
-  def __eq__(self, other):
-    return isinstance(other, Model) and self.name == other.name
-
-
+@dataclass
 class Location:
+  name: str
+  short_code: str
+  index: int
+  population: int
+
+  # Override __init__ to correctly initialize the location name and data, and
+  # to handle the special case of 'US'
   def __init__(self, location_name: str):
     if location_name.upper() == 'US':
       self.name = location_name.upper()
@@ -61,15 +56,6 @@ class Location:
       self.name = location_name.lower().capitalize()
     location_data = get_locations()[self.name]
     self.short_code, self.index, self.population = location_data
-
-  def __str__(self):
-    return f'{self.name}'
-
-  def __hash__(self):
-    return hash(self.name)
-
-  def __eq__(self, other):
-    return isinstance(other, Location) and self.name == other.name
 
 
 class Annotation(ABC):
@@ -103,10 +89,6 @@ class Annotation(ABC):
       return VerticalAnnotation(value, label, color)
     else:
       raise ValueError(f'Invalid type "{type}".')
-
-  def to_dict(self) -> dict[str, Any]:
-    """Convert object to dictionary for JSON serialization."""
-    return asdict(self)
 
   @classmethod
   def from_dict(cls, data: dict[str, Any]) -> Self:
@@ -166,18 +148,13 @@ class PlotType(StrEnum):
     return isinstance(other, PlotType) and self.value == other.value
 
 
+@dataclass
 class AxisRange:
-  def __init__(self, min: str | None, max: str | None):
-    self.min = min
-    self.max = max
+  min: str | None
+  max: str | None
 
 
+@dataclass
 class Zoom:
-  def __init__(self, x: dict[str, str] | None = None, y: dict[str, str] | None = None):
-    if x is None:
-      self.x = AxisRange(None, None)
-    if y is None:
-      self.y = AxisRange(None, None)
-    else:
-      self.x = AxisRange(x['min'], x['max'])
-      self.y = AxisRange(y['min'], y['max'])
+  x: AxisRange
+  y: AxisRange

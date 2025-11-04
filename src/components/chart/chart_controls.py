@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Any
 
 from src.components.chart.chart_properties import (
   Annotation,
@@ -7,6 +6,7 @@ from src.components.chart.chart_properties import (
   Model,
   PlotType,
   Scenario,
+  ScenarioVariable,
   Zoom,
 )
 from src.components.enums import AgeGroup, CertaintyInterval, DataType, Target
@@ -18,15 +18,16 @@ class ChartControls:
     plot_type: str,
     round_num: int,
     scenario_names: list[str],
+    scenario_variables: list[dict],
     model_names: list[str],
     location_name: str,
     target: str,
     age_group: str,
-    x_axis: str,
-    y_axis: str,
+    x_axis: str | None = None,
+    y_axis: str | None = None,
     x_start_date: str | None = None,
-    zoom: dict[str, dict[str, Any]] | None = None,
-    annotations: list[dict[str, Any]] | None = None,
+    zoom: dict | None = None,
+    annotations: list[dict] | None = None,
     certainty_percent: str | None = None,
     pathogen: str = 'covid',
   ):
@@ -34,6 +35,7 @@ class ChartControls:
     self.round_num = round_num
     self.pathogen = pathogen
     self.scenarios = [Scenario(name=scenario_name) for scenario_name in scenario_names]
+    self.scenario_variables = [ScenarioVariable(**var) for var in scenario_variables]
     self.models = [Model(model_name) for model_name in model_names]
     self.location = Location(location_name)
     self.target = Target.from_input_value(target)
@@ -49,3 +51,22 @@ class ChartControls:
     )
     self.zoom = Zoom(x=zoom['x'], y=zoom['y']) if zoom else Zoom()
     self.data_type = DataType.QUANTILE
+
+  @classmethod
+  def from_dict(cls, data: dict):
+    return cls(
+      plot_type=data['plot_type'],
+      round_num=data['round_num'],
+      scenario_names=data['scenario_names'],
+      scenario_variables=data['scenario_variables'],
+      model_names=data['model_names'],
+      location_name=data['location_name'],
+      target=data['target'],
+      age_group=data['age_group'],
+      x_axis=data['x_axis'],
+      y_axis=data['y_axis'],
+      x_start_date=data['x_start_date'],
+      zoom=data.get('zoom', None),
+      annotations=data.get('annotations', None),
+      certainty_percent=data.get('certainty_percent', None),
+    )

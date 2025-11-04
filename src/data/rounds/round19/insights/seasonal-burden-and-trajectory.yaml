@@ -15,8 +15,12 @@ controls:
   plot_type: line
   location_name: US
   target: incident_hospitalization
-  model_names: [Ensemble]
-  scenario_names: [A-2023-10-27, B-2023-10-27]
+  model_names: ["Ensemble"]
+  scenario_names: ["A-2023-10-27", "B-2023-10-27"]
+  scenario_variables:
+    - name: Vaccination Strategy
+      options: ["High risk", "All ages"]
+      selected_option: High risk
   certainty_percent: "95%"
   age_group: "0-130"
   x_start_date: "2025-01-01"

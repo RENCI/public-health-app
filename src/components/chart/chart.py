@@ -67,10 +67,10 @@ class Chart(ABC):
       str(controls.target.input_value),
       str(controls.age_group.input_value),
       str(controls.certainty_percent.display_value if controls.certainty_percent else ''),
-      str(controls.zoom.x.min if controls.zoom.x.min else ''),
-      str(controls.zoom.x.max if controls.zoom.x.max else ''),
-      str(controls.zoom.y.min if controls.zoom.y.min else ''),
-      str(controls.zoom.y.max if controls.zoom.y.max else ''),
+      str(controls.zoom.x.get('min') if controls.zoom and controls.zoom.x.get('min') else ''),
+      str(controls.zoom.x.get('max') if controls.zoom and controls.zoom.x.get('max') else ''),
+      str(controls.zoom.y.get('min') if controls.zoom and controls.zoom.y.get('min') else ''),
+      str(controls.zoom.y.get('max') if controls.zoom and controls.zoom.y.get('max') else ''),
       str(sorted([a.get_key() for a in controls.annotations]) if controls.annotations else []),
     ]
     # Use a deterministic string key

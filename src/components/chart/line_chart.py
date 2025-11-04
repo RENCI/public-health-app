@@ -130,15 +130,25 @@ class LineChart(Chart):
     # plot annotations
     self._plot_annotations()
 
-    # update axes
-    self._fig.update_xaxes(matches='x', showspikes=True, spikemode='across', spikesnap='cursor')
-    self._fig.update_yaxes(matches='y', showspikes=True, spikemode='across')
+    # apply spike guides for each axis in the chart viewport
+    self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
+    self._fig.update_yaxes(showspikes=True, spikemode='across')
 
     # update zoom ranges
-    if self.controls.zoom.x.min is not None and self.controls.zoom.x.max is not None:
-      self._fig.update_xaxes(range=[self.controls.zoom.x.min, self.controls.zoom.x.max])
-    if self.controls.zoom.y.min is not None and self.controls.zoom.y.max is not None:
-      self._fig.update_yaxes(range=[self.controls.zoom.y.min, self.controls.zoom.y.max])
+    if (
+      self.controls.zoom is not None
+      and self.controls.zoom.x is not None
+      and self.controls.zoom.x.get('min') is not None
+      and self.controls.zoom.x.get('max') is not None
+    ):
+      self._fig.update_xaxes(range=[self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')])
+    if (
+      self.controls.zoom is not None
+      and self.controls.zoom.y is not None
+      and self.controls.zoom.y.get('min') is not None
+      and self.controls.zoom.y.get('max') is not None
+    ):
+      self._fig.update_yaxes(range=[self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')])
     self._fig.update_yaxes(title_text=self.controls.target.display_value)
 
     self._fig.update_layout(

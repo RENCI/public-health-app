@@ -75,15 +75,24 @@ class BoxplotChart(Chart):
       # second_scenario_df = second_df.query('scenario_id == @scenario.id')
       self._fig.add_trace(
         go.Box(
+          x=scenario_df[self.controls.x_axis],
+          marker_color=get_model_color_by_id(ensemble_model_id),
+        )
+        if self.controls.x_axis
+        else go.Box(
           y=scenario_df[self.controls.y_axis],
           marker_color=get_model_color_by_id(ensemble_model_id),
         ),
         row=i,
         col=1,
-        secondary_y=False,
       )
       self._fig.add_trace(
         go.Box(
+          x=scenario_df[self.controls.x_axis],
+          marker_color=get_model_color_by_id(ensemble_model_id),
+        )
+        if self.controls.x_axis
+        else go.Box(
           y=scenario_df[self.controls.y_axis],
           marker_color=get_model_color_by_id(ensemble_model_id),
         ),
@@ -95,7 +104,7 @@ class BoxplotChart(Chart):
     # plot annotations
     self._plot_annotations()
 
-    # update axes
+    # update axes so that they use a secondary y-axis only for the second column
     self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
     for row in range(1, num_rows + 1):
       y_axis_num = f'y{row}'
@@ -105,7 +114,7 @@ class BoxplotChart(Chart):
         self._fig.update_yaxes(
           showspikes=True,
           spikemode='across',
-          matches=y_axis_num,
+          # matches=y_axis_num if col == 2 else None,
           row=row,
           col=col,
           title_text=y_axis_title,
@@ -113,10 +122,24 @@ class BoxplotChart(Chart):
         )
 
     # update zoom ranges
-    if self.controls.zoom.x.min and self.controls.zoom.x.max:
-      self._fig.update_xaxes(range=[self.controls.zoom.x.min, self.controls.zoom.x.max])
-    if self.controls.zoom.y.min and self.controls.zoom.y.max:
-      self._fig.update_yaxes(range=[self.controls.zoom.y.min, self.controls.zoom.y.max])
+    if (
+      self.controls.zoom is not None
+      and self.controls.zoom.x is not None
+      and self.controls.zoom.x.get('min') is not None
+      and self.controls.zoom.x.get('max') is not None
+    ):
+      self._fig.update_xaxes(
+        range=[self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
+      )
+    if (
+      self.controls.zoom is not None
+      and self.controls.zoom.y is not None
+      and self.controls.zoom.y.get('min') is not None
+      and self.controls.zoom.y.get('max') is not None
+    ):
+      self._fig.update_yaxes(
+        range=[self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
+      )
 
     self._fig.update_layout(
       hovermode='closest',
