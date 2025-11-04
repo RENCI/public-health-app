@@ -29,6 +29,7 @@ app = Dash(
   external_stylesheets=external_stylesheets,
   use_pages=True,
   pages_folder='src/pages',
+  suppress_callback_exceptions=True,
 )
 
 app.title = 'ACCIDDA'

@@ -45,6 +45,7 @@ default_control_values = dict(
   age_group='0-130',
   certainty_percent='95%',
   annotations=None,
+  zoom=None,
 )
 
 
@@ -59,15 +60,12 @@ def visualization_editor(control_values=None, show_controls=True):
   init_location_name: str = controls['location_name']
   init_target: str = controls['target']
   init_age_group: str = controls['age_group']
-  if 'x_start_date' in controls:
-    init_x_start_date: str | None = controls['x_start_date']
-  else:
-    init_x_start_date = None
+  init_x_start_date: str | None = controls.get('x_start_date', None)
   init_x_axis: str = controls['x_axis']
   init_y_axis: str = controls['y_axis']
-  init_certainty_percent: str | None = controls['certainty_percent']
-  init_zoom: dict[str, dict[str, Any]] | None = controls['zoom']
-  init_annotations: list[dict[str, Any]] | None = controls['annotations']
+  init_certainty_percent: str | None = controls.get('certainty_percent', None)
+  init_zoom: dict[str, dict[str, Any]] | None = controls.get('zoom', None)
+  init_annotations: list[dict[str, Any]] | None = controls.get('annotations', None)
 
   figure_control_values = dict(
     plot_type=init_plot_type,

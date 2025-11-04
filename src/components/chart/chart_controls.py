@@ -2,6 +2,7 @@ from datetime import datetime
 
 from src.components.chart.chart_properties import (
   Annotation,
+  AxisRange,
   Location,
   Model,
   PlotType,
@@ -49,7 +50,10 @@ class ChartControls:
     self.certainty_percent = (
       CertaintyInterval.from_display_value(certainty_percent) if certainty_percent else None
     )
-    self.zoom = Zoom(x=zoom['x'], y=zoom['y']) if zoom else Zoom()
+    if zoom is not None:
+      self.zoom = Zoom(**zoom)
+    else:
+      self.zoom = None
     self.data_type = DataType.QUANTILE
 
   @classmethod

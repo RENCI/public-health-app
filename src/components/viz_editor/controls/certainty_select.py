@@ -2,10 +2,10 @@ import dash_mantine_components as dmc
 
 from src.components.enums import CertaintyInterval
 
-options = [{'value': v.get_bounds(), 'label': v.get_display_value()} for v in CertaintyInterval]
+options = [v.get_display_value() for v in CertaintyInterval]
 
 
-def certainty_select(value: list[tuple[float, float]] = CertaintyInterval.NONE.get_bounds()):
+def certainty_select(value: str = CertaintyInterval.NONE.get_display_value()):
   return dmc.Select(
     label='Certainty Percent',
     placeholder='',
