@@ -44,7 +44,7 @@ def generate_round_pdf(round_dict):
     f"""
     <h2>{insight['title']}</h2>
     <figure>
-      <img src="https://placehold.co/650x300?text=Visualization" style="width: 100%;">
+      <img src="{insight['image_url']}" style="width: 100%;">
       <figcaption>Figure {i + 1}. Visualization caption</figcaption>
     </figure>
     <div>{md_to_html(insight['description'])}</div>
@@ -79,6 +79,7 @@ def generate_round_pdf(round_dict):
 
 def generate_insight_pdf(insight):
   title = insight.get('title', '')
+  image_url = insight.get('image_url')
   summary = insight.get('summary') or ''
   description_md = insight.get('description') or 'Details not found'
   description_html = md_to_html(description_md)
@@ -103,7 +104,7 @@ def generate_insight_pdf(insight):
 
       {description_html}
 
-      <img src="https://placehold.co/650x300?text=Visualization" style="width: 100%;">
+      <img src="{image_url}" style="width: 100%;">
       
     </main>
   """
