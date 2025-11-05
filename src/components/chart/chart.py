@@ -3,6 +3,8 @@ from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Self
+import io
+import base64
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -261,3 +263,13 @@ class Chart(ABC):
     if not gold_std_path.exists() or not gold_std_path.is_file():
       raise FileNotFoundError(f'File not found for gold standard data: {gold_std_path}')
     return pd.read_csv(gold_std_path, parse_dates=['time_value'])
+
+  def save_image(self, width: int = 600, height: int = 400, scale: float = 2.0) -> str:
+    """
+    Return a base64-encoded PNG snapshot of the chart figure.
+    """
+    buffer = io.BytesIO()
+    self._fig.write_image(buffer, format='png', width=width, height=height, scale=scale)
+    buffer.seek(0)
+    img_bytes = buffer.read()
+    return "data:image/png;base64," + base64.b64encode(img_bytes).decode('utf-8')
