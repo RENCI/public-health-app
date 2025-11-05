@@ -1,20 +1,12 @@
 import os
 
 import yaml
-import uuid
-
 import dash_mantine_components as dmc
 from dash import (
   Input,
   Output,
-  State,
   callback,
-  clientside_callback,
   dcc,
-  exceptions,
-  html,
-  no_update,
-  register_page,
 )
 from dash_iconify import DashIconify
 from src.components.toolbar import toolbar_button
@@ -24,7 +16,8 @@ from src.components.toolbar import toolbar_button
 #   ensure both are in the layout.
 #   pass insight dict into insight_yaml_modal.
 
-def insight_yaml_modal(insight = {}):  
+
+def insight_yaml_modal(insight={}):
   return dmc.Modal(
     [
       dmc.Code(
@@ -57,6 +50,7 @@ def insight_yaml_modal_button():
       id='insight-yaml-modal-button',
     )
   return ''
+
 
 @callback(
   Output('insight-yaml-modal', 'opened'),

@@ -55,8 +55,7 @@ explorer_button = dmc.Anchor(
 
 
 insight_toolbar = toolbar(
-  left=[back_button],
-  right=[insight_yaml_modal_button(), download_button, explorer_button]
+  left=[back_button], right=[insight_yaml_modal_button(), download_button, explorer_button]
 )
 
 
@@ -81,13 +80,26 @@ loading_insight = [
 
 
 def insight_heading(round_number: str, round_date: str, round_name: str):
-  return dmc.Stack([
-    dmc.Text(f'Round {round_number}', style=dict(fontSize='var(--mantine-h3-font-size'), c='dimmed', fw=700, mb=8),
-    dmc.Flex([
-      dmc.Text(round_name, style=dict(fontSize='var(--mantine-h2-font-size'), fw=700),
-      dmc.Text(f'Date completed: {round_date}', c='dimmed', style=dict(fontStyle='italic')),
-    ], justify='space-between', align='flex-end'),
-  ], gap=0)
+  return dmc.Stack(
+    [
+      dmc.Text(
+        f'Round {round_number}',
+        style=dict(fontSize='var(--mantine-h3-font-size'),
+        c='dimmed',
+        fw=700,
+        mb=8,
+      ),
+      dmc.Flex(
+        [
+          dmc.Text(round_name, style=dict(fontSize='var(--mantine-h2-font-size'), fw=700),
+          dmc.Text(f'Date completed: {round_date}', c='dimmed', style=dict(fontStyle='italic')),
+        ],
+        justify='space-between',
+        align='flex-end',
+      ),
+    ],
+    gap=0,
+  )
 
 
 layout = dmc.Container(
@@ -133,7 +145,6 @@ def show_insight_details(pathname, custom_insights):
     if not insight:
       raise ValueError(f'Insight {insight_id} not found')
 
-
     controls = insight.get('controls', {})
     round_number = str(controls['round_num'])
 
@@ -150,7 +161,7 @@ def show_insight_details(pathname, custom_insights):
         round_name=this_round.get('name'),
       ),
       insight_toolbar,
-      dmc.Title(f'Insight: {insight.get('title', 'Untitled Insight')}', order=1),
+      dmc.Title(f'Insight: {insight.get("title", "Untitled Insight")}', order=1),
       dmc.Text(insight.get('summary', 'Summary not found')),
       html.Div(
         visualization_editor(control_values=controls, show_controls=False),
