@@ -124,22 +124,42 @@ class BoxplotChart(Chart):
     self._fig.update_xaxes(showspikes=False)
     self._fig.update_yaxes(showspikes=False)
 
-    # update zoom ranges
-    if (
+    # calculate global x-axis range across all scenarios
+    should_use_zoom = (
       self.controls.zoom is not None
       and self.controls.zoom.x is not None
       and self.controls.zoom.x.get('min') is not None
       and self.controls.zoom.x.get('max') is not None
-    ):
-      self._fig.update_xaxes(
-        range=[self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
-      )
-    if (
-      self.controls.zoom is not None
       and self.controls.zoom.y is not None
       and self.controls.zoom.y.get('min') is not None
       and self.controls.zoom.y.get('max') is not None
-    ):
+    )
+    if self.controls.x_axis and not should_use_zoom:
+      for scenario in self.controls.scenarios:
+        scenario_df = df.query('scenario_id == @scenario.id')
+        scenario_x_values = scenario_df[self.controls.x_axis]
+        if scenario_x_values.empty:
+          continue
+        x_min = scenario_x_values.min()
+        x_max = scenario_x_values.max()
+        if x_min is not None and x_max is not None and (x_min < x_max):
+          self._fig.update_xaxes(range=[x_min, x_max])
+          break
+    elif self.controls.y_axis and not should_use_zoom:
+      for scenario in self.controls.scenarios:
+        scenario_df = df.query('scenario_id == @scenario.id')
+        scenario_y_values = scenario_df[self.controls.y_axis]
+        if scenario_y_values.empty:
+          continue
+        y_min = scenario_y_values.min()
+        y_max = scenario_y_values.max()
+        if y_min is not None and y_max is not None and (y_min < y_max):
+          self._fig.update_yaxes(range=[y_min, y_max])
+          break
+    elif should_use_zoom:
+      self._fig.update_xaxes(
+        range=[self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
+      )
       self._fig.update_yaxes(
         range=[self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
       )
