@@ -52,7 +52,7 @@ def insight_editor(insight_id, custom_insights=None):
 
   return html.Div(
     [
-      visualization_editor(control_values=controls, show_controls=True),
+      visualization_editor(controls=controls, show_controls=True),
       save_insight_form(initial_title=title, initial_description=description),
     ],
     id='editor-contents',

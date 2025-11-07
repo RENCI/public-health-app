@@ -109,7 +109,7 @@ def render_shared_insight(pathname, selected_round, custom_insights):
     dmc.Title(title, order=1),
     dmc.Divider(my=24),
     html.Div(
-      visualization_editor(control_values=controls, show_controls=False),
+      visualization_editor(controls=controls, show_controls=False),
       style=dict(margin='24px 0'),
     ),
     dcc.Markdown(description),

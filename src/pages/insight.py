@@ -131,7 +131,7 @@ def show_insight_details(pathname, custom_insights, theme):
       dmc.Title(insight.get('title', 'Untitled Insight'), order=1),
       dmc.Divider(my=24),
       html.Div(
-        visualization_editor(control_values=controls, show_controls=False),
+        visualization_editor(controls=controls, show_controls=False),
         style=dict(margin='24px 0'),
       ),
       dcc.Markdown(insight.get('description', '')),
