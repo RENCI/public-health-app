@@ -2,7 +2,3 @@
   --mantine-font-family-headings: Montserrat;
   --mantine-font-family: Inter;
 }
-
-@view-transition {
-  navigation: auto;
-}
