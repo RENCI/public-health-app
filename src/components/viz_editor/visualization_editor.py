@@ -50,8 +50,10 @@ default_control_values = dict(
 )
 
 
-def visualization_editor(control_values=None, show_controls=True):
-  controls = {**(control_values or {})}
+def visualization_editor(controls=None, show_controls=True):
+  if not controls:
+    controls = default_control_values
+    print('No controls provided, using default values')
 
   init_theme: str = controls.get('theme', 'light')
   init_plot_type: str = controls['plot_type']
@@ -93,6 +95,12 @@ def visualization_editor(control_values=None, show_controls=True):
     storage_type='local',
     data=default_control_values,
   )
+
+  # This is kind of a hack used to update the chart-controls-store when the page is loaded
+  # for the first time. This is necessary because the callback that updates the
+  # chart-controls-store is not called when the page is initially loaded so it needs to be
+  # triggered, and since the chart-controls-store is stored in local storage it will preserve
+  # the values when the page is reloaded unless it's reset.
   initial_page_load_chart_controls_store = dcc.Store(
     id='initial-page-load-chart-controls-store',
     storage_type='memory',
@@ -100,20 +108,16 @@ def visualization_editor(control_values=None, show_controls=True):
   )
 
   chart_controls = ChartControls.from_dict({**default_control_values, **figure_control_values})
-
-  # Get or create chart instance using the manager
   chart = chart_manager.get_chart(chart_controls)
   figure = chart.get_fig() if chart else go.Figure()
   graph = dcc.Graph(id='graph', figure=figure)
 
-  empty_figure_container = html.Div(
-    id='insight-visualization-figure',
-    children=graph,
-    style={'min-height': '45vh'},
-  )
-
   if not chart:
-    return empty_figure_container
+    return html.Div(
+      id='insight-visualization-figure',
+      children=graph,
+      style={'min-height': '45vh'},
+    )
 
   if not show_controls:
     return graph
