@@ -107,7 +107,8 @@ def visualization_editor(controls=None, show_controls=True):
     data=figure_control_values,
   )
 
-  chart_controls = ChartControls.from_dict({**default_control_values, **figure_control_values})
+  controls_dict = {**default_control_values, **figure_control_values}
+  chart_controls = ChartControls.from_dict(controls_dict)
   chart = chart_manager.get_chart(chart_controls)
   figure = chart.get_fig() if chart else go.Figure()
   graph = dcc.Graph(id='graph', figure=figure)
@@ -145,12 +146,17 @@ def visualization_editor(controls=None, show_controls=True):
                     scenarios_select(value=init_scenario_names),
                     span=dict(base=12),
                   ),
-                  dmc.GridCol(models_select(value=init_model_names), span=dict(base=12)),
+                  dmc.GridCol(
+                    models_select(value=init_model_names, disabled=init_plot_type == 'boxplot'),
+                    span=dict(base=12),
+                  ),
                   dmc.GridCol(location_select(value=init_location_name), span=dict(base=12, sm=6)),
                   dmc.GridCol(target_select(value=init_target), span=dict(base=12, sm=6)),
                   dmc.GridCol(age_group_select(value=init_age_group), span=dict(base=12, sm=6)),
                   dmc.GridCol(
-                    certainty_select(value=init_certainty_percent),
+                    certainty_select(
+                      value=init_certainty_percent, disabled=init_plot_type == 'boxplot'
+                    ),
                     span=dict(base=12, sm=6),
                   ),
                 ],
@@ -160,10 +166,12 @@ def visualization_editor(controls=None, show_controls=True):
             dmc.Card(
               zoom_control(value=init_zoom),
               variant='soft',
+              style={'display': 'none'} if init_plot_type == 'boxplot' else {},
             ),
             dmc.Card(
               annotations_control(value=init_annotations),
               variant='soft',
+              style={'display': 'none'} if init_plot_type == 'boxplot' else {},
             ),
           ],
           gap='md',

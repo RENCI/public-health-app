@@ -5,7 +5,7 @@ from src.constants import get_model_names
 options = [m for m in get_model_names()]
 
 
-def models_select(value=['Ensemble']):
+def models_select(value=['Ensemble'], disabled=False):
   return dmc.MultiSelect(
     label='Models',
     placeholder='',
@@ -13,4 +13,5 @@ def models_select(value=['Ensemble']):
     value=value,
     required=True,
     data=options,
+    disabled=disabled,
   )
