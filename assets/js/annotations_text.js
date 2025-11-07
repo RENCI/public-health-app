@@ -11,9 +11,7 @@ function slugify(str) {
 
 (function() {
   function getChartLabelsFor(el) {
-    console.log(el);
     const idToMatch = slugify(el.dataset.annotationRef);
-    console.log(idToMatch);
     const annotationTextElements = Array.from(document.querySelectorAll('.annotation-text'))
       .filter(label => idToMatch == slugify(label.dataset.unformatted));
 
@@ -47,7 +45,6 @@ function slugify(str) {
     el.addEventListener('mouseenter', () => {
       const glowColor = el.style.color || 'crimson';
       const labels = getChartLabelsFor(el);
-      console.log(labels);
       setGlow(labels, glowColor);
     });
 
@@ -59,10 +56,8 @@ function slugify(str) {
 
   window.attachAnnotationListeners = function() {
     const annotations = document.querySelectorAll('.annotation-text');
-    console.log(annotations);
 
     document.querySelectorAll('[data-annotation-ref]').forEach(el => {
-      console.log(el, slugify(el.dataset.annotationRef));
       if (el._hasListener) return;
       styleAnnotationReference(el);
       attachAnnotationEvents(el);
