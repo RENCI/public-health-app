@@ -51,12 +51,11 @@ class BoxplotChart(Chart):
 
     # create boxplot for each scenario
     num_rows = len(self.controls.scenarios)
-    num_cols = 2
+    num_cols = 1
     self._fig = make_subplots(
       rows=num_rows,
       cols=num_cols,
       vertical_spacing=0.1,
-      specs=[[{'secondary_y': False}, {'secondary_y': True}] for _ in range(num_rows)],
     )
 
     # start with the raw dataframe
@@ -73,59 +72,57 @@ class BoxplotChart(Chart):
     for i, scenario in enumerate(self.controls.scenarios, start=1):
       scenario_df = df.query('scenario_id == @scenario.id')
       # second_scenario_df = second_df.query('scenario_id == @scenario.id')
+      scenario_display_name = f'Scenario {scenario.name.split()[0][0].upper()}'
+      trace = go.Box(
+        marker_color=get_model_color_by_id(ensemble_model_id),
+        name='',
+        showlegend=False,
+      )
+      if self.controls.x_axis:
+        trace.x = scenario_df[self.controls.x_axis]
+      else:
+        trace.y = scenario_df[self.controls.y_axis]
       self._fig.add_trace(
-        go.Box(
-          x=scenario_df[self.controls.x_axis],
-          marker_color=get_model_color_by_id(ensemble_model_id),
-        )
-        if self.controls.x_axis
-        else go.Box(
-          y=scenario_df[self.controls.y_axis],
-          marker_color=get_model_color_by_id(ensemble_model_id),
-        ),
+        trace,
         row=i,
         col=1,
       )
-      self._fig.add_trace(
-        go.Box(
-          x=scenario_df[self.controls.x_axis],
-          marker_color=get_model_color_by_id(ensemble_model_id),
-        )
-        if self.controls.x_axis
-        else go.Box(
-          y=scenario_df[self.controls.y_axis],
-          marker_color=get_model_color_by_id(ensemble_model_id),
-        ),
-        row=i,
-        col=2,
-        secondary_y=True,
+      # Add scenario name as vertical text annotation to the right of the boxplot
+      subplot_idx = ((i - 1) * num_cols) + 1
+      # Get the axis domain for this subplot
+      x_axis = self._fig.layout[f'xaxis{subplot_idx}']
+      # Position to the right of subplot domain using paper coordinates
+      # x_axis.domain is a list [min, max] in paper coordinates
+      x_domain = getattr(x_axis, 'domain', [0.55, 1.0])
+      if isinstance(x_domain, (list, tuple)) and len(x_domain) >= 2:
+        x_paper = x_domain[1] + 0.02
+      else:
+        x_paper = 1.02
+      # Calculate y position to center vertically in the row
+      vertical_spacing = 0.1
+      row_height = (1.0 - (vertical_spacing * (num_rows - 1))) / num_rows
+      y_top = 1.0 - ((i - 1) * (row_height + vertical_spacing))
+      y_bottom = y_top - row_height
+      y_paper = (y_top + y_bottom) / 2
+      self._fig.add_annotation(
+        text=scenario_display_name,
+        xref='paper',
+        yref='paper',
+        x=x_paper,
+        y=y_paper,
+        xanchor='left',
+        yanchor='middle',
+        textangle=-90,
+        showarrow=False,
+        font=dict(size=12),
       )
 
     # plot annotations
     self._plot_annotations()
 
-    # update axes so that they use a secondary y-axis only for the second column
-    self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
-    for row in range(1, num_rows + 1):
-      # Update primary y-axis for first column
-      self._fig.update_yaxes(
-        showspikes=True,
-        spikemode='across',
-        row=row,
-        col=1,
-        title_text=None,
-      )
-
-      # Update secondary y-axis for second column with dynamic title
-      y_axis_title = f'Scenario {self.controls.scenarios[row - 1].name}'
-      self._fig.update_yaxes(
-        showspikes=True,
-        spikemode='across',
-        row=row,
-        col=2,
-        title_text=y_axis_title,
-        secondary_y=True,
-      )
+    # update axes
+    self._fig.update_xaxes(showspikes=False)
+    self._fig.update_yaxes(showspikes=False)
 
     # update zoom ranges
     if (
@@ -152,6 +149,7 @@ class BoxplotChart(Chart):
       height=400 + (200 * max(0, num_rows - 1)),
       title='Forecast distribution (boxplot)',
       uirevision=self.__hash__(),
+      showlegend=False,
     )
 
     self.set_theme()

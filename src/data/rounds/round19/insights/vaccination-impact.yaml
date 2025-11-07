@@ -23,7 +23,7 @@ controls:
   certainty_percent: "95%"
   age_group: "0-130"
   x_start_date: "2025-01-01"
-  y_axis: value
+  x_axis: value
   round_num: 19
   # zoom:
   #   x:
