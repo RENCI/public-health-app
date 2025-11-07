@@ -107,19 +107,25 @@ class BoxplotChart(Chart):
     # update axes so that they use a secondary y-axis only for the second column
     self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
     for row in range(1, num_rows + 1):
-      y_axis_num = f'y{row}'
-      for col in range(1, num_cols + 1):
-        # Only set y-axis title for second column (secondary_y=True)
-        y_axis_title = f'Scenario {self.controls.scenarios[row - 1].name}' if col == 2 else None
-        self._fig.update_yaxes(
-          showspikes=True,
-          spikemode='across',
-          # matches=y_axis_num if col == 2 else None,
-          row=row,
-          col=col,
-          title_text=y_axis_title,
-          secondary_y=(col == 2),
-        )
+      # Update primary y-axis for first column
+      self._fig.update_yaxes(
+        showspikes=True,
+        spikemode='across',
+        row=row,
+        col=1,
+        title_text=None,
+      )
+
+      # Update secondary y-axis for second column with dynamic title
+      y_axis_title = f'Scenario {self.controls.scenarios[row - 1].name}'
+      self._fig.update_yaxes(
+        showspikes=True,
+        spikemode='across',
+        row=row,
+        col=2,
+        title_text=y_axis_title,
+        secondary_y=True,
+      )
 
     # update zoom ranges
     if (
@@ -147,6 +153,8 @@ class BoxplotChart(Chart):
       title='Forecast distribution (boxplot)',
       uirevision=self.__hash__(),
     )
+
+    self.set_theme()
 
     return self._fig
 

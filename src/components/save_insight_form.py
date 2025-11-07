@@ -7,6 +7,7 @@ from dash import Input, Output, State, callback, exceptions
 from dash_iconify import DashIconify
 
 default_control_values = {
+  'theme': 'light',
   'plot_type': 'line',
   'round_num': 19,
   'pathogen': 'covid',
@@ -145,10 +146,11 @@ def save_custom_insight(
     image_url='https://placehold.co/400?text=Visualization',
     created_at=now,
     updated_at=now,
-    controls=dict(
-      round=round_number,
-      **(current_chart_controls or default_control_values),
-    ),
+    controls={
+      'round': round_number,
+      **default_control_values,
+      **(current_chart_controls or {}),
+    },
   )
 
   notification = {

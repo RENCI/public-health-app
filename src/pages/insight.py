@@ -108,8 +108,9 @@ def add_back_link_href(pathname):
   Output('insight-view-container', 'children'),
   Input('url', 'pathname'),
   Input('custom-insights-store', 'data'),
+  Input('theme-store', 'data'),
 )
-def show_insight_details(pathname, custom_insights):
+def show_insight_details(pathname, custom_insights, theme):
   """Render the insight details page given /insight/<insight_id>"""
   if not pathname or not pathname.startswith('/insight/'):
     raise exceptions.PreventUpdate
@@ -124,6 +125,7 @@ def show_insight_details(pathname, custom_insights):
       raise ValueError(f'Insight {insight_id} not found')
 
     controls = insight.get('controls', {})
+    controls = {**controls, 'theme': theme}
 
     return [
       dmc.Title(insight.get('title', 'Untitled Insight'), order=1),

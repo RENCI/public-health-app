@@ -39,9 +39,24 @@ class Chart(ABC):
       self.controls.target.input_value,
     )
     self._fig: go.Figure = self._create_empty_figure()
+    self.set_theme()
 
   def _create_empty_figure(self) -> go.Figure:
     return go.Figure()
+
+  def set_theme(self):
+    if self.controls.theme and self.controls.theme == 'light':
+      self.set_theme_light()
+    elif self.controls.theme and self.controls.theme == 'dark':
+      self.set_theme_dark()
+    else:
+      self.set_theme_light()
+
+  def set_theme_light(self):
+    self._fig.update_layout(template='plotly_white')
+
+  def set_theme_dark(self):
+    self._fig.update_layout(template='plotly_dark')
 
   @abstractmethod
   def refresh_fig(self) -> go.Figure:

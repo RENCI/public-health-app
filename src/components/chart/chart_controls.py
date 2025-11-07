@@ -2,7 +2,6 @@ from datetime import datetime
 
 from src.components.chart.chart_properties import (
   Annotation,
-  AxisRange,
   Location,
   Model,
   PlotType,
@@ -16,6 +15,7 @@ from src.components.enums import AgeGroup, CertaintyInterval, DataType, Target
 class ChartControls:
   def __init__(
     self,
+    theme: str,
     plot_type: str,
     round_num: int,
     scenario_names: list[str],
@@ -32,6 +32,7 @@ class ChartControls:
     certainty_percent: str | None = None,
     pathogen: str = 'covid',
   ):
+    self.theme = theme
     self.plot_type = PlotType(plot_type)
     self.round_num = round_num
     self.pathogen = pathogen
@@ -59,6 +60,7 @@ class ChartControls:
   @classmethod
   def from_dict(cls, data: dict):
     return cls(
+      theme=data['theme'],
       plot_type=data['plot_type'],
       round_num=data['round_num'],
       scenario_names=data['scenario_names'],

@@ -141,14 +141,18 @@ class LineChart(Chart):
       and self.controls.zoom.x.get('min') is not None
       and self.controls.zoom.x.get('max') is not None
     ):
-      self._fig.update_xaxes(range=[self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')])
+      self._fig.update_xaxes(
+        range=[self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
+      )
     if (
       self.controls.zoom is not None
       and self.controls.zoom.y is not None
       and self.controls.zoom.y.get('min') is not None
       and self.controls.zoom.y.get('max') is not None
     ):
-      self._fig.update_yaxes(range=[self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')])
+      self._fig.update_yaxes(
+        range=[self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
+      )
     self._fig.update_yaxes(title_text=self.controls.target.display_value)
 
     self._fig.update_layout(
@@ -158,6 +162,8 @@ class LineChart(Chart):
       title_subtitle_text=self.get_subtitle(),
       uirevision=self.__hash__(),
     )
+
+    self.set_theme()
 
     return self._fig
 
