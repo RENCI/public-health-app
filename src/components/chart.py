@@ -605,7 +605,6 @@ class Chart:
           line_color=annotation.color,
           line_width=1,
           annotation_text=annotation.label,
-          name=annotation.label,
         )
       else:
         raise ValueError(f'Invalid annotation type: {annotation.type}')
