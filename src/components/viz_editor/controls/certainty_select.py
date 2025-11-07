@@ -12,4 +12,5 @@ def certainty_select(value: str = CertaintyInterval.NONE.get_display_value()):
     id='certainty-select',
     value=value,
     data=options,
+    disabled=value is None,
   )

@@ -17,7 +17,6 @@ from .ui import (
   Input('annotations-store', 'data'),
 )
 def render_annotations(data):
-  print('Data: ' + str(data))
   if not data:
     return []
   return [
@@ -106,7 +105,6 @@ def handle_remove_annotation_modal(remove_clicks, cancel_clicks, confirm_clicks,
   prevent_initial_call=True,
 )
 def sync_annotations(_, __, type, value, label, color, store, edit_index):
-  print('Store: ' + str(store))
   trigger = ctx.triggered_id
   store = store or []
 

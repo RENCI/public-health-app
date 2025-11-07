@@ -2,6 +2,7 @@ import dash_mantine_components as dmc
 from dash import dcc
 from dash_iconify import DashIconify
 
+from . import callbacks  # noqa: F401
 from .modals import edit_annotation_modal, remove_annotation_modal
 
 add_annotation_button = dmc.Button(
