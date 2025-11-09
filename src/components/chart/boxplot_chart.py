@@ -61,9 +61,11 @@ class BoxplotChart(Chart):
     # start with the raw dataframe
     df = self._raw_df
     # second_df = self._second_raw_df
+
     # filter for given age group
     df = df.query('age_group == @self.controls.age_group.input_value')
     # second_df = second_df.query('age_group == @self.controls.age_group.input_value')
+
     # filter for ensemble model, specifically
     ensemble_model_id = get_model_id('Ensemble')
     df = df.query('model_name == @ensemble_model_id')
@@ -87,9 +89,9 @@ class BoxplotChart(Chart):
         row=i,
         col=1,
       )
+
       # Add scenario name as vertical text annotation to the right of the boxplot
       subplot_idx = ((i - 1) * num_cols) + 1
-      # Get the axis domain for this subplot
       x_axis = self._fig.layout[f'xaxis{subplot_idx}']
       # Position to the right of subplot domain using paper coordinates
       # x_axis.domain is a list [min, max] in paper coordinates
@@ -124,7 +126,7 @@ class BoxplotChart(Chart):
     self._fig.update_xaxes(showspikes=False)
     self._fig.update_yaxes(showspikes=False)
 
-    # calculate global x-axis range across all scenarios
+    # calculate largest x-axis range across all scenarios and use it for all subplots
     should_use_zoom = (
       self.controls.zoom is not None
       and self.controls.zoom.x is not None

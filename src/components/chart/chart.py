@@ -164,8 +164,6 @@ class Chart(ABC):
   def _plot_annotations(self):
     if not self.controls.annotations:
       return
-    # Clear existing annotations. We will rebuild them below.
-    # self._fig.layout.shapes = []
     for annotation in self.controls.annotations:
       if isinstance(annotation, HorizontalAnnotation):
         self._fig.add_hline(
