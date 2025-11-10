@@ -10,11 +10,11 @@ from dash import (
 )
 from dash_iconify import DashIconify
 
-from src.components.toolbar import toolbar
 from src.components.save_insight_form import save_insight_form
+from src.components.toolbar import toolbar
 from src.components.viz_editor import visualization_editor
 from src.data.rounds.round19 import get_insight
-from src.util.get_query_param import get_query_param
+from src.util import get_query_param
 
 register_page(__name__, path_template='/explorer', name='Insight Explorer')
 
@@ -34,7 +34,7 @@ reset_button = dmc.Button(
   id='reset-button',
   leftSection=DashIconify(icon='feather:refresh-ccw'),
   variant='light',
-  size='xs'
+  size='xs',
 )
 
 insight_toolbar = toolbar(
@@ -85,7 +85,6 @@ def update_back_button_href(search):
   State('custom-insights-store', 'data'),
 )
 def render_or_reset_explorer(reset_clicks, search, custom_insights):
-
   starter_id = get_query_param(search, 'starter')
 
   return insight_editor(starter_id, custom_insights)

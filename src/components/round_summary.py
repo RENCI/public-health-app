@@ -17,11 +17,13 @@ from dash_iconify import DashIconify
 from slugify import slugify
 
 from src.components.toolbar import toolbar
-from src.util.data import load_rounds
-from src.util.export.pdf import generate_round_pdf
-from src.util.format_timestamp import format_timestamp
-from src.util.insight import generate_insight_share_url
-from src.util.time_ago import time_ago
+from src.util import (
+  format_timestamp,
+  generate_insight_share_url,
+  generate_round_pdf,
+  load_rounds,
+  time_ago,
+)
 
 
 def tipped_text(text, tooltip=None, size='md'):

@@ -9,7 +9,7 @@ from lzstring import LZString
 
 from src.components.tooltip import tooltip
 from src.components.viz_editor import visualization_editor
-from src.util.insight import extract_controls_from_share_url
+from src.util import extract_controls_from_share_url
 
 # this path gets used in util.insight.extract_controls_from_share_url,
 # so ensure that `encoded` there stays aligned with path_template here.
