@@ -81,7 +81,7 @@ class Chart(ABC):
       str(controls.location.name),
       str(controls.target.input_value),
       str(controls.age_group.input_value),
-      str(controls.certainty_percent.display_value if controls.certainty_percent else ''),
+      str(controls.uncertainty_interval.display_value if controls.uncertainty_interval else ''),
       str(controls.zoom.x.get('min') if controls.zoom and controls.zoom.x.get('min') else ''),
       str(controls.zoom.x.get('max') if controls.zoom and controls.zoom.x.get('max') else ''),
       str(controls.zoom.y.get('min') if controls.zoom and controls.zoom.y.get('min') else ''),

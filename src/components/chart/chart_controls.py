@@ -9,7 +9,7 @@ from src.components.chart.chart_properties import (
   ScenarioVariable,
   Zoom,
 )
-from src.components.enums import AgeGroup, CertaintyInterval, DataType, Target
+from src.components.enums import AgeGroup, DataType, Target, UncertaintyInterval
 
 
 class ChartControls:
@@ -29,7 +29,7 @@ class ChartControls:
     x_start_date: str | None = None,
     zoom: dict | None = None,
     annotations: list[dict] | None = None,
-    certainty_percent: str | None = None,
+    uncertainty_interval: str | None = None,
     pathogen: str = 'covid',
   ):
     self.theme = theme
@@ -48,8 +48,8 @@ class ChartControls:
     self.annotations = (
       [Annotation.from_dict(annotation) for annotation in annotations] if annotations else None
     )
-    self.certainty_percent = (
-      CertaintyInterval.from_display_value(certainty_percent) if certainty_percent else None
+    self.uncertainty_interval = (
+      UncertaintyInterval.from_display_value(uncertainty_interval) if uncertainty_interval else None
     )
     if zoom is not None:
       self.zoom = Zoom(**zoom)
@@ -74,5 +74,5 @@ class ChartControls:
       x_start_date=data['x_start_date'],
       zoom=data.get('zoom', None),
       annotations=data.get('annotations', None),
-      certainty_percent=data.get('certainty_percent', None),
+      uncertainty_interval=data.get('uncertainty_interval', None),
     )

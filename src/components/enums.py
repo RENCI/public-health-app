@@ -80,7 +80,7 @@ class DataType(Enum):
     return isinstance(other, DataType) and self.path_value == other.path_value
 
 
-class CertaintyInterval(Enum):
+class UncertaintyInterval(Enum):
   NONE = ('None', [])
   FIFTY_PERCENT = ('50%', [(0.25, 0.75)])
   EIGHTY_PERCENT = ('80%', [(0.1, 0.9)])
@@ -124,4 +124,4 @@ class CertaintyInterval(Enum):
     return hash(self.display_value)
 
   def __eq__(self, other):
-    return isinstance(other, CertaintyInterval) and self.display_value == other.display_value
+    return isinstance(other, UncertaintyInterval) and self.display_value == other.display_value

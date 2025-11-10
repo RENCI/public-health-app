@@ -3,7 +3,7 @@ from plotly.subplots import make_subplots
 
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
-from src.components.enums import CertaintyInterval
+from src.components.enums import UncertaintyInterval
 from src.constants import get_model_color_by_id, get_model_id
 
 
@@ -191,11 +191,11 @@ class BoxplotChart(Chart):
     )
     self._raw_df = new_raw_df
 
-  def update_certainty_percent(self, certainty_percent: str | None):
+  def update_uncertainty_interval(self, uncertainty_interval: str | None):
     """
-    Update the certainty percentage.
+    Update the uncertainty interval.
     """
-    self.controls.certainty_percent = (
-      CertaintyInterval.from_display_value(certainty_percent) if certainty_percent else None
+    self.controls.uncertainty_interval = (
+      UncertaintyInterval.from_display_value(uncertainty_interval) if uncertainty_interval else None
     )
     self.refresh_fig()

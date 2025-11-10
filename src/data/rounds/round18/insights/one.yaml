@@ -20,7 +20,7 @@ controls:
     - name: Vaccination Strategy
       options: ["High risk", "All ages"]
       selected_option: High risk
-  certainty_percent: "95%"
+  uncertainty_interval: "95%"
   age_group: "0-130"
   x_start_date: "2025-01-01"
   x_axis: target_end_date

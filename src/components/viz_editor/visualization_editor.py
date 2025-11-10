@@ -10,11 +10,11 @@ from src.components.chart.chart_instance_manager import ChartInstanceManager
 from .controls import (
   age_group_select,
   annotations_control,
-  certainty_select,
   location_select,
   models_select,
   scenarios_select,
   target_select,
+  uncertainty_interval_select,
   zoom_control,
 )
 
@@ -44,7 +44,7 @@ default_control_values = dict(
   y_axis='value',
   x_start_date='2025-01-01',
   age_group='0-130',
-  certainty_percent='95%',
+  uncertainty_interval='95%',
   annotations=None,
   zoom=None,
 )
@@ -67,7 +67,7 @@ def visualization_editor(controls=None, show_controls=True):
   init_x_start_date: str | None = controls.get('x_start_date', None)
   init_x_axis: str = controls.get('x_axis', None)
   init_y_axis: str = controls.get('y_axis', None)
-  init_certainty_percent: str | None = controls.get('certainty_percent', None)
+  init_uncertainty_interval: str | None = controls.get('uncertainty_interval', None)
   init_zoom: dict[str, dict[str, Any]] | None = controls.get('zoom', None)
   init_annotations: list[dict[str, Any]] | None = controls.get('annotations', None)
 
@@ -86,7 +86,7 @@ def visualization_editor(controls=None, show_controls=True):
     x_start_date=init_x_start_date,
     zoom=init_zoom,
     annotations=init_annotations,
-    certainty_percent=init_certainty_percent,
+    uncertainty_interval=init_uncertainty_interval,
   )
 
   chart_extent_store = dcc.Store(id='chart-extent-store', storage_type='local')
@@ -154,8 +154,8 @@ def visualization_editor(controls=None, show_controls=True):
                   dmc.GridCol(target_select(value=init_target), span=dict(base=12, sm=6)),
                   dmc.GridCol(age_group_select(value=init_age_group), span=dict(base=12, sm=6)),
                   dmc.GridCol(
-                    certainty_select(
-                      value=init_certainty_percent, disabled=init_plot_type == 'boxplot'
+                    uncertainty_interval_select(
+                      value=init_uncertainty_interval, disabled=init_plot_type == 'boxplot'
                     ),
                     span=dict(base=12, sm=6),
                   ),
@@ -220,7 +220,7 @@ def update_graph_figure(
   Input('location-select', 'value'),
   Input('target-select', 'value'),
   Input('age-group-select', 'value'),
-  Input('certainty-select', 'value'),
+  Input('uncertainty-interval-select', 'value'),
   Input('zoom-store', 'data'),
   Input('annotations-store', 'data'),
   Input('graph', 'relayoutData'),
@@ -235,7 +235,7 @@ def update_chart_controls(
   location_name: str,
   target: str,
   age_group: str,
-  certainty: str | None,
+  uncertainty_interval: str | None,
   zoom: dict[str, dict[str, Any]] | None,
   annotations: list[dict[str, Any]] | None,
   relayout: dict[str, Any] | None,
@@ -266,7 +266,7 @@ def update_chart_controls(
     location_name=location_name,
     target=target,
     age_group=age_group,
-    certainty_percent=certainty,
+    uncertainty_interval=uncertainty_interval,
     zoom=new_zoom,
     annotations=annotations,
   )
