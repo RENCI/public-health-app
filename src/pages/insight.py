@@ -193,3 +193,46 @@ clientside_callback(
   Input('download-insight-button', 'n_clicks'),
   prevent_initial_call=True,
 )
+
+@callback(
+  Output('insight-pdf-download', 'data'),
+  Output('notification-container', 'sendNotifications', allow_duplicate=True),
+  Output('download-insight-button', 'loading'),
+  Input('download-insight-button', 'n_clicks'),
+  State('custom-insights-store', 'data'),
+  State('url', 'pathname'),
+  prevent_initial_call=True,
+)
+def handle_click_download(n_clicks, custom_insights, pathname):
+  if not n_clicks:
+    return no_update, no_update, False
+
+  if not pathname or not pathname.startswith('/insight/'):
+    raise exceptions.PreventUpdate
+
+  try:
+    insight_id = pathname.split('/insight/')[-1]
+    if not insight_id:
+      raise ValueError('No insight ID provided')
+
+    insight = get_insight(insight_id, custom_insights=custom_insights or [])
+    if not insight:
+      raise ValueError(f'Insight {insight_id} not found')
+
+    round_number = insight.get('controls', {}).get('round_number', '18')
+    slugified_title = slugify(insight.get('title', ''))
+
+    pdf = generate_insight_pdf(insight)
+    filename = f'SMH_{round_number}_{slugified_title}.pdf'
+
+    return dcc.send_bytes(pdf, filename), no_update, False
+
+  except Exception as error:
+    print(f'Download failed: {error}')
+    notification = {
+      'action': 'show',
+      'id': f'insight-pdf-download-failed-{uuid.uuid4()}',
+      'message': 'Download failed!',
+      'color': 'crimson',
+    }
+    return no_update, [notification], False
