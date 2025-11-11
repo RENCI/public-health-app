@@ -159,9 +159,7 @@ class LineChart(Chart):
       hovermode='x unified',
       height=chart_total_height + 180,
       title=self.get_title(),
-      title_subtitle_text=self.get_subtitle(
-        begin_date=self._start_date_str, end_date=self._end_date_str
-      ),
+      title_subtitle_text=self.get_subtitle(),
       uirevision=self.__hash__(),
     )
 
@@ -176,9 +174,9 @@ class LineChart(Chart):
     return self._raw_df
 
   def get_title(self) -> str:
-    return f'{self.controls.target.display_value} over time (by scenario)'
+    return f'{self.controls.target.display_value} Over Time'
 
-  def get_subtitle(self, begin_date: str, end_date: str) -> str:
+  def get_subtitle(self) -> str:
     return (
       f'Pathogen: {self.controls.pathogen}'
       + f' | Location: {self.controls.location.name}'
@@ -188,7 +186,6 @@ class LineChart(Chart):
         if self.controls.uncertainty_interval
         else ''
       )
-      + f' | During: {begin_date} - {end_date}'
     )
 
   def update_controls(self, controls: ChartControls) -> None:

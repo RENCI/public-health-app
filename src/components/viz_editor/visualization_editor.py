@@ -100,7 +100,8 @@ def visualization_editor(controls=None, show_controls=True):
   # for the first time. This is necessary because the callback that updates the
   # chart-controls-store is not called when the page is initially loaded so it needs to be
   # triggered, and since the chart-controls-store is stored in local storage it will preserve
-  # the values when the page is reloaded unless it's reset.
+  # its values (potentially from a different chart type on a different insight) when the page
+  # is reloaded unless it's reset.
   initial_page_load_chart_controls_store = dcc.Store(
     id='initial-page-load-chart-controls-store',
     storage_type='memory',
@@ -270,10 +271,12 @@ def update_chart_controls(
     zoom=new_zoom,
     annotations=annotations,
   )
+  # initial_chart_controls must come after current_chart_controls;
+  # see initial_page_load_chart_controls_store comment above for more details
   return {
     **default_control_values,
-    **initial_chart_controls,
     **current_chart_controls,
+    **initial_chart_controls,
     **new_chart_controls,
   }
 

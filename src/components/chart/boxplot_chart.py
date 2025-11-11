@@ -1,3 +1,4 @@
+import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -24,9 +25,27 @@ class BoxplotChart(Chart):
     #   self.controls.location.name,
     #   'incident_death',
     # )
+    self._start_date_str, self._end_date_str = self._calculate_data_time_range()
     self._fig = go.Figure()
 
     self.refresh_fig()
+
+  def _calculate_data_time_range(self) -> tuple[str, str]:
+    min_date: pd.Timestamp = pd.Timestamp.max
+    max_date: pd.Timestamp = pd.Timestamp.min
+    for scenario in self.controls.scenarios:
+      scenario_df = self._raw_df.query('scenario_id == @scenario.id')
+      scenario_min_date = scenario_df['target_end_date'].min()
+      scenario_max_date = scenario_df['target_end_date'].max()
+      if scenario_min_date < min_date:
+        min_date = scenario_min_date
+      if scenario_max_date > max_date:
+        max_date = scenario_max_date
+    if min_date == pd.Timestamp.max:
+      raise ValueError('No start date found for scenarios')
+    if max_date == pd.Timestamp.min:
+      raise ValueError('No end date found for scenarios')
+    return min_date.strftime('%Y-%m-%d'), max_date.strftime('%Y-%m-%d')
 
   def __hash__(self):
     """
@@ -180,13 +199,14 @@ class BoxplotChart(Chart):
     return self._fig
 
   def get_title(self) -> str:
-    return f'{self.controls.target.display_value} forecast distribution (boxplot)'
+    return f'{self.controls.target.display_value} Distribution'
 
   def get_subtitle(self) -> str:
     return (
       f'Pathogen: {self.controls.pathogen}'
       + f' | Location: {self.controls.location.name}'
       + f' | Age group: {self.controls.age_group.display_value}'
+      + f' | During: {self._start_date_str} - {self._end_date_str}'
     )
 
   def _reload_data(self):
