@@ -187,7 +187,7 @@ def show_insight_details(pathname, custom_insights, theme):
 
     controls = insight.get('controls', {})
     controls = {**controls, 'theme': theme}
-    annotations = controls['annotations'] or []
+    annotations = controls.get('annotations', [])
 
     return [
       dmc.Title(insight.get('title', 'Untitled Insight'), order=1),
