@@ -33,10 +33,10 @@ function slugify(str) {
   function styleAnnotationReference(el) {
     const newStyle = {
       cursor: 'pointer',
-      border: '1px dashed',
-      borderColor: el.style.color || 'inherit',
-      borderWidth: '0 0 2px 0',
-      paddingBottom: '2px',
+      textDecoration: 'underline',
+      textDecorationStyle: 'dashed',
+      textDecorationColor: el.style.color || 'inherit',
+      textUnderlineOffset: '5px',
     };
     Object.assign(el.style, newStyle);
   }
