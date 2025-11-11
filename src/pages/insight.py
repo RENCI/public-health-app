@@ -202,7 +202,7 @@ def show_insight_details(pathname, custom_insights, theme):
             dangerously_allow_html=True,
             style=dict(lineHeight=2),
           ),
-        ], span=dict(base=12, md=7)),
+        ], span=dict(base=12, md=7 if len(annotations) else 12)),
         dmc.GridCol(
           dmc.Card(
             dmc.Stack(annotations_list(annotations), id='annotations-list-container'),
@@ -210,7 +210,7 @@ def show_insight_details(pathname, custom_insights, theme):
             p='lg',
           ),
           span=dict(base=12, md=5),
-        ),
+        ) if len(annotations) else None,
       ]),
       dcc.Download(id='insight-pdf-download'),
     ]
