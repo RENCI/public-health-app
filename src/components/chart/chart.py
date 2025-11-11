@@ -38,8 +38,21 @@ class Chart(ABC):
       self.controls.location.name,
       self.controls.target.input_value,
     )
+    self._set_start_and_end_dates()
     self._fig: go.Figure = self._create_empty_figure()
     self.set_theme()
+
+  def _set_start_and_end_dates(self):
+    max_end_date = None
+    for scenario in self.controls.scenarios:
+      scenario_df = self._raw_df.query('scenario_id == @scenario.id')
+      scenario_max_end_date = scenario_df['target_end_date'].max()
+      if (
+        max_end_date is not None and scenario_max_end_date > max_end_date
+      ) or max_end_date is None:
+        max_end_date = scenario_max_end_date
+    self._start_date_str = self.controls.scenarios[0].name.split(sep='-', maxsplit=1)[1]
+    self._end_date_str = max_end_date.strftime('%Y-%m-%d')
 
   def _create_empty_figure(self) -> go.Figure:
     return go.Figure()

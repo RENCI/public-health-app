@@ -150,15 +150,10 @@ def get_pathogen_color(pathogen: str = 'RSV') -> str:
   return get_pathogen_colors().get(pathogen, 'rgba(128, 128, 128, 1)')  # Default gray
 
 
-def get_location_data(location: str) -> tuple[str, int, int]:
+def get_location_short_code(location: str) -> str:
   """Get the short code for a specific location."""
   location = location.lower().capitalize()
-  return get_locations().get(location, ('', 0, 0))
-
-
-def get_location_order() -> list[str]:
-  """Get the ordered list of locations."""
-  return get_constants().get('location_order', [])
+  return get_location_data(location)[0]
 
 
 def get_uncertainty_interval_opacities() -> dict[UncertaintyInterval, float]:
