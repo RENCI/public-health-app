@@ -46,6 +46,7 @@ def markdown_editor(
 @callback(
   Output({'type': 'preview', 'id': MATCH}, 'children'),
   Input({'type': 'editor', 'id': MATCH}, 'value'),
+  prevent_initial_call=True,
 )
 def update_preview(value):
   return '## Nothing to preview :(' if not value else value
