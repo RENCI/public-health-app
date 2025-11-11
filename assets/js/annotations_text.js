@@ -43,8 +43,8 @@ function slugify(str) {
 
   function attachAnnotationEvents(el) {
     el.addEventListener('mouseenter', () => {
-      const glowColor = el.style.color || 'crimson';
       const labels = getChartLabelsFor(el);
+      const glowColor = labels?.[0]?.style?.fill || 'crimson';
       setGlow(labels, glowColor);
     });
 
