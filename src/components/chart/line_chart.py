@@ -177,7 +177,16 @@ class LineChart(Chart):
     return f'{self.controls.target.display_value} over time (by scenario)'
 
   def get_subtitle(self) -> str:
-    return f'Pathogen: {self.controls.pathogen} | Location: {self.controls.location.name} | Age group: {self.controls.age_group.display_value}'
+    return (
+      f'Pathogen: {self.controls.pathogen}'
+      + f' | Location: {self.controls.location.name}'
+      + f' | Age group: {self.controls.age_group.display_value}'
+      + (
+        f' | Uncertainty interval: {self.controls.uncertainty_interval.display_value}'
+        if self.controls.uncertainty_interval
+        else ''
+      )
+    )
 
   def update_controls(self, controls: ChartControls) -> None:
     """

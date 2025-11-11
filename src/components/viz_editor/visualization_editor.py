@@ -272,8 +272,8 @@ def update_chart_controls(
   )
   return {
     **default_control_values,
-    **current_chart_controls,
     **initial_chart_controls,
+    **current_chart_controls,
     **new_chart_controls,
   }
 

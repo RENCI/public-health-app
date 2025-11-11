@@ -169,7 +169,8 @@ class BoxplotChart(Chart):
     self._fig.update_layout(
       hovermode='closest',
       height=400 + (200 * max(0, num_rows - 1)),
-      title='Forecast distribution (boxplot)',
+      title=self.get_title(),
+      title_subtitle_text=self.get_subtitle(),
       uirevision=self.__hash__(),
       showlegend=False,
     )
@@ -177,6 +178,16 @@ class BoxplotChart(Chart):
     self.set_theme()
 
     return self._fig
+
+  def get_title(self) -> str:
+    return f'{self.controls.target.display_value} forecast distribution (boxplot)'
+
+  def get_subtitle(self) -> str:
+    return (
+      f'Pathogen: {self.controls.pathogen}'
+      + f' | Location: {self.controls.location.name}'
+      + f' | Age group: {self.controls.age_group.display_value}'
+    )
 
   def _reload_data(self):
     """

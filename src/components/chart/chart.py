@@ -66,6 +66,14 @@ class Chart(ABC):
   def _reload_data(self):
     pass
 
+  @abstractmethod
+  def get_title(self) -> str:
+    pass
+
+  @abstractmethod
+  def get_subtitle(self) -> str:
+    pass
+
   @staticmethod
   def get_key(controls: ChartControls) -> str:
     """
