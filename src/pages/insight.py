@@ -196,7 +196,7 @@ def show_insight_details(pathname, custom_insights, theme):
       ),
       dmc.Grid([
         dmc.GridCol([
-          dmc.Title('Description', order=2, my=12),
+          dmc.Title('Discussion', order=2, my=12),
           dcc.Markdown(
             markdown.markdown(insight.get('description', ''), extensions=['extra']),
             dangerously_allow_html=True,
