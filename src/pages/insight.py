@@ -1,10 +1,9 @@
-import markdown
-from datetime import datetime
 import uuid
+from datetime import datetime
 
 import dash_mantine_components as dmc
+import markdown
 from dash import (
-  ALL,
   Input,
   Output,
   State,
@@ -19,16 +18,18 @@ from dash import (
 from dash_iconify import DashIconify
 
 from src.components.tooltip import tooltip
+<<<<<<< HEAD
 from src.components.toolbar import toolbar, toolbar_button
+=======
+>>>>>>> dev
 from src.components.viz_editor import visualization_editor
 from src.components.insight_yaml_modal import insight_yaml_modal_button, insight_yaml_modal
 from src.data.rounds.round19 import get_insight
-from src.util.data import load_rounds
-from src.util.export.pdf import generate_insight_pdf
-from src.util.slugify import slugify
+from src.util import generate_insight_pdf, slugify
 
 register_page(__name__, path_template='/insight/<insight_id>', name='Insight Details')
 
+<<<<<<< HEAD
 back_button = dmc.Anchor(
   toolbar_button('Round Summary', icon=DashIconify(icon='feather:chevron-left')),
   id='back-to-insights-button',
@@ -61,10 +62,11 @@ insight_toolbar = toolbar(
 )
 
 
+=======
+>>>>>>> dev
 loading_insight = [
-  dmc.Space(h=16),
-  dmc.Title(id='insight-view-title', order=1, children=dmc.Skeleton(h=82)),
-  insight_toolbar,
+  dmc.Title(id='insight-view-title', order=1, children=dmc.Skeleton(h=85)),
+  dmc.Divider(my=24),
   html.Div(
     id='insight-view-figure-container',
     children=dmc.Stack(
@@ -80,7 +82,45 @@ loading_insight = [
   dcc.Download(id='insight-pdf-download'),
 ]
 
+back_button = dmc.Anchor(
+  '← Back to Round Overview',
+  id='back-to-insights-button',
+  href='/',
+)
 
+explorer_button = dcc.Link(
+  dmc.Button(
+    'Explore',
+    leftSection=DashIconify(icon='feather:arrow-up-right'),
+  ),
+  id='explorer-button',
+  href='#',
+)
+
+download_button = dmc.ActionIcon(
+  DashIconify(icon='feather:download'),
+  variant='subtle',
+  id='download-insight-button',
+  size='lg',
+  loading=False,
+)
+
+insight_toolbar = dmc.Flex(
+  children=[
+    back_button,
+    dmc.Group(
+      [
+        tooltip(download_button, label='Download PDF'),
+        tooltip(explorer_button, label="Explore this insight's data"),
+      ]
+    ),
+  ],
+  justify='space-between',
+  align='center',
+  mb=24,
+)
+
+<<<<<<< HEAD
 def insight_heading(round_number: str, round_date: str, round_name: str):
   return dmc.Stack(
     [
@@ -102,6 +142,8 @@ def insight_heading(round_number: str, round_date: str, round_name: str):
     ],
     gap=0,
   )
+=======
+>>>>>>> dev
 
 def annotations_list(annotations: list):
   if len(annotations) == 0:
@@ -111,51 +153,59 @@ def annotations_list(annotations: list):
     dmc.Title('Annotations', order=2),
   ]
 
-  date_annotations = [dmc.ListItem(
-    dmc.Text(
-      children=[
-        dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
-        f'{datetime.fromisoformat(annotation["value"]).strftime("%B %-d, %Y")}',
-      ],
-      id=annotation['label'],
-      c=annotation['color'],
-      className=f'annotation-ref vertical {annotation['label']}',
-      **{'data-annotation-ref': slugify(annotation['label'])}
-    ),
-    id={'type': 'annotation-item', 'id': annotation['label']},
-  ) for annotation in annotations if annotation['type'] == 'vertical']
+  date_annotations = [
+    dmc.ListItem(
+      dmc.Text(
+        children=[
+          dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
+          f'{datetime.fromisoformat(annotation["value"]).strftime("%B %-d, %Y")}',
+        ],
+        id=annotation['label'],
+        c=annotation['color'],
+        className=f'annotation-ref vertical {annotation["label"]}',
+        **{'data-annotation-ref': slugify(annotation['label'])},
+      ),
+      id={'type': 'annotation-item', 'id': annotation['label']},
+    )
+    for annotation in annotations
+    if annotation['type'] == 'vertical'
+  ]
 
-  value_annotations = [dmc.ListItem(
-    dmc.Text(
-      children=[
-        dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
-        f'{annotation["value"]:,}',
-      ],
-      id=annotation['label'],
-      c=annotation['color'],
-      className=f'annotation-ref horizontal {annotation['label']}',
-      **{'data-annotation-ref': slugify(annotation['label'])}
-    ),
-    id={'type': 'annotation-item', 'id': annotation['label']},
-  ) for annotation in annotations if annotation['type'] == 'horizontal']
+  value_annotations = [
+    dmc.ListItem(
+      dmc.Text(
+        children=[
+          dmc.Text(f'{annotation["label"]}: ', fw=700, span=True),
+          f'{annotation["value"]:,}',
+        ],
+        id=annotation['label'],
+        c=annotation['color'],
+        className=f'annotation-ref horizontal {annotation["label"]}',
+        **{'data-annotation-ref': slugify(annotation['label'])},
+      ),
+      id={'type': 'annotation-item', 'id': annotation['label']},
+    )
+    for annotation in annotations
+    if annotation['type'] == 'horizontal'
+  ]
 
   if len(value_annotations) > 0:
-    list_items.extend([
-      dmc.Title('Notable Values', order=3),
-      dmc.List(value_annotations),
-    ])
+    list_items.extend(
+      [
+        dmc.Title('Notable Values', order=3),
+        dmc.List(value_annotations),
+      ]
+    )
 
   if len(date_annotations) > 0:
-    list_items.extend([
-      dmc.Title('Notable Dates', order=3),
-      dmc.List(date_annotations)
-    ])
-  
+    list_items.extend([dmc.Title('Notable Dates', order=3), dmc.List(date_annotations)])
+
   return list_items
 
 
 layout = dmc.Container(
   children=[
+    insight_toolbar,
     dmc.Box(id='dummy-output'),
     dmc.Box(
       loading_insight,
@@ -183,8 +233,9 @@ def add_back_link_href(pathname):
   Output('insight-view-container', 'children'),
   Input('url', 'pathname'),
   Input('custom-insights-store', 'data'),
+  Input('theme-store', 'data'),
 )
-def show_insight_details(pathname, custom_insights):
+def show_insight_details(pathname, custom_insights, theme):
   """Render the insight details page given /insight/<insight_id>"""
   if not pathname or not pathname.startswith('/insight/'):
     raise exceptions.PreventUpdate
@@ -200,13 +251,8 @@ def show_insight_details(pathname, custom_insights):
       raise ValueError(f'Insight {insight_id} not found')
 
     controls = insight.get('controls', {})
-    annotations = controls['annotations'] or []
-    round_number = str(controls['round_num'])
-
-    rounds = load_rounds()
-    this_round = rounds.get(round_number)
-    if not this_round:
-      raise exceptions.PreventUpdate
+    controls = {**controls, 'theme': theme}
+    annotations = controls.get('annotations', [])
 
     return [
       dmc.Space(h=16),
@@ -219,14 +265,14 @@ def show_insight_details(pathname, custom_insights):
       dmc.Title(f'Insight: {insight.get("title", "Untitled Insight")}', order=1),
       dmc.Text(insight.get('summary', 'Summary not found')),
       html.Div(
-        visualization_editor(control_values=controls, show_controls=False),
+        visualization_editor(controls=controls, show_controls=False),
         style=dict(margin='24px 0'),
       ),
       dmc.Stack(annotations_list(annotations), id='annotations-list-container'),
       dmc.Title('Description', order=2, my=12),
       dcc.Markdown(
         markdown.markdown(insight.get('description', ''), extensions=['extra']),
-        dangerously_allow_html=True
+        dangerously_allow_html=True,
       ),
       dcc.Download(id='insight-pdf-download'),
       insight_yaml_modal(insight),
@@ -253,7 +299,6 @@ clientside_callback(
   Output('dummy-output', 'children'),
   Input('insight-view-container', 'children'),
 )
-
 
 
 clientside_callback(
@@ -310,4 +355,3 @@ def handle_click_download(n_clicks, custom_insights, pathname):
       'color': 'crimson',
     }
     return no_update, [notification], False
-

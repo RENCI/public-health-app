@@ -51,9 +51,9 @@ class Target(InputAndDisplayEnum):
 
 
 class AgeGroup(InputAndDisplayEnum):
-  ALL = ('0-130', 'all ages')
-  UNDER_SIXTY_FIVE = ('0-64', 'ages 0-64')
-  SIXTY_FIVE_AND_ABOVE = ('65-130', 'ages 65+')
+  ALL = ('0-130', 'All ages')
+  UNDER_SIXTY_FIVE = ('0-64', 'Ages 0-64')
+  SIXTY_FIVE_AND_ABOVE = ('65-130', 'Ages 65+')
 
   def __init__(self, input_value: str, display_value: str):
     super().__init__(display_value, input_value)
@@ -80,11 +80,13 @@ class DataType(Enum):
     return isinstance(other, DataType) and self.path_value == other.path_value
 
 
-class CertaintyInterval(Enum):
+class UncertaintyInterval(Enum):
   NONE = ('None', [])
   FIFTY_PERCENT = ('50%', [(0.25, 0.75)])
+  EIGHTY_PERCENT = ('80%', [(0.1, 0.9)])
+  NINETY_PERCENT = ('90%', [(0.05, 0.95)])
   NINETY_FIVE_PERCENT = ('95%', [(0.025, 0.975)])
-  MULTI = ('Multi', [(0.025, 0.975), (0.05, 0.95), (0.1, 0.9), (0.25, 0.75)])
+  ALL = ('All', [(0.025, 0.975), (0.05, 0.95), (0.1, 0.9), (0.25, 0.75)])
 
   def __init__(self, display_value: str, bounds: list[tuple[float, float]]):
     self.display_value = display_value
@@ -97,11 +99,18 @@ class CertaintyInterval(Enum):
     return self.bounds
 
   @classmethod
-  def from_display_value(cls, value: str) -> 'CertaintyInterval':
+  def from_display_value(cls, value: str) -> Self:
     for member in cls:
       if member.display_value == value:
         return member
     raise ValueError(f'No enum member found for display value: {value}')
+
+  @classmethod
+  def from_bounds(cls, bounds: list[tuple[float, float]]) -> Self:
+    for member in cls:
+      if member.bounds == bounds:
+        return member
+    raise ValueError(f'No enum member found for bounds: {bounds}')
 
   @classmethod
   def display_values(cls) -> list[str]:
@@ -115,4 +124,4 @@ class CertaintyInterval(Enum):
     return hash(self.display_value)
 
   def __eq__(self, other):
-    return isinstance(other, CertaintyInterval) and self.display_value == other.display_value
+    return isinstance(other, UncertaintyInterval) and self.display_value == other.display_value

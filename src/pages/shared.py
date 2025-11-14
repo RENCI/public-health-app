@@ -9,7 +9,7 @@ from lzstring import LZString
 
 from src.components.tooltip import tooltip
 from src.components.viz_editor import visualization_editor
-from src.util.insight import extract_controls_from_share_url
+from src.util import extract_controls_from_share_url
 
 # this path gets used in util.insight.extract_controls_from_share_url,
 # so ensure that `encoded` there stays aligned with path_template here.
@@ -109,7 +109,7 @@ def render_shared_insight(pathname, selected_round, custom_insights):
     dmc.Title(title, order=1),
     dmc.Divider(my=24),
     html.Div(
-      visualization_editor(control_values=controls, show_controls=False),
+      visualization_editor(controls=controls, show_controls=False),
       style=dict(margin='24px 0'),
     ),
     dcc.Markdown(description),

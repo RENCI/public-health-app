@@ -12,9 +12,10 @@ from dash_iconify import DashIconify
 
 from src.components.toolbar import toolbar, toolbar_button
 from src.components.save_insight_form import save_insight_form
+from src.components.toolbar import toolbar
 from src.components.viz_editor import visualization_editor
 from src.data.rounds.round19 import get_insight
-from src.util.get_query_param import get_query_param
+from src.util import get_query_param
 
 register_page(__name__, path_template='/explorer', name='Insight Explorer')
 
@@ -31,6 +32,12 @@ reset_button = toolbar_button(
   'Reset to Original',
   icon=DashIconify(icon='feather:refresh-ccw'),
   id='reset-button',
+<<<<<<< HEAD
+=======
+  leftSection=DashIconify(icon='feather:refresh-ccw'),
+  variant='light',
+  size='xs',
+>>>>>>> dev
 )
 
 
@@ -49,7 +56,7 @@ def insight_editor(insight_id, custom_insights=None):
 
   return html.Div(
     [
-      visualization_editor(control_values=controls, show_controls=True),
+      visualization_editor(controls=controls, show_controls=True),
       save_insight_form(initial_title=title, initial_description=description),
     ],
     id='editor-contents',

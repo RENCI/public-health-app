@@ -4,7 +4,7 @@ summary: We expect continued substantial burden of disease from COVID-19 in the 
 description: >
   First, note that ever so important time <span data-annotation-ref="some-policy-change">when that one policy changed</span>.
   We also want to keep the <span data-annotation-ref="value-for-seasonal-burden-and-trajectory-insight">Sample Threshold</span> in mind.
-  
+
   - **Two peaks similar to last winter’s peak** (~20,000 hospitalizations at peak) are projected for late August 2025 and January 2026.
 
   - **648,000 cumulative hospitalizations (95% PI 241,000–778,000) and 40,000 deaths (95% PI 25,000-59,000)** due to COVID-19 projected from April 27, 2025 to April 25, 2026 in the high-risk vaccination scenario (i.e., booster vaccination only among individuals aged 65+ or otherwise at high risk for elevated severity).
@@ -16,11 +16,16 @@ template: default
 created_at: "2025-05-18T22:45:12Z"
 updated_at: "2025-05-18T22:45:12Z"
 controls:
-  location: US
+  plot_type: line
+  location_name: US
   target: incident_hospitalization
-  models: [Ensemble]
-  scenarios: [A-2023-10-27, B-2023-10-27]
-  certainty: "95%"
+  model_names: ["Ensemble"]
+  scenario_names: ["A-2023-10-27", "B-2023-10-27"]
+  scenario_variables:
+    - name: Vaccination Strategy
+      options: ["High risk", "All ages"]
+      selected_option: High risk
+  uncertainty_interval: "95%"
   age_group: "0-130"
   x_start_date: "2025-01-01"
   x_axis: target_end_date

@@ -1,15 +1,15 @@
 from datetime import datetime
-from dash import Input, Output, State, ctx, exceptions, no_update, callback
-from dash import ALL
-import dash_mantine_components as dmc
+
+from dash import ALL, Input, Output, State, callback, ctx, exceptions
+
+from .store import remove_annotation
 from .ui import (
+  annotation_color_input,
+  annotation_label_input,
   annotation_row,
   annotation_type_select,
   annotation_value_input,
-  annotation_label_input,
-  annotation_color_input,
 )
-from .store import remove_annotation, update_annotation
 
 
 @callback(

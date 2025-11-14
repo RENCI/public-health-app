@@ -1,13 +1,13 @@
 import dash_mantine_components as dmc
 
 options = [
-  {'value': 'Ensemble', 'label': 'Ensemble'},
-  {'value': 'Ensemble_LOP', 'label': 'Ensemble_LOP'},
-  {'value': 'Individual Models', 'label': 'Individual Models'},
+  'Ensemble',
+  'Ensemble_LOP',
+  'Individual Models',
 ]
 
 
-def ensemble_select(value='Ensemble'):
+def ensemble_select(value: str = 'Ensemble'):
   return dmc.Select(
     label='Ensemble',
     placeholder='',

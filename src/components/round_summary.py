@@ -14,15 +14,16 @@ from dash import (
   no_update,
 )
 from dash_iconify import DashIconify
+from slugify import slugify
 
-from src.components.tooltip import tooltip
 from src.components.toolbar import toolbar
-from src.util.data import load_rounds
-from src.util.export.pdf import generate_round_pdf
-from src.util.format_timestamp import format_timestamp
-from src.util.insight import generate_insight_share_url
-from src.util.slugify import slugify
-from src.util.time_ago import time_ago
+from src.util import (
+  format_timestamp,
+  generate_insight_share_url,
+  generate_round_pdf,
+  load_rounds,
+  time_ago,
+)
 
 
 def tipped_text(text, tooltip=None, size='md'):
@@ -279,18 +280,29 @@ download_button = dmc.Button(
   loading=False,
 )
 
-def round_heading(number: str, date: str, name: str):
-  return dmc.Stack([
-    dmc.Title(f'Round {number}', order=1, style=dict(fontSize='var(--mantine-h2-font-size'), c='dimmed'),
-    dmc.Flex([
-      dmc.Text(name, style=dict(fontSize='var(--mantine-h1-font-size'), fw=700),
-      dmc.Text(f'Date completed: {date}', c='dimmed', span=True, style=dict(fontStyle='italic')),
-    ], justify='space-between', align='flex-end'),
-  ], gap=0)
 
-round_toolbar = toolbar(
-  right=[download_button]
-)
+def round_heading(number: str, date: str, name: str):
+  return dmc.Stack(
+    [
+      dmc.Title(
+        f'Round {number}', order=1, style=dict(fontSize='var(--mantine-h2-font-size'), c='dimmed'
+      ),
+      dmc.Flex(
+        [
+          dmc.Text(name, style=dict(fontSize='var(--mantine-h1-font-size'), fw=700),
+          dmc.Text(
+            f'Date completed: {date}', c='dimmed', span=True, style=dict(fontStyle='italic')
+          ),
+        ],
+        justify='space-between',
+        align='flex-end',
+      ),
+    ],
+    gap=0,
+  )
+
+
+round_toolbar = toolbar(right=[download_button])
 
 
 def round_summary():
@@ -328,7 +340,7 @@ def update_round_summary(round_number, pathname):
   rounds = load_rounds()
   this_round = rounds.get(round_number)
   if not this_round:
-    return f'Round {round_number}', 'No data.', []
+    return dmc.Text(f'Round {round_number}'), dmc.Text('No data.'), [], []
 
   round_name = this_round.get('name')
   round_date = this_round.get('date')
