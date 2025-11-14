@@ -185,6 +185,15 @@ class BoxplotChart(Chart):
         range=[self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
       )
 
+    # Add x-axis label only to the last row (bottom plot)
+    if num_rows > 1:
+      last_row_xaxis_name = f'xaxis{num_rows}'
+    else:
+      last_row_xaxis_name = 'xaxis'
+    self._fig.layout[last_row_xaxis_name].title = dict(
+      text=self.controls.target.display_value,
+    )
+
     self._fig.update_layout(
       hovermode='closest',
       height=400 + (200 * max(0, num_rows - 1)),
