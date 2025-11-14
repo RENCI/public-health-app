@@ -1,9 +1,39 @@
 import datetime
 import uuid
+from typing import Any
 
 import dash_mantine_components as dmc
 from dash import Input, Output, State, callback, exceptions
 from dash_iconify import DashIconify
+
+default_control_values = {
+  'theme': 'light',
+  'plot_type': 'line',
+  'round_num': 19,
+  'pathogen': 'covid',
+  'scenarios': [
+    {
+      'id': 'A-2023-10-27',
+      'name': 'A-2023-10-27',
+      'description': 'Scenario A',
+    },
+  ],
+  'scenario_variables': [
+    {
+      'name': 'Vaccination Strategy',
+      'options': ['High risk', 'All ages'],
+      'selected_option': 'All ages',
+    },
+  ],
+  'model_names': ['Ensemble'],
+  'location_name': 'US',
+  'target': 'incident_hospitalization',
+  'age_group': '0-130',
+  'x_axis': 'target_end_date',
+  'y_axis': 'value',
+  'x_start_date': '2025-01-01',
+  'zoom': None,
+}
 
 form_toggle_button = dmc.Button(
   'Save as New Insight',
@@ -88,44 +118,23 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   State('insight-title-input', 'value'),
   State('insight-description-input', 'value'),
   State('selected-round-store', 'data'),
-  State('scenarios-select', 'value'),
-  State('models-select', 'value'),
-  State('location-select', 'value'),
-  State('target-select', 'value'),
-  State('age-group-select', 'value'),
-  State('certainty-select', 'value'),
-  State('zoom-store', 'data'),
-  State('annotations-store', 'data'),
+  State('chart-controls-store', 'data'),
   suppress_callback_exceptions=True,
   prevent_initial_call=True,
 )
 def save_custom_insight(
-  n_clicks,
-  current_store,
-  title,
-  description,
-  round_number,
-  scenarios,
-  models,
-  location,
-  target,
-  age_group,
-  certainty,
-  zoom,
-  annotations,
+  n_clicks: int,
+  current_custom_insights: list[dict[str, Any]],
+  title: str,
+  description: str,
+  round_number: str,
+  current_chart_controls: dict[str, Any] | None = None,
 ):
   if not n_clicks:
     raise exceptions.PreventUpdate
 
   # validation
-  title_error = None
-  desc_error = None
-  if not title or not title.strip():
-    title_error = 'Title is required.'
-  if not description or not description.strip():
-    desc_error = 'Description is required.'
-
-  if title_error or desc_error:
+  if not (title and title.strip() and description and description.strip()):
     raise exceptions.PreventUpdate
 
   now = datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -137,17 +146,11 @@ def save_custom_insight(
     image_url='https://placehold.co/400?text=Visualization',
     created_at=now,
     updated_at=now,
-    controls=dict(
-      round=round_number,
-      scenarios=scenarios,
-      models=models,
-      location=location,
-      target=target,
-      age_group=age_group,
-      certainty=certainty,
-      zoom=zoom,
-      annotations=annotations,
-    ),
+    controls={
+      'round': round_number,
+      **default_control_values,
+      **(current_chart_controls or {}),
+    },
   )
 
   notification = {
@@ -157,9 +160,9 @@ def save_custom_insight(
     'color': 'limegreen',
   }
 
-  current_store = current_store or []
+  current_custom_insights = current_custom_insights or []
   return (
-    current_store + [new_item],
+    current_custom_insights + [new_item],
     None,
     None,
     [notification],

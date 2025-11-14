@@ -1,5 +1,5 @@
-abbreviation,location,location_name,population
-US,US,US,328728466.0
+abbreviation,location_id,location_name,population
+US,00,US,328728466.0
 AL,01,Alabama,4903185.0
 AK,02,Alaska,731545.0
 AZ,04,Arizona,7278717.0

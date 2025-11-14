@@ -1,19 +1,20 @@
 from typing import Any
 
 import dash_mantine_components as dmc
+import plotly.graph_objects as go
 from dash import Input, Output, State, callback, dcc, exceptions, html
 
-from src.components.chart import ChartControls, PlotType
-from src.components.chart_instance_manager import ChartInstanceManager
+from src.components.chart import ChartControls
+from src.components.chart.chart_instance_manager import ChartInstanceManager
 
 from .controls import (
   age_group_select,
   annotations_control,
-  certainty_select,
   location_select,
   models_select,
   scenarios_select,
   target_select,
+  uncertainty_interval_select,
   zoom_control,
 )
 
@@ -22,60 +23,118 @@ chart_manager = ChartInstanceManager()
 
 
 default_control_values = dict(
-  scenarios=['A-2023-10-27', 'B-2023-10-27'],
-  models=['Ensemble'],
-  location='US',
-  target='cumulative_hospitalization',
+  theme='light',
+  plot_type='line',
+  round_num=19,
+  scenario_names=[
+    'A-2023-10-27',
+    'B-2023-10-27',
+  ],
+  scenario_variables=[
+    {
+      'name': 'Vaccination Strategy',
+      'options': ['High risk', 'All ages'],
+      'selected_option': 'All ages',
+    }
+  ],
+  model_names=['Ensemble'],
+  location_name='US',
+  target='incident_hospitalization',
+  x_axis='target_end_date',
+  y_axis='value',
+  x_start_date='2025-01-01',
   age_group='0-130',
-  certainty='None',
-  zoom=None,
+  uncertainty_interval='95%',
   annotations=None,
+  zoom=None,
 )
 
 
-def visualization_editor(control_values=None, show_controls=True):
-  controls = {**default_control_values, **(control_values or {})}
+def visualization_editor(controls=None, show_controls=True):
+  if not controls:
+    controls = default_control_values
+    print('No controls provided, using default values')
 
-  init_scenarios = controls['scenarios']
-  init_models = controls['models']
-  init_location = controls['location']
-  init_target = controls['target']
-  init_age_group = controls['age_group']
-  init_certainty = controls['certainty']
-  init_zoom = controls['zoom']
-  init_annotations = controls['annotations']
+  init_theme: str = controls.get('theme', 'light')
+  init_plot_type: str = controls['plot_type']
+  init_round_num: int = controls['round_num']
+  init_scenario_names: list[str] = controls['scenario_names']
+  init_scenario_variables: list[dict] = controls['scenario_variables']
+  init_model_names: list[str] = controls['model_names']
+  init_location_name: str = controls['location_name']
+  init_target: str = controls['target']
+  init_age_group: str = controls['age_group']
+  init_x_start_date: str | None = controls.get('x_start_date', None)
+  init_x_axis: str = controls.get('x_axis', None)
+  init_y_axis: str = controls.get('y_axis', None)
+  init_uncertainty_interval: str | None = controls.get('uncertainty_interval', None)
+  init_zoom: dict[str, dict[str, Any]] | None = controls.get('zoom', None)
+  init_annotations: list[dict[str, Any]] | None = controls.get('annotations', None)
 
-  figure_control_values = ChartControls(
-    round_num=19,
-    pathogen='covid',
-    scenario_names=init_scenarios,
-    model_names=init_models,
-    location_name=init_location,
-    age_group=init_age_group,
+  figure_control_values = dict(
+    theme=init_theme,
+    plot_type=init_plot_type,
+    round_num=init_round_num,
+    scenario_names=init_scenario_names,
+    scenario_variables=init_scenario_variables,
+    model_names=init_model_names,
+    location_name=init_location_name,
     target=init_target,
-    certainty_percent=init_certainty,
+    age_group=init_age_group,
+    x_axis=init_x_axis,
+    y_axis=init_y_axis,
+    x_start_date=init_x_start_date,
     zoom=init_zoom,
     annotations=init_annotations,
+    uncertainty_interval=init_uncertainty_interval,
   )
 
-  # Get or create chart instance using the manager
-  chart = chart_manager.get_chart(figure_control_values, PlotType.LINE)
-
-  figure_container = html.Div(
-    id='insight-visualization-figure',
-    children=[chart.get_graph()],
-    style={'min-height': '45vh'},
+  chart_extent_store = dcc.Store(id='chart-extent-store', storage_type='local')
+  chart_controls_store = dcc.Store(
+    id='chart-controls-store',
+    storage_type='local',
+    data=default_control_values,
   )
+
+  # This is kind of a hack used to update the chart-controls-store when the page is loaded
+  # for the first time. This is necessary because the callback that updates the
+  # chart-controls-store is not called when the page is initially loaded so it needs to be
+  # triggered, and since the chart-controls-store is stored in local storage it will preserve
+  # its values (potentially from a different chart type on a different insight) when the page
+  # is reloaded unless it's reset.
+  initial_page_load_chart_controls_store = dcc.Store(
+    id='initial-page-load-chart-controls-store',
+    storage_type='memory',
+    data=figure_control_values,
+  )
+
+  controls_dict = {**default_control_values, **figure_control_values}
+  chart_controls = ChartControls.from_dict(controls_dict)
+  chart = chart_manager.get_chart(chart_controls)
+  figure = chart.get_fig() if chart else go.Figure()
+  graph = dcc.Graph(id='graph', figure=figure)
+
+  if not chart:
+    return html.Div(
+      id='insight-visualization-figure',
+      children=graph,
+      style={'min-height': '45vh'},
+    )
 
   if not show_controls:
-    return figure_container
+    return graph
 
   return dmc.Grid(
-    children=[
+    [
       dmc.GridCol(
-        [dcc.Store('chart-extent-store'), figure_container],
+        [
+          chart_controls_store,
+          initial_page_load_chart_controls_store,
+          chart_extent_store,
+          graph,
+        ],
         id='visualization-column',
-        span=dict(base=12, xl=8),
+        span=dict(base=12, xl=8, lg=7),
         style={'display': 'flex', 'flexDirection': 'column'},
       ),
       dmc.GridCol(
@@ -84,12 +143,23 @@ def visualization_editor(control_values=None, show_controls=True):
             dmc.Card(
               dmc.Grid(
                 [
-                  dmc.GridCol(scenarios_select(value=init_scenarios), span=dict(base=12)),
-                  dmc.GridCol(models_select(value=init_models), span=dict(base=12)),
-                  dmc.GridCol(location_select(value=init_location), span=dict(base=12, sm=6)),
+                  dmc.GridCol(
+                    scenarios_select(value=init_scenario_names),
+                    span=dict(base=12),
+                  ),
+                  dmc.GridCol(
+                    models_select(value=init_model_names, disabled=init_plot_type == 'boxplot'),
+                    span=dict(base=12),
+                  ),
+                  dmc.GridCol(location_select(value=init_location_name), span=dict(base=12, sm=6)),
                   dmc.GridCol(target_select(value=init_target), span=dict(base=12, sm=6)),
                   dmc.GridCol(age_group_select(value=init_age_group), span=dict(base=12, sm=6)),
-                  dmc.GridCol(certainty_select(value=init_certainty), span=dict(base=12, sm=6)),
+                  dmc.GridCol(
+                    uncertainty_interval_select(
+                      value=init_uncertainty_interval, disabled=init_plot_type == 'boxplot'
+                    ),
+                    span=dict(base=12, sm=6),
+                  ),
                 ],
               ),
               variant='soft',
@@ -97,16 +167,18 @@ def visualization_editor(control_values=None, show_controls=True):
             dmc.Card(
               zoom_control(value=init_zoom),
               variant='soft',
+              style={'display': 'none'} if init_plot_type == 'boxplot' else {},
             ),
             dmc.Card(
               annotations_control(value=init_annotations),
               variant='soft',
+              style={'display': 'none'} if init_plot_type == 'boxplot' else {},
             ),
           ],
           gap='md',
         ),
         id='controls-column',
-        span=dict(base=12, xl=4),
+        span=dict(base=12, xl=4, lg=5),
       ),
     ],
     mb=12,
@@ -114,55 +186,99 @@ def visualization_editor(control_values=None, show_controls=True):
 
 
 @callback(
-  Output('insight-visualization-figure', 'children'),
+  Output('graph', 'figure'),
+  Input('chart-controls-store', 'data'),
+  # prevent_initial_call=True,
+)
+def update_graph_figure(
+  current_chart_controls: dict[str, Any],
+):
+  if not current_chart_controls:
+    raise exceptions.PreventUpdate
+
+  try:
+    chart_controls = ChartControls.from_dict({**default_control_values, **current_chart_controls})
+
+    # Get or create chart instance using the manager
+    chart = chart_manager.get_chart(chart_controls)
+
+    if not chart:
+      raise Exception('Chart not found')
+
+    return chart.get_fig()
+  except Exception as e:
+    import traceback
+
+    print(traceback.print_exception(e))
+    return go.Figure(layout=go.Layout(title='Error loading chart'))
+
+
+@callback(
+  Output('chart-controls-store', 'data'),
+  Input('theme-store', 'data'),
   Input('scenarios-select', 'value'),
   Input('models-select', 'value'),
   Input('location-select', 'value'),
   Input('target-select', 'value'),
   Input('age-group-select', 'value'),
-  Input('certainty-select', 'value'),
+  Input('uncertainty-interval-select', 'value'),
   Input('zoom-store', 'data'),
   Input('annotations-store', 'data'),
-  # State('round-number-store', 'value'),
+  Input('graph', 'relayoutData'),
+  Input('initial-page-load-chart-controls-store', 'data'),
+  State('chart-controls-store', 'data'),
   prevent_initial_call=True,
 )
-def update_chart(
+def update_chart_controls(
+  theme: str,
   scenario_names: list[str],
   model_names: list[str],
-  location: str,
+  location_name: str,
   target: str,
   age_group: str,
-  certainty: str,
-  zoom: dict[str, Any],
+  uncertainty_interval: str | None,
+  zoom: dict[str, dict[str, Any]] | None,
   annotations: list[dict[str, Any]] | None,
-  # round_num: int,
+  relayout: dict[str, Any] | None,
+  initial_chart_controls: dict[str, Any] | None,
+  current_chart_controls: dict[str, Any] | None,
 ):
-  try:
-    chart_controls = ChartControls(
-      round_num=19,
-      pathogen='covid',
-      scenario_names=scenario_names,
-      model_names=model_names,
-      location_name=location,
-      target=target,
-      age_group=age_group,
-      certainty_percent=certainty,
-      zoom=zoom,
-      annotations=annotations,
-    )
+  if not (scenario_names and model_names and location_name and target and age_group):
+    raise exceptions.PreventUpdate
 
-    # Get or create chart instance using the manager
-    chart = chart_manager.get_chart(chart_controls, PlotType.LINE)
+  if relayout and 'xaxis.range' in relayout and 'yaxis.range' in relayout:
+    new_zoom = {
+      'x': {
+        'min': relayout.get('xaxis.range[0]'),
+        'max': relayout.get('xaxis.range[1]'),
+      },
+      'y': {
+        'min': relayout.get('yaxis.range[0]'),
+        'max': relayout.get('yaxis.range[1]'),
+      },
+    }
+  else:
+    new_zoom = None
 
-    if not chart:
-      raise Exception('Chart not found')
-    return [chart.get_graph()]  # must return a list here for the callback to work
-  except Exception as e:
-    print(f'Error updating chart: {e}')
-    import traceback
-
-    traceback.print_exc()
-    return html.Div(f'Error loading chart: {str(e)}', style={'color': 'red'})
+  new_chart_controls = dict(
+    theme=theme,
+    scenario_names=scenario_names,
+    model_names=model_names,
+    location_name=location_name,
+    target=target,
+    age_group=age_group,
+    uncertainty_interval=uncertainty_interval,
+    zoom=new_zoom,
+    annotations=annotations,
+  )
+  # initial_chart_controls must come after current_chart_controls;
+  # see initial_page_load_chart_controls_store comment above for more details
+  return {
+    **default_control_values,
+    **current_chart_controls,
+    **initial_chart_controls,
+    **new_chart_controls,
+  }
 
 
 @callback(
@@ -172,10 +288,19 @@ def update_chart(
 def sync_zoom_store(relayout):
   if not relayout:
     raise exceptions.PreventUpdate
-  return dict(
-    x={'min': relayout.get('xaxis.range[0]'), 'max': relayout.get('xaxis.range[1]')},
-    y={'min': relayout.get('yaxis.range[0]'), 'max': relayout.get('yaxis.range[1]')},
-  )
+  if 'xaxis.range[0]' in relayout and 'yaxis.range[0]' in relayout:
+    return {
+      'x': {
+        'min': relayout.get('xaxis.range[0]'),
+        'max': relayout.get('xaxis.range[1]'),
+      },
+      'y': {
+        'min': relayout.get('yaxis.range[0]'),
+        'max': relayout.get('yaxis.range[1]'),
+      },
+    }
+  else:
+    return None
 
 
 @callback(

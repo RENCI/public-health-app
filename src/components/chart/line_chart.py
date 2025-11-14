@@ -1,0 +1,251 @@
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+from src.components.chart.chart import Chart
+from src.components.chart.chart_controls import ChartControls
+from src.components.chart.chart_properties import Model
+from src.components.enums import UncertaintyInterval
+from src.constants import get_model_color_with_uncertainty_interval
+
+
+class LineChart(Chart):
+  """Chart class for displaying a chart"""
+
+  def __init__(self, controls: ChartControls):
+    super().__init__(controls)
+    self._raw_df[self.controls.x_axis] = pd.to_datetime(self._raw_df[self.controls.x_axis])
+    self._raw_df = self._raw_df.set_index(self.controls.x_axis)
+
+    self.refresh_fig()
+
+  def __hash__(self):
+    """
+    Generate a unique hash for chart instances based on their parameters.
+    This creates a deterministic string representation that can be used as a key.
+    """
+    return hash(self.get_key(self.controls))
+
+  def __eq__(self, other):
+    return isinstance(other, LineChart) and self.controls == other.controls
+
+  def refresh_fig(self) -> go.Figure:
+    # handle empty properties
+    if not (
+      self.controls.scenarios
+      and self.controls.models
+      and self.controls.location
+      and self.controls.target
+    ):
+      self._create_empty_figure()
+      return self._fig
+
+    # update layout
+    num_rows = len(self.controls.scenarios)
+    # Define fixed dimensions
+    SUBPLOT_HEIGHT = 300  # Fixed height per subplot in pixels
+    FIXED_SPACING = 50  # Fixed spacing between subplots in pixels
+
+    # Calculate total figure height accounting for fixed spacing
+    chart_total_height = (SUBPLOT_HEIGHT * num_rows) + (FIXED_SPACING * (num_rows - 1))
+
+    # Calculate vertical_spacing as a fraction of total height
+    # This ensures the actual pixel spacing remains constant
+    if num_rows > 1:
+      vertical_spacing = FIXED_SPACING / chart_total_height
+    else:
+      vertical_spacing = 0  # No spacing needed for single subplot
+
+    # start with the raw dataframe
+    df = self._raw_df
+
+    # filter for given age group
+    df = df.query('age_group == @self.controls.age_group.input_value')
+
+    # create subplots
+    self._fig = make_subplots(
+      rows=num_rows,
+      cols=1,
+      vertical_spacing=vertical_spacing,
+      row_heights=[1] * num_rows,
+      subplot_titles=[f'Scenario {s.name}' for s in self.controls.scenarios],
+    )
+
+    # add traces for each scenario
+    for i, scenario in enumerate(self.controls.scenarios, start=1):
+      # filter for given scenario
+      scenario_df = df.query('scenario_id == @scenario.id')
+
+      # decide whether to add uncertainty intervals
+      should_add_uncertainty_intervals = self.controls.uncertainty_interval is not None
+
+      # add traces for each model
+      for model in self.controls.models:
+        # add uncertainty intervals if necessary
+        if should_add_uncertainty_intervals:
+          self._plot_uncertainty_interval(scenario_df=scenario_df, model=model, row_num=i)
+
+        # add main line (0.5 quantile)
+        primary_line_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
+        self._fig.add_trace(
+          go.Scatter(
+            x=primary_line_data.index,
+            y=primary_line_data[self.controls.y_axis],
+            mode='lines',
+            name=f'Model {model.name}',
+            legendgroup=f'Model {model.name}',
+            showlegend=(i == 1),
+            line=dict(color=model.color),
+          ),
+          row=i,
+          col=1,
+        )
+
+      # load gold standard data (the actual data up to present day, not projections)
+      gold_std_df = Chart.collect_gold_std_data(self.controls.round_num)
+      gold_std_df['time_value'] = pd.to_datetime(gold_std_df['time_value'])
+      gold_std_df = gold_std_df.set_index('time_value')
+      gold_std_df = gold_std_df.query('age_group == @self.controls.age_group.input_value')
+      gold_std_df = gold_std_df.query('geo_value_fullname == @self.controls.location.name')
+
+      # filter gold standard data to start from x_start_date
+      gold_std_df = gold_std_df.loc[self.controls.x_start_date or gold_std_df.index.min() :]
+
+      # add gold standard line
+      self._fig.add_trace(
+        go.Scatter(
+          x=gold_std_df.index,
+          y=gold_std_df['value'],
+          mode='lines',
+          name='Gold standard',
+          line=dict(color='black', dash='dot'),
+          marker=dict(symbol='diamond'),
+          legendgroup='Gold standard',
+          showlegend=(i == 1),
+        ),
+        row=i,
+        col=1,
+      )
+
+    # plot annotations
+    self._plot_annotations()
+
+    # apply spike guides for each axis in the chart viewport
+    self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
+    self._fig.update_yaxes(showspikes=True, spikemode='across')
+
+    # update zoom ranges
+    if (
+      self.controls.zoom is not None
+      and self.controls.zoom.x is not None
+      and self.controls.zoom.x.get('min') is not None
+      and self.controls.zoom.x.get('max') is not None
+    ):
+      self._fig.update_xaxes(
+        range=[self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
+      )
+    if (
+      self.controls.zoom is not None
+      and self.controls.zoom.y is not None
+      and self.controls.zoom.y.get('min') is not None
+      and self.controls.zoom.y.get('max') is not None
+    ):
+      self._fig.update_yaxes(
+        range=[self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
+      )
+    self._fig.update_yaxes(title_text=self.controls.target.display_value)
+
+    self._fig.update_layout(
+      hovermode='x unified',
+      height=chart_total_height + 180,
+      title=self.get_title(),
+      title_subtitle_text=self.get_subtitle(),
+      uirevision=self.__hash__(),
+    )
+
+    self.set_theme()
+
+    return self._fig
+
+  def get_fig(self) -> go.Figure:
+    return self._fig
+
+  def get_raw_dataframe(self) -> pd.DataFrame:
+    return self._raw_df
+
+  def get_title(self) -> str:
+    return f'{self.controls.target.display_value} Over Time'
+
+  def get_subtitle(self) -> str:
+    return (
+      f'Pathogen: {self.controls.pathogen}'
+      + f' | Location: {self.controls.location.name}'
+      + f' | Age group: {self.controls.age_group.display_value}'
+      + (
+        f' | Uncertainty interval: {self.controls.uncertainty_interval.display_value}'
+        if self.controls.uncertainty_interval
+        else ''
+      )
+    )
+
+  def update_controls(self, controls: ChartControls) -> None:
+    """
+    Reload data, for example if a variable changed, e.g. round number, location, target, etc.
+    This is called by individual update methods when data-dependent fields change.
+    """
+    new_raw_df = Chart.collect_data(
+      self.controls.data_type,
+      self.controls.round_num,
+      self.controls.location.name,
+      self.controls.target.input_value,
+    )
+    new_raw_df[self.controls.x_axis] = pd.to_datetime(new_raw_df[self.controls.x_axis])
+    new_raw_df = new_raw_df.set_index(self.controls.x_axis)
+    self._raw_df = new_raw_df
+
+  def update_uncertainty_interval(self, uncertainty_interval: str | None):
+    """
+    Update the uncertainty interval.
+    """
+    self.controls.uncertainty_interval = (
+      UncertaintyInterval.from_display_value(uncertainty_interval) if uncertainty_interval else None
+    )
+    self.refresh_fig()
+
+  def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int):
+    for lower_q, upper_q in self.controls.uncertainty_interval.get_bounds():
+      lower_model = scenario_df.query('type_id == @lower_q and model_name == @model.id')
+      upper_model = scenario_df.query('type_id == @upper_q and model_name == @model.id')
+      fill_color = get_model_color_with_uncertainty_interval(
+        model.color,
+        uncertainty_interval=UncertaintyInterval.from_bounds([(lower_q, upper_q)]),
+      )
+      self._fig.add_trace(
+        go.Scatter(
+          x=pd.concat([lower_model.index.to_series(), upper_model.index.to_series()[::-1]]),
+          y=pd.concat([lower_model[self.controls.y_axis], upper_model[self.controls.y_axis][::-1]]),
+          fill='toself',
+          fillcolor=fill_color,
+          line=dict(color='rgba(0,0,0,0)'),
+          legendgroup=f'Model {model.name}',
+          hoverinfo='skip',
+          showlegend=False,
+        ),
+        row=row_num,
+        col=1,
+      )
+
+  def _reload_data(self):
+    """
+    Reload data, for example if a variable changed, e.g. round number, location, target, etc.
+    This is called by individual update methods when data-dependent fields change.
+    """
+    new_raw_df = Chart.collect_data(
+      self.controls.data_type,
+      self.controls.round_num,
+      self.controls.location.name,
+      self.controls.target.input_value,
+    )
+    new_raw_df[self.controls.x_axis] = pd.to_datetime(new_raw_df[self.controls.x_axis])
+    new_raw_df = new_raw_df.set_index(self.controls.x_axis)
+    self._raw_df = new_raw_df

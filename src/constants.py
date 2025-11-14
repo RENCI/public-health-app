@@ -6,9 +6,12 @@ from typing import Any, Optional
 
 import pandas as pd
 
+from src.components.enums import UncertaintyInterval
+from src.util.colors import replace_opacity
+
 # Global variable to store loaded constants
 _CONSTANTS: Optional[dict[str, Any]] = None
-_LOCATIONS: Optional[dict[str, tuple[str, int, int]]] = None
+_LOCATIONS: Optional[dict[str, tuple[str, str, int]]] = None
 
 
 def load_constants() -> None:
@@ -36,7 +39,7 @@ def load_locations() -> None:
     locations_dict = {
       record['location_name']: (
         record['abbreviation'],
-        record['location'],
+        record['location_id'],
         record['population'],
       )
       for record in locations
@@ -59,6 +62,11 @@ def get_locations() -> dict[str, tuple[str, int, int]]:
   if _LOCATIONS is None:
     load_locations()
   return _LOCATIONS
+
+
+def get_location_data(location_name: str) -> tuple[str, int, int]:
+  location_data = get_locations().get(location_name.lower().capitalize(), ('', '', 0))
+  return (location_data[0], int(location_data[1]), int(location_data[2]))
 
 
 # Convenience functions for common access patterns
@@ -142,12 +150,30 @@ def get_pathogen_color(pathogen: str = 'RSV') -> str:
   return get_pathogen_colors().get(pathogen, 'rgba(128, 128, 128, 1)')  # Default gray
 
 
-def get_location_data(location: str) -> tuple[str, int, int]:
+def get_location_short_code(location: str) -> str:
   """Get the short code for a specific location."""
   location = location.lower().capitalize()
-  return get_locations().get(location, ('', 0, 0))
+  return get_location_data(location)[0]
 
 
-def get_location_order() -> list[str]:
-  """Get the ordered list of locations."""
-  return get_constants().get('location_order', [])
+def get_uncertainty_interval_opacities() -> dict[UncertaintyInterval, float]:
+  """Get the opacity mappings for uncertainty intervals."""
+  return {
+    UncertaintyInterval.NINETY_FIVE_PERCENT: 0.2,
+    UncertaintyInterval.NINETY_PERCENT: 0.3,
+    UncertaintyInterval.EIGHTY_PERCENT: 0.4,
+    UncertaintyInterval.FIFTY_PERCENT: 0.5,
+  }
+
+
+def get_uncertainty_interval_opacity(uncertainty_interval: UncertaintyInterval) -> float:
+  """Get the opacity for a specific uncertainty interval."""
+  return get_uncertainty_interval_opacities()[uncertainty_interval]
+
+
+def get_model_color_with_uncertainty_interval(
+  model_color: str,
+  uncertainty_interval: UncertaintyInterval = UncertaintyInterval.NINETY_FIVE_PERCENT,
+) -> str:
+  """Get the model color with the opacity for a specific uncertainty interval. Defaults to 95%."""
+  return replace_opacity(model_color, get_uncertainty_interval_opacity(uncertainty_interval))
