@@ -32,12 +32,6 @@ reset_button = toolbar_button(
   'Reset to Original',
   icon=DashIconify(icon='feather:refresh-ccw'),
   id='reset-button',
-<<<<<<< HEAD
-=======
-  leftSection=DashIconify(icon='feather:refresh-ccw'),
-  variant='light',
-  size='xs',
->>>>>>> dev
 )
 
 

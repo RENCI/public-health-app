@@ -18,10 +18,7 @@ from dash import (
 from dash_iconify import DashIconify
 
 from src.components.tooltip import tooltip
-<<<<<<< HEAD
 from src.components.toolbar import toolbar, toolbar_button
-=======
->>>>>>> dev
 from src.components.viz_editor import visualization_editor
 from src.components.insight_yaml_modal import insight_yaml_modal_button, insight_yaml_modal
 from src.data.rounds.round19 import get_insight
@@ -29,7 +26,6 @@ from src.util import generate_insight_pdf, slugify
 
 register_page(__name__, path_template='/insight/<insight_id>', name='Insight Details')
 
-<<<<<<< HEAD
 back_button = dmc.Anchor(
   toolbar_button('Round Summary', icon=DashIconify(icon='feather:chevron-left')),
   id='back-to-insights-button',
@@ -62,8 +58,6 @@ insight_toolbar = toolbar(
 )
 
 
-=======
->>>>>>> dev
 loading_insight = [
   dmc.Title(id='insight-view-title', order=1, children=dmc.Skeleton(h=85)),
   dmc.Divider(my=24),
@@ -120,7 +114,7 @@ insight_toolbar = dmc.Flex(
   mb=24,
 )
 
-<<<<<<< HEAD
+
 def insight_heading(round_number: str, round_date: str, round_name: str):
   return dmc.Stack(
     [
@@ -142,8 +136,6 @@ def insight_heading(round_number: str, round_date: str, round_name: str):
     ],
     gap=0,
   )
-=======
->>>>>>> dev
 
 def annotations_list(annotations: list):
   if len(annotations) == 0:
