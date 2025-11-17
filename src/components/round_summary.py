@@ -123,7 +123,7 @@ def insight_button(item):
   return dmc.Anchor(
     dmc.Card(
       [
-        dmc.Box(graphic, style=dict(width='200px', aspectRatio=1)),
+        dmc.Box(graphic, style=dict(width='150px', aspectRatio=1)),
         dmc.Stack(
           [title, summary],
           align='flex-start',
@@ -132,6 +132,7 @@ def insight_button(item):
         ),
       ],
       withBorder=True,
+      className='bright-hover',
       style=dict(
         display='flex',
         justifyContent='flex-start',
@@ -210,7 +211,7 @@ def custom_insight_button(item):
   return dmc.Anchor(
     dmc.Card(
       [
-        dmc.Box(graphic, style=dict(width='200px', aspectRatio=1)),
+        dmc.Box(graphic, style=dict(width='150px', aspectRatio=1)),
         dmc.Stack(
           [
             title,
@@ -226,6 +227,7 @@ def custom_insight_button(item):
         ),
       ],
       withBorder=True,
+      className='bright-hover',
       style=dict(
         display='flex',
         justifyContent='flex-start',

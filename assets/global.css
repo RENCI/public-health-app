@@ -2,3 +2,9 @@
   --mantine-font-family-headings: Montserrat;
   --mantine-font-family: Inter;
 }
+
+.bright-hover {
+  &:hover {
+    filter: brightness(1.1);
+  }
+}
