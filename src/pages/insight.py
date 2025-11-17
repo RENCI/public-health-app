@@ -22,7 +22,7 @@ from src.components.toolbar import toolbar, toolbar_button
 from src.components.viz_editor import visualization_editor
 from src.components.insight_yaml_modal import insight_yaml_modal_button, insight_yaml_modal
 from src.data.rounds.round19 import get_insight
-from src.util import generate_insight_pdf, slugify
+from src.util import generate_insight_pdf, load_rounds, slugify
 
 register_page(__name__, path_template='/insight/<insight_id>', name='Insight Details')
 
@@ -245,6 +245,9 @@ def show_insight_details(pathname, custom_insights, theme):
     controls = insight.get('controls', {})
     controls = {**controls, 'theme': theme}
     annotations = controls.get('annotations', [])
+    round_number = controls.get('round_num', '18')
+    rounds = load_rounds()
+    this_round = rounds.get(round_number)
 
     return [
       dmc.Space(h=16),
