@@ -196,46 +196,49 @@ def custom_insight_button(item):
     justify='flex-start',
   )
 
-  actions = dmc.Group(
+  actions = dmc.Stack(
     [
       delete_button,
       share_button,
     ],
-    align='flex-end',
+    justify='flex-end',
+    p='xs',
+    style=dict(
+      backgroundColor='light-dark(var(--mantine-color-disabled), var(--mantine-color-dark-outline))',
+    ),
   )
 
-  return dmc.Anchor(
-    dmc.Card(
-      [
-        dmc.Box(graphic, style=dict(width='150px', aspectRatio=1)),
-        dmc.Stack(
-          [
-            title,
-            dmc.Flex(
-              [details, actions],
-              justify='space-between',
-              align='flex-end',
-            ),
-          ],
-          align='space-between',
-          px='lg', py='md',
-          style=dict(flex=1),
-        ),
-      ],
-      withBorder=True,
-      className='emphasize-hover',
-      style=dict(
-        display='flex',
-        justifyContent='flex-start',
-        alignItems='stretch',
-        minHeight='150px',
-        height='min-content',
-        padding=0,
-        flexDirection='row',
+  return dmc.Card(
+    [
+      dmc.Anchor(
+        [
+          dmc.Box(graphic, style=dict(width='150px', aspectRatio=1)),
+          dmc.Stack(
+            [
+              title,
+              details
+            ],
+            w='100%',
+            px='lg', py='md',
+          ),
+        ],
+        href=f'/insight/{item["id"]}',
+        underline=False,
+        style=dict(flex=1, display='flex', alignItems='stretch'),
       ),
+      actions,
+    ],
+    withBorder=True,
+    className='emphasize-hover',
+    style=dict(
+      display='flex',
+      justifyContent='flex-start',
+      alignItems='stretch',
+      minHeight='150px',
+      height='min-content',
+      padding=0,
+      flexDirection='row',
     ),
-    href=f'/insight/{item["id"]}',
-    underline=False,
   )
 
 
