@@ -59,7 +59,7 @@ no_insights_message = dmc.Card(
             ),
           ),
           href='/explorer',
-          size='lg',
+          size='md',
           underline=False,
         ),
       ],
@@ -78,11 +78,8 @@ new_insight_prompt = dmc.Card(
     [
       dmc.Anchor(
         dmc.Button(
-          [
-            'Build a new custom insight',
-            ' ',
-            DashIconify(icon='feather:arrow-right', width=20),
-          ],
+          'Build a new custom insight',
+          leftSection=DashIconify(icon='feather:arrow-up-right', width=20),
           variant='gradient',
           gradient={'from': 'lime', 'to': 'teal', 'deg': 120},
           style=dict(
@@ -92,15 +89,14 @@ new_insight_prompt = dmc.Card(
             alignItems='center',
             minHeight='100%',
           ),
+          size='md',
         ),
         href='/explorer',
-        size='lg',
         underline=False,
       ),
     ],
-    h=150,
+    h=125,
   ),
-  withBorder=True,
 )
 
 
