@@ -151,10 +151,18 @@ def custom_insight_button(item):
   created_at = item.get('created_at', None)
 
   graphic = dmc.Image(
-    src=item['image_url'], radius='sm', style=dict(width='125px', height='125px', objectFit='cover')
+    src=item['image_url'],
+    radius='sm',
+    style=dict(
+      height='100%', 
+      aspectRatio=1, 
+      objectFit='cover', 
+      borderTopRightRadius=0, 
+      borderBottomRightRadius=0,
+    )
   )
 
-  title = dmc.Text(item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left'))
+  title = dmc.Text(item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left', flex=1))
 
   share_button = dmc.ActionIcon(
     DashIconify(icon='feather:share-2', width=16, color='teal'),
@@ -172,22 +180,6 @@ def custom_insight_button(item):
     style=dict(alignSelf='center'),
   )
 
-  view_button = dmc.Anchor(
-    dmc.Button(
-      ['View', dmc.Space(w=8), DashIconify(icon='feather:arrow-right', width=16)],
-      variant='light',
-      style=dict(
-        textDecoration='none',
-        display='flex',
-        justifyContent='center',
-        alignItems='center',
-        minHeight='100%',
-      ),
-    ),
-    href=f'/insight/{item["id"]}',
-    underline=False,
-  )
-
   custom_insights_badge = dmc.Badge(
     'Custom',
     variant='gradient',
@@ -196,54 +188,56 @@ def custom_insight_button(item):
     radius='md',
   )
 
-  return dmc.Card(
+  details = dmc.Group(
     [
-      graphic,
-      dmc.Stack(
-        [
-          title,
-          dmc.Flex(
-            [
-              dmc.Group(
-                [
-                  custom_insights_badge,
-                  tipped_text(
-                    f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'
-                  ),
-                ],
-                align='center',
-                justify='flex-start',
-              ),
-              dmc.Group(
-                [
-                  delete_button,
-                  share_button,
-                ],
-                align='flex-end',
-              ),
-            ],
-            justify='space-between',
-            align='flex-end',
-          ),
-        ],
-        justify='space-between',
-        align='stretch',
-        style=dict(flex=1),
-        gap=8,
+      custom_insights_badge,
+      tipped_text(
+        f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'
       ),
-      view_button,
     ],
-    withBorder=True,
-    style=dict(
-      display='flex',
-      gap='1rem',
-      justifyContent='flex-start',
-      alignItems='stretch',
-      minHeight='150px',
-      maxHeight='200px',
-      padding='1rem',
-      flexDirection='row',
+    align='center',
+    justify='flex-start',
+  )
+
+  actions = dmc.Group(
+    [
+      delete_button,
+      share_button,
+    ],
+    align='flex-end',
+  )
+
+  return dmc.Anchor(
+    dmc.Card(
+      [
+        dmc.Box(graphic, style=dict(width='200px', aspectRatio=1)),
+        dmc.Stack(
+          [
+            title,
+            dmc.Flex(
+              [details, actions],
+              justify='space-between',
+              align='flex-end',
+            ),
+          ],
+          align='space-between',
+          px='lg', py='md',
+          style=dict(flex=1),
+        ),
+      ],
+      withBorder=True,
+      style=dict(
+        display='flex',
+        justifyContent='flex-start',
+        alignItems='stretch',
+        minHeight='150px',
+        height='min-content',
+        padding=0,
+        flexDirection='row',
+      ),
     ),
+    href=f'/insight/{item["id"]}',
+    underline=False,
   )
 
 
