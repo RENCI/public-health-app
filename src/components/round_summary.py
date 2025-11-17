@@ -128,7 +128,7 @@ def insight_button(item):
         ),
       ],
       withBorder=True,
-      className='bright-hover',
+      className='emphasize-hover',
       style=dict(
         display='flex',
         justifyContent='flex-start',
@@ -223,7 +223,7 @@ def custom_insight_button(item):
         ),
       ],
       withBorder=True,
-      className='bright-hover',
+      className='emphasize-hover',
       style=dict(
         display='flex',
         justifyContent='flex-start',
