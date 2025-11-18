@@ -5,7 +5,8 @@ FROM containers.renci.org/helxplatform/uv-base:v0.0.1
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=8050 \
-    UV_PYTHON=python3.12.5
+    UV_PYTHON=python3.12.5 \
+    DASH_ENV=production
 
 # Install system dependencies for building Python packages and WeasyPrint
 RUN apt-get update && apt-get install -y --no-install-recommends \
