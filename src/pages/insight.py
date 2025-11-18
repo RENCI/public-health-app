@@ -99,22 +99,6 @@ download_button = dmc.ActionIcon(
   loading=False,
 )
 
-insight_toolbar = dmc.Flex(
-  children=[
-    back_button,
-    dmc.Group(
-      [
-        tooltip(download_button, label='Download PDF'),
-        tooltip(explorer_button, label="Explore this insight's data"),
-      ]
-    ),
-  ],
-  justify='space-between',
-  align='center',
-  mb=24,
-)
-
-
 def insight_heading(round_number: str, round_date: str, round_name: str):
   return dmc.Stack(
     [
@@ -245,7 +229,7 @@ def show_insight_details(pathname, custom_insights, theme):
     controls = insight.get('controls', {})
     controls = {**controls, 'theme': theme}
     annotations = controls.get('annotations', [])
-    round_number = controls.get('round_num', '18')
+    round_number = str(controls.get('round_num', '18'))
     rounds = load_rounds()
     this_round = rounds.get(round_number)
 
@@ -256,7 +240,6 @@ def show_insight_details(pathname, custom_insights, theme):
         round_date=this_round.get('date'),
         round_name=this_round.get('name'),
       ),
-      insight_toolbar,
       dmc.Title(f'Insight: {insight.get("title", "Untitled Insight")}', order=1),
       dmc.Text(insight.get('summary', 'Summary not found')),
       html.Div(
