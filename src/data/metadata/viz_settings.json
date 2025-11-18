@@ -16,13 +16,6 @@
       "inc hosp": "Incident Hospitalization",
       "cum hosp": "Cumulative Hospitalization"
     },
-    "age_group": {
-      "0-0.99": "Under 1 year old",
-      "1-4": "1 to 4 years old (included)",
-      "5-64": "5 to 64 years old (included)",
-      "65-130": "65+ year old",
-      "0-130": "Overall Population"
-    },
     "def_target": "hosp",
     "models": [
       "Ensemble_LOP_untrimmed",
@@ -42,27 +35,6 @@
       "JHU_UNC-flepiMoP",
       "Ensemble_LOP_all"
     ],
-    "point": {
-      "type": "quantile",
-      "type_id": 0.5
-    },
-    "ensemble": {
-      "default": "Ensemble_LOP",
-      "hide": ["Ensemble_LOP_untrimmed", "Ensemble"]
-    },
-    "zeroed_file": "Sample",
-    "horizon_limit": {
-      "required": 29,
-      "optional": 29
-    },
-    "gold_standard": {
-      "inc hosp": "rsvnet_hospitalization",
-      "inc death": null,
-      "cum hosp": "rsvnet_round1_cumhosp",
-      "cum death": null
-    },
-    "multi": "True",
-    "abstract": "False",
     "scenario_plot": {
       "peak": {
         "Peak Season 2022-2023": {
