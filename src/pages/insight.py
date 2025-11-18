@@ -18,11 +18,45 @@ from dash import (
 from dash_iconify import DashIconify
 
 from src.components.tooltip import tooltip
+from src.components.toolbar import toolbar, toolbar_button
 from src.components.viz_editor import visualization_editor
+from src.components.insight_yaml_modal import insight_yaml_modal_button, insight_yaml_modal
 from src.data.rounds.round19 import get_insight
-from src.util import generate_insight_pdf, slugify
+from src.util import generate_insight_pdf, load_rounds, slugify
 
 register_page(__name__, path_template='/insight/<insight_id>', name='Insight Details')
+
+back_button = dmc.Anchor(
+  toolbar_button('Round Summary', icon=DashIconify(icon='feather:chevron-left')),
+  id='back-to-insights-button',
+  href='/',
+)
+
+
+download_button = toolbar_button(
+  'PDF',
+  icon=DashIconify(icon='feather:download'),
+  id='download-insight-button',
+  loading=False,
+)
+
+
+explorer_button = dmc.Anchor(
+  toolbar_button(
+    'Explore',
+    icon=DashIconify(icon='feather:arrow-up-right'),
+    variant='gradient',
+    gradient={'from': 'lime', 'to': 'teal', 'deg': 120},
+  ),
+  id='explorer-button',
+  href='#',
+)
+
+
+insight_toolbar = toolbar(
+  left=[back_button], right=[insight_yaml_modal_button(), download_button, explorer_button]
+)
+
 
 loading_insight = [
   dmc.Title(id='insight-view-title', order=1, children=dmc.Skeleton(h=85)),
@@ -65,21 +99,27 @@ download_button = dmc.ActionIcon(
   loading=False,
 )
 
-insight_toolbar = dmc.Flex(
-  children=[
-    back_button,
-    dmc.Group(
-      [
-        tooltip(download_button, label='Download PDF'),
-        tooltip(explorer_button, label="Explore this insight's data"),
-      ]
-    ),
-  ],
-  justify='space-between',
-  align='center',
-  mb=24,
-)
-
+def insight_heading(round_number: str, round_date: str, round_name: str):
+  return dmc.Stack(
+    [
+      dmc.Text(
+        f'Round {round_number}',
+        style=dict(fontSize='var(--mantine-h3-font-size'),
+        c='dimmed',
+        fw=700,
+        mb=8,
+      ),
+      dmc.Flex(
+        [
+          dmc.Text(round_name, style=dict(fontSize='var(--mantine-h2-font-size'), fw=700),
+          dmc.Text(f'Date completed: {round_date}', c='dimmed', style=dict(fontStyle='italic')),
+        ],
+        justify='space-between',
+        align='flex-end',
+      ),
+    ],
+    gap=0,
+  )
 
 def annotations_list(annotations: list):
   if len(annotations) == 0:
@@ -147,6 +187,7 @@ layout = dmc.Container(
       loading_insight,
       id='insight-view-container',
     ),
+    insight_yaml_modal(),  # getting this in the DOM. will be updated by callback
   ],
   size=1200,
 )
@@ -188,10 +229,19 @@ def show_insight_details(pathname, custom_insights, theme):
     controls = insight.get('controls', {})
     controls = {**controls, 'theme': theme}
     annotations = controls.get('annotations', [])
+    round_number = str(controls.get('round_num', '18'))
+    rounds = load_rounds()
+    this_round = rounds.get(round_number)
 
     return [
-      dmc.Title(insight.get('title', 'Untitled Insight'), order=1),
-      dmc.Divider(my=24),
+      dmc.Space(h=16),
+      insight_heading(
+        round_number=round_number,
+        round_date=this_round.get('date'),
+        round_name=this_round.get('name'),
+      ),
+      dmc.Title(f'Insight: {insight.get("title", "Untitled Insight")}', order=1),
+      dmc.Text(insight.get('summary', 'Summary not found')),
       html.Div(
         visualization_editor(controls=controls, show_controls=False),
         style=dict(margin='24px 0'),
@@ -203,6 +253,7 @@ def show_insight_details(pathname, custom_insights, theme):
         dangerously_allow_html=True,
       ),
       dcc.Download(id='insight-pdf-download'),
+      insight_yaml_modal(insight),
     ]
 
   except Exception as e:
@@ -239,7 +290,6 @@ clientside_callback(
   Input('download-insight-button', 'n_clicks'),
   prevent_initial_call=True,
 )
-
 
 @callback(
   Output('insight-pdf-download', 'data'),
