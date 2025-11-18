@@ -141,7 +141,7 @@ def visualization_editor(controls=None, show_controls=True):
               dmc.Grid(
                 [
                   dmc.GridCol(
-                    scenarios_select(value=init_scenario_ids),
+                    scenarios_select(value=[str(scenario_id) for scenario_id in init_scenario_ids]),
                     span=dict(base=12),
                   ),
                   dmc.GridCol(
@@ -211,7 +211,7 @@ def update_graph_figure(
 
 
 @callback(
-  Output('chart-controls-store', 'data'),
+  Output('chart-controls-store', 'data', allow_duplicate=True),
   Input('theme-store', 'data'),
   Input('scenarios-select', 'value'),
   Input('models-select', 'value'),
@@ -228,7 +228,7 @@ def update_graph_figure(
 )
 def update_chart_controls(
   theme: str,
-  scenario_ids: list[int],
+  scenario_ids: list[str],
   model_names: list[str],
   location_name: str,
   target: str,
@@ -259,7 +259,7 @@ def update_chart_controls(
 
   new_chart_controls = dict(
     theme=theme,
-    scenario_ids=scenario_ids,
+    scenario_ids=[int(scenario_id) for scenario_id in scenario_ids],
     model_names=model_names,
     location_name=location_name,
     target=target,
@@ -275,6 +275,19 @@ def update_chart_controls(
     **current_chart_controls,
     **initial_chart_controls,
     **new_chart_controls,
+  }
+
+
+@callback(
+  Output('chart-controls-store', 'data', allow_duplicate=True),
+  Input('round-select', 'value'),
+  prevent_initial_call=True,
+)
+def update_chart_controls_for_round(round_number: str):
+  if not round_number:
+    raise exceptions.PreventUpdate
+  return default_control_values | {
+    'round_num': int(round_number),
   }
 
 

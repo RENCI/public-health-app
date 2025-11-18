@@ -5,12 +5,16 @@ from src.util.constants import get_scenarios_for_round
 
 scenarios = get_scenarios_for_round(19)
 options = [
-  {'label': scenario['description'], 'value': str(scenario['id'])} for scenario in scenarios
+  {
+    'label': f'{str(scenario["name"]).split("-")[0]}. {scenario["description"]}',
+    'value': str(scenario['id']),
+  }
+  for scenario in scenarios
 ]
-default_option = [int(option['value']) for option in options] if options else []
+default_option = [options[0]['value']] if options else None
 
 
-def scenarios_select(value: list[int] = default_option):
+def scenarios_select(value: list[str] = default_option):
   return dmc.MultiSelect(
     label='Scenarios',
     placeholder='',
@@ -32,7 +36,11 @@ def update_scenarios_select_for_round(round_number: str):
     return [], None
   scenarios = get_scenarios_for_round(int(round_number))
   options = [
-    {'label': scenario['description'], 'value': str(scenario['id'])} for scenario in scenarios
+    {
+      'label': f'{str(scenario["name"]).split("-")[0]}. {scenario["description"]}',
+      'value': str(scenario['id']),
+    }
+    for scenario in scenarios
   ]
-  first_scenario_value = [int(option['value']) for option in options] if options else None
+  first_scenario_value = options[0]['value'] if options else None
   return options, [first_scenario_value] if first_scenario_value else None
