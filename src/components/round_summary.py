@@ -59,7 +59,7 @@ no_insights_message = dmc.Card(
             ),
           ),
           href='/explorer',
-          size='lg',
+          size='md',
           underline=False,
         ),
       ],
@@ -78,11 +78,8 @@ new_insight_prompt = dmc.Card(
     [
       dmc.Anchor(
         dmc.Button(
-          [
-            'Build a new custom insight',
-            ' ',
-            DashIconify(icon='feather:arrow-right', width=20),
-          ],
+          'Build a new custom insight',
+          leftSection=DashIconify(icon='feather:arrow-up-right', width=20),
           variant='gradient',
           gradient={'from': 'lime', 'to': 'teal', 'deg': 120},
           style=dict(
@@ -92,64 +89,58 @@ new_insight_prompt = dmc.Card(
             alignItems='center',
             minHeight='100%',
           ),
+          size='md',
         ),
         href='/explorer',
-        size='lg',
         underline=False,
       ),
     ],
-    h=150,
+    h=125,
   ),
-  withBorder=True,
 )
 
 
 def insight_button(item):
   graphic = dmc.Image(
-    src=item['image_url'], radius='sm', style=dict(width='125px', height='125px', objectFit='cover')
+    src=item['image_url'],
+    radius='sm',
+    style=dict(
+      height='100%', 
+      aspectRatio=1, 
+      objectFit='cover', 
+      borderTopRightRadius=0, 
+      borderBottomRightRadius=0,
+    )
   )
 
   title = dmc.Text(item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left'))
   summary = dmc.Text(item['summary'], c='dimmed')
 
-  view_button = dmc.Anchor(
-    dmc.Button(
-      'View',
-      rightSection=DashIconify(icon='feather:arrow-right', width=20),
-      variant='light',
+  return dmc.Anchor(
+    dmc.Card(
+      [
+        dmc.Box(graphic, style=dict(width='150px', aspectRatio=1)),
+        dmc.Stack(
+          [title, summary],
+          align='flex-start',
+          px='lg', py='md',
+          style=dict(flex=1, overflow='hidden'),
+        ),
+      ],
+      withBorder=True,
+      className='emphasize-hover',
       style=dict(
-        textDecoration='none',
         display='flex',
-        justifyContent='center',
-        alignItems='center',
-        minHeight='100%',
+        justifyContent='flex-start',
+        alignItems='stretch',
+        minHeight='150px',
+        height='min-content',
+        padding=0,
+        flexDirection='row',
       ),
     ),
     href=f'/insight/{item["id"]}',
     underline=False,
-  )
-
-  return dmc.Card(
-    [
-      graphic,
-      dmc.Stack(
-        [title, summary],
-        align='flex-start',
-        style=dict(flex=1, overflow='hidden'),
-      ),
-      view_button,
-    ],
-    withBorder=True,
-    style=dict(
-      display='flex',
-      gap='1rem',
-      justifyContent='flex-start',
-      alignItems='stretch',
-      minHeight='150px',
-      maxHeight='150px',
-      padding='1rem',
-      flexDirection='row',
-    ),
   )
 
 
@@ -157,10 +148,18 @@ def custom_insight_button(item):
   created_at = item.get('created_at', None)
 
   graphic = dmc.Image(
-    src=item['image_url'], radius='sm', style=dict(width='125px', height='125px', objectFit='cover')
+    src=item['image_url'],
+    radius='sm',
+    style=dict(
+      height='100%', 
+      aspectRatio=1, 
+      objectFit='cover', 
+      borderTopRightRadius=0, 
+      borderBottomRightRadius=0,
+    )
   )
 
-  title = dmc.Text(item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left'))
+  title = dmc.Text(item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left', flex=1))
 
   share_button = dmc.ActionIcon(
     DashIconify(icon='feather:share-2', width=16, color='teal'),
@@ -178,22 +177,6 @@ def custom_insight_button(item):
     style=dict(alignSelf='center'),
   )
 
-  view_button = dmc.Anchor(
-    dmc.Button(
-      ['View', dmc.Space(w=8), DashIconify(icon='feather:arrow-right', width=16)],
-      variant='light',
-      style=dict(
-        textDecoration='none',
-        display='flex',
-        justifyContent='center',
-        alignItems='center',
-        minHeight='100%',
-      ),
-    ),
-    href=f'/insight/{item["id"]}',
-    underline=False,
-  )
-
   custom_insights_badge = dmc.Badge(
     'Custom',
     variant='gradient',
@@ -202,52 +185,58 @@ def custom_insight_button(item):
     radius='md',
   )
 
+  details = dmc.Group(
+    [
+      custom_insights_badge,
+      tipped_text(
+        f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'
+      ),
+    ],
+    align='center',
+    justify='flex-start',
+  )
+
+  actions = dmc.Stack(
+    [
+      delete_button,
+      share_button,
+    ],
+    justify='flex-end',
+    p='xs',
+    style=dict(
+      backgroundColor='light-dark(var(--mantine-color-disabled), var(--mantine-color-dark-outline))',
+    ),
+  )
+
   return dmc.Card(
     [
-      graphic,
-      dmc.Stack(
+      dmc.Anchor(
         [
-          title,
-          dmc.Flex(
+          dmc.Box(graphic, style=dict(width='150px', aspectRatio=1)),
+          dmc.Stack(
             [
-              dmc.Group(
-                [
-                  custom_insights_badge,
-                  tipped_text(
-                    f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'
-                  ),
-                ],
-                align='center',
-                justify='flex-start',
-              ),
-              dmc.Group(
-                [
-                  delete_button,
-                  share_button,
-                ],
-                align='flex-end',
-              ),
+              title,
+              details
             ],
-            justify='space-between',
-            align='flex-end',
+            w='100%',
+            px='lg', py='md',
           ),
         ],
-        justify='space-between',
-        align='stretch',
-        style=dict(flex=1),
-        gap=8,
+        href=f'/insight/{item["id"]}',
+        underline=False,
+        style=dict(flex=1, display='flex', alignItems='stretch'),
       ),
-      view_button,
+      actions,
     ],
     withBorder=True,
+    className='emphasize-hover',
     style=dict(
       display='flex',
-      gap='1rem',
       justifyContent='flex-start',
       alignItems='stretch',
       minHeight='150px',
-      maxHeight='200px',
-      padding='1rem',
+      height='min-content',
+      padding=0,
       flexDirection='row',
     ),
   )
