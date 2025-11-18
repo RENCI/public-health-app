@@ -11,19 +11,13 @@ default_control_values = {
   'plot_type': 'line',
   'round_num': 19,
   'pathogen': 'covid',
-  'scenarios': [
-    {
-      'id': 'A-2023-10-27',
-      'name': 'A-2023-10-27',
-      'description': 'Scenario A',
-    },
-  ],
+  'scenario_ids': [77, 78],
   'scenario_variables': [
     {
       'name': 'Vaccination Strategy',
       'options': ['High risk', 'All ages'],
       'selected_option': 'All ages',
-    },
+    }
   ],
   'model_names': ['Ensemble'],
   'location_name': 'US',

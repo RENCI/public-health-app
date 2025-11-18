@@ -1,5 +1,6 @@
 id: vaccination-impact-copy-copy
 title: Ut occaecat veniam sit irure adipisicing occaecat quis et est sed ut aliquip sunt.
+summary: Ut occaecat veniam sit irure adipisicing occaecat quis et est sed ut aliquip sunt.
 description: >
   - Nostrud sunt nostrud cupidatat cillum sit consectetur culpa ut culpa ex sint dolore in quis esse pariatur sunt.
   - Lorem ipsum pariatur excepteur aliquip ut do fugiat quis eiusmod eu amet consectetur anim culpa est pariatur ullamco cillum sunt duis.
@@ -14,7 +15,7 @@ controls:
   location_name: US
   target: Incident Hospitalization
   model_names: ["Ensemble"]
-  scenario_names: ["A-2023-10-27", "B-2023-10-27"]
+  scenario_ids: [77, 78]
   scenario_variables:
     - name: Vaccination Strategy
       options: ["High risk", "All ages"]

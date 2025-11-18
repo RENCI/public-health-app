@@ -4,24 +4,26 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any, Self
 
-from src.constants import (
+from src.util.constants import (
   get_locations,
-  get_model_color_by_id,
-  get_model_id,
-  get_scenario_id,
+  get_model_by_name,
+  get_scenario_by_id,
 )
 
 
 @dataclass
 class Scenario:
-  id: str
+  id: int
   name: str
   description: str
+  round: int
 
-  def __init__(self, name: str):
-    self.name = name.lower().capitalize()
-    self.id = get_scenario_id(self.name)
-    self.description = ''
+  def __init__(self, id: int):
+    scenario_data = get_scenario_by_id(id)
+    self.id = scenario_data['id']
+    self.name = scenario_data['name']
+    self.description = scenario_data['description']
+    self.round = scenario_data['round']
 
 
 @dataclass
@@ -33,11 +35,15 @@ class ScenarioVariable:
 
 @dataclass
 class Model:
-  # Override __init__ to get the model id and color
+  id: int
+  name: str
+  color: str
+
   def __init__(self, model_name: str):
     self.name = model_name
-    self.id = get_model_id(model_name)
-    self.color = get_model_color_by_id(self.id)
+    model_data = get_model_by_name(model_name)
+    self.id = model_data['id']
+    self.color = model_data['color']
 
 
 @dataclass

@@ -1,11 +1,11 @@
 import dash_mantine_components as dmc
 
-from src.constants import get_model_names
+from src.util.constants import get_unique_model_names
 
-options = [m for m in get_model_names()]
+options = get_unique_model_names()
 
 
-def models_select(value=['Ensemble'], disabled=False):
+def models_select(value: list[str] = ['Ensemble'], disabled=False):
   return dmc.MultiSelect(
     label='Models',
     placeholder='',

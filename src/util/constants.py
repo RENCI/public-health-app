@@ -70,74 +70,57 @@ def get_location_data(location_name: str) -> tuple[str, int, int]:
 
 
 # Convenience functions for common access patterns
-def get_pathogen() -> str:
-  """Get the current pathogen."""
-  return get_constants().get('pathogen', '')
-
-
-def get_pathogen_display_name() -> str:
-  """Get the pathogen display name."""
-  return get_constants().get('pathogen_display_name', '')
-
-
-def get_scenarios() -> list[dict[str, str]]:
+def get_scenarios() -> list[dict[str, str | int]]:
   """Get scenario ID mappings."""
   return get_constants().get('scenarios', [])
 
 
-def get_scenario_ids() -> list[int]:
-  """Get scenario ID mappings."""
-  return [scenario['id'] for scenario in get_scenarios()]
+def get_scenario_by_id(id: int) -> dict[str, str | int]:
+  """Get scenario by ID."""
+  return [scenario for scenario in get_scenarios() if scenario['id'] == id][0]
 
 
-def get_scenario_id(name: str) -> int | None:
-  """Get scenario ID mappings."""
-  return [scenario['id'] for scenario in get_scenarios() if scenario['name'] == name][0]
+def get_scenarios_for_round(round_number: int) -> list[dict[str, str | int]]:
+  """Get scenarios for a specific round. Returns a list of scenario dictionaries."""
+  return [scenario for scenario in get_scenarios() if scenario['round'] == round_number]
 
 
-def get_scenario_names() -> list[str]:
-  """Get scenario name mappings."""
-  return [scenario['name'] for scenario in get_scenarios()]
-
-
-def get_scenario_name(id: int) -> str:
-  """Get scenario ID mappings."""
-  return [scenario['name'] for scenario in get_scenarios() if scenario['id'] == id][0]
-
-
-def get_models() -> list[dict[str, str]]:
+def get_models() -> list[dict[str, str | int]]:
   """Get model name mappings."""
   return get_constants().get('models', [])
 
 
 def get_model_names() -> list[str]:
-  """Get model name mappings."""
+  """Get model names."""
   return [model['name'] for model in get_models()]
 
 
-def get_model_name(id: int) -> str:
-  """Get model name mappings."""
-  return [model['name'] for model in get_models() if model['id'] == id][0]
+def get_unique_model_names() -> list[str]:
+  """
+  Get unique model names. Changing from list to dict and back removes duplicates
+  while preserving the original order.
+  """
+  return list(dict.fromkeys(get_model_names()))
 
 
-def get_model_id(name: str) -> int:
-  """Get model ID mappings."""
-  return [model['id'] for model in get_models() if model['name'] == name][0]
+def get_model_by_id(id: int) -> dict[str, str | int]:
+  """Get model by ID."""
+  return [model for model in get_models() if model['id'] == id][0]
 
 
-def get_model_colors() -> dict[str, str]:
-  """Get color mappings for models."""
-  return {model['name']: model['color'] for model in get_models()}
+def get_model_by_name(name: str = 'Ensemble') -> dict[str, str | int]:
+  """Get model by name."""
+  return [model for model in get_models() if model['name'] == name][0]
 
 
 def get_model_color_by_id(id: int = 1) -> str:
   """Get the color for a specific model."""
-  return [model['color'] for model in get_models() if model['id'] == id][0]
+  return get_model_by_id(id)['color']
 
 
-def get_model_color_by_name(name: str = 'Ensemble_LOP') -> str:
+def get_model_color_by_name(name: str = 'Ensemble') -> str:
   """Get the color for a specific model."""
-  return [model['color'] for model in get_models() if model['name'] == name][0]
+  return get_model_by_name(name)['color']
 
 
 def get_pathogen_colors() -> dict[str, str]:
@@ -145,9 +128,9 @@ def get_pathogen_colors() -> dict[str, str]:
   return get_constants().get('pathogen_colors', [])
 
 
-def get_pathogen_color(pathogen: str = 'RSV') -> str:
+def get_pathogen_color(pathogen: str = 'COVID-19') -> str:
   """Get the color for a specific pathogen."""
-  return get_pathogen_colors().get(pathogen, 'rgba(128, 128, 128, 1)')  # Default gray
+  return get_pathogen_colors().get(pathogen, 'rgba(116, 113, 174, 1)')  # Default gray
 
 
 def get_location_short_code(location: str) -> str:

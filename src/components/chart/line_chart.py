@@ -6,7 +6,7 @@ from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
 from src.components.chart.chart_properties import Model
 from src.components.enums import UncertaintyInterval
-from src.constants import get_model_color_with_uncertainty_interval
+from src.util.constants import get_model_color_with_uncertainty_interval
 
 
 class LineChart(Chart):
