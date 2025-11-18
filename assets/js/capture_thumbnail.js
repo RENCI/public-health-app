@@ -14,8 +14,8 @@
         try {
           const img = await Plotly.toImage(plot, {
             format: 'png',
-            width: 600,
-            height: 400,
+            width: 1000,
+            height: 800,
             scale: 2,
           });
           return img;
