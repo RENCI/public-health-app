@@ -68,7 +68,7 @@ class LineChart(Chart):
       cols=1,
       vertical_spacing=vertical_spacing,
       row_heights=[1] * num_rows,
-      subplot_titles=[f'{s.description}' for s in self.controls.scenarios],
+      subplot_titles=[f'{s.name.split("-")[0]}. {s.description}' for s in self.controls.scenarios],
     )
 
     # add traces for each scenario
