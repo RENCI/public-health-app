@@ -18,15 +18,15 @@ function slugify(str) {
     return annotationTextElements;
   }
 
-  function setGlow(labelEls, color) {
+  function setHighlight(labelEls) {
     labelEls.forEach(label => {
-      label.style.filter = `drop-shadow(0 0 3px ${color})`;
+      label.style.textShadow = `-0.05ex 0 0 black, 0.05ex 0 0 black`;
     });
   }
 
-  function clearGlow(labelEls) {
+  function clearHighlight(labelEls) {
     labelEls.forEach(label => {
-      label.style.filter = '';
+            label.style.textShadow = '';
     });
   }
 
@@ -44,13 +44,12 @@ function slugify(str) {
   function attachAnnotationEvents(el) {
     el.addEventListener('mouseenter', () => {
       const labels = getChartLabelsFor(el);
-      const glowColor = labels?.[0]?.style?.fill || 'crimson';
-      setGlow(labels, glowColor);
+      setHighlight(labels);
     });
 
     el.addEventListener('mouseleave', () => {
       const labels = getChartLabelsFor(el);
-      clearGlow(labels);
+      clearHighlight(labels);
     });
   }
 
