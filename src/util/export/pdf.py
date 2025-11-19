@@ -29,7 +29,8 @@ def md_to_html(md_text: str) -> str:
 
 
 def generate_round_pdf(round_dict):
-  round_number = round_dict.get('round_number') or '18'
+  round_number = str(round_dict.get('round_number') or 18)
+
   date = round_dict.get('date') or '...'
 
   summary_md = round_dict.get('report') or 'Report not found'
@@ -40,16 +41,11 @@ def generate_round_pdf(round_dict):
     '<ul>' + ''.join(f'<li>{insight["summary"]}</li>' for insight in insights) + '</ul>'
   )
 
-  image_url = (
-    insight['image_url']
-    or 'https://placehold.co/650x300?text=Visualization'
-  )
-
   insights_details_html = '<br />'.join(
     f"""
     <h2>{insight['title']}</h2>
     <figure>
-      <img src="{image_url}" style="width: 100%;">
+      <img src="{insight['image_url']}" style="width: 100%;">
       <figcaption>Figure {i + 1}. Visualization caption</figcaption>
     </figure>
     <div>{md_to_html(insight['description'])}</div>
