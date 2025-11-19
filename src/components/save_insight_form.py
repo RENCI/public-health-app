@@ -3,7 +3,7 @@ import uuid
 from typing import Any
 
 import dash_mantine_components as dmc
-from dash import Input, Output, State, callback, exceptions
+from dash import Input, Output, State, callback, clientside_callback, dcc, exceptions
 from dash_iconify import DashIconify
 
 default_control_values = {
@@ -86,6 +86,7 @@ def save_insight_form(initial_title='', initial_description=''):
           )
         ],
       ),
+      dcc.Store(id='thumbnail-store'),
     ]
   )
 
@@ -101,13 +102,19 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   return not is_visible
 
 
+clientside_callback(
+  'window.dash_clientside.clientside.capture_thumbnail',
+  Output('thumbnail-store', 'data'),
+  Input('save-insight-button', 'n_clicks'),
+)
+
 @callback(
   Output('custom-insights-store', 'data', allow_duplicate=True),
   Output('insight-title-input', 'error'),
   Output('insight-description-input', 'error'),
   Output('notification-container', 'sendNotifications', allow_duplicate=True),
   Output('_pages_location', 'pathname'),  # update path
-  Input('save-insight-button', 'n_clicks'),
+  Input('thumbnail-store', 'data'),
   State('custom-insights-store', 'data'),
   State('insight-title-input', 'value'),
   State('insight-description-input', 'value'),
@@ -117,27 +124,30 @@ def toggle_form_visibility(reveal_clicks, hide_clicks, is_visible):
   prevent_initial_call=True,
 )
 def save_custom_insight(
-  n_clicks: int,
+  thumbnail_data,
   current_custom_insights: list[dict[str, Any]],
   title: str,
   description: str,
   round_number: str,
   current_chart_controls: dict[str, Any] | None = None,
 ):
-  if not n_clicks:
-    raise exceptions.PreventUpdate
-
+  print(dict(thumbnail_data=thumbnail_data))
   # validation
   if not (title and title.strip() and description and description.strip()):
     raise exceptions.PreventUpdate
 
   now = datetime.datetime.now(datetime.timezone.utc).isoformat()
   new_id = f'custom-{uuid.uuid4()}'
+  image_url = (
+    thumbnail_data
+    or 'https://placehold.co/400?text=Visualization'
+  )
+  print(dict(image_url=image_url))
   new_item = dict(
     id=new_id,
     title=title.strip(),
     description=description.strip(),
-    image_url='https://placehold.co/400?text=Visualization',
+    image_url=image_url,
     created_at=now,
     updated_at=now,
     controls={

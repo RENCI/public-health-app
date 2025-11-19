@@ -2,6 +2,24 @@ import dash_mantine_components as dmc
 from dash import html
 
 
+def toolbar_button(children, icon, **kwargs):
+  defaults = dict(
+    leftSection=icon,
+    variant='light',
+    size='xs',
+  )
+
+  # remove conflicting keys from kwargs so defaults win, unless overridden
+  for key in list(defaults.keys()):
+    if key in kwargs:
+      pass
+
+  # merge defaults with incoming overrides
+  final_props = {**defaults, **kwargs}
+
+  return dmc.Button(children, **final_props)
+
+
 def toolbar(
   left=None,
   right=None,
