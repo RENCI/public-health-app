@@ -17,7 +17,6 @@ from dash import (
 )
 from dash_iconify import DashIconify
 
-from src.components.tooltip import tooltip
 from src.components.toolbar import toolbar, toolbar_button
 from src.components.viz_editor import visualization_editor
 from src.components.insight_yaml_modal import insight_yaml_modal_button, insight_yaml_modal

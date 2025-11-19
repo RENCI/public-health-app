@@ -105,12 +105,12 @@ def insight_button(item):
     src=item['image_url'],
     radius='sm',
     style=dict(
-      height='100%', 
-      aspectRatio=1, 
-      objectFit='cover', 
-      borderTopRightRadius=0, 
+      height='100%',
+      aspectRatio=1,
+      objectFit='cover',
+      borderTopRightRadius=0,
       borderBottomRightRadius=0,
-    )
+    ),
   )
 
   title = dmc.Text(item['title'], size='lg')
@@ -123,7 +123,8 @@ def insight_button(item):
         dmc.Stack(
           [title, summary],
           align='flex-start',
-          px='lg', py='md',
+          px='lg',
+          py='md',
           style=dict(flex=1, overflow='hidden'),
         ),
       ],
@@ -151,15 +152,17 @@ def custom_insight_button(item):
     src=item['image_url'],
     radius='sm',
     style=dict(
-      height='100%', 
-      aspectRatio=1, 
-      objectFit='cover', 
-      borderTopRightRadius=0, 
+      height='100%',
+      aspectRatio=1,
+      objectFit='cover',
+      borderTopRightRadius=0,
       borderBottomRightRadius=0,
-    )
+    ),
   )
 
-  title = dmc.Text(item['title'], size='lg', style=dict(flex=1))
+  title = dmc.Text(
+    item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left', flex=1)
+  )
 
   share_button = dmc.ActionIcon(
     DashIconify(icon='feather:share-2', width=16, color='teal'),
@@ -188,9 +191,7 @@ def custom_insight_button(item):
   details = dmc.Group(
     [
       custom_insights_badge,
-      tipped_text(
-        f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'
-      ),
+      tipped_text(f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'),
     ],
     align='center',
     justify='flex-start',
@@ -214,13 +215,11 @@ def custom_insight_button(item):
         [
           dmc.Box(graphic, style=dict(width='150px', aspectRatio=1)),
           dmc.Stack(
-            [
-              title,
-              details
-            ],
+            [title, details],
             w='100%',
             c='var(--mantine-color-text)',
-            px='lg', py='md',
+            px='lg',
+            py='md',
           ),
         ],
         href=f'/insight/{item["id"]}',
@@ -314,6 +313,18 @@ def round_summary():
     ],
     gap=0,
   )
+
+
+# @callback(
+#   Output('url', 'pathname'),
+#   Input('selected-round-store', 'data'),
+#   Input('url', 'pathname'),
+# )
+# def update_url_after_round_change(round_number, pathname):
+#   if not round_number:
+#     return no_update
+
+#   return f'/round/{round_number}'
 
 
 @callback(

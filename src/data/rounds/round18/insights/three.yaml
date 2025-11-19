@@ -1,5 +1,6 @@
 id: vaccination-impact-copy
 title: Irure minim mollit minim dolore voluptate tempor pariatur officia nulla ad sunt aute.
+summary: Irure minim mollit minim dolore voluptate tempor pariatur officia nulla ad sunt aute.
 description: >
   - **Fugiat consequat in laboris deserunt labore nulla velit est minim cillum cillum enim.**
   - **Quis incididunt quis pariatur culpa elit mollit ullamco anim sunt minim.n.
@@ -19,7 +20,7 @@ controls:
   location_name: US
   target: Incident Hospitalization
   model_names: ["Ensemble"]
-  scenario_names: ["A-2023-10-27", "B-2023-10-27"]
+  scenario_ids: [77, 78]
   scenario_variables:
     - name: Vaccination Strategy
       options: ["High risk", "All ages"]

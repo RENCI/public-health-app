@@ -1,17 +1,17 @@
+from typing import Any
+
 import dash_mantine_components as dmc
 from dash import Dash, _dash_renderer, dcc
 
 from src.components.layout import layout
-from src.constants import get_constants
 from src.theme import DEFAULT_THEME
+from src.util.constants import get_constants
 
 
-def initialize_app_data():
+def initialize_app_data() -> dict[str, Any]:
   """Load and initialize all application data at startup."""
   # load constants from JSON file
-  constants = get_constants()
-  # initialize chart cache
-  return constants
+  return get_constants()
 
 
 # load and return constants/chart cache once at application startup

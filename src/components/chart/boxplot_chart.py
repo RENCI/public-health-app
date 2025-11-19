@@ -5,7 +5,7 @@ from plotly.subplots import make_subplots
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
 from src.components.enums import UncertaintyInterval
-from src.constants import get_model_color_by_id, get_model_id
+from src.util.constants import get_model_by_name, get_model_color_by_name
 
 
 class BoxplotChart(Chart):
@@ -86,7 +86,7 @@ class BoxplotChart(Chart):
     # second_df = second_df.query('age_group == @self.controls.age_group.input_value')
 
     # filter for ensemble model, specifically
-    ensemble_model_id = get_model_id('Ensemble')
+    ensemble_model_id = get_model_by_name('Ensemble')['id']
     df = df.query('model_name == @ensemble_model_id')
     # second_df = second_df.query('model_name == @ensemble_model_id')
 
@@ -95,7 +95,7 @@ class BoxplotChart(Chart):
       # second_scenario_df = second_df.query('scenario_id == @scenario.id')
       scenario_display_name = f'Scenario {scenario.name.split()[0][0].upper()}'
       trace = go.Box(
-        marker_color=get_model_color_by_id(ensemble_model_id),
+        marker_color=get_model_color_by_name('Ensemble'),
         name='',
         showlegend=False,
       )

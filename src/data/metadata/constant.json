@@ -1,53 +1,497 @@
 {
-  "pathogen": "covid",
-  "pathogen_display_name": "COVID-19",
   "scenarios": [
     {
-      "id": 77,
-      "name": "A-2023-10-27"
+      "name": "A-2020-12-22",
+      "description": "Optimistic Scenario",
+      "round": 1,
+      "id": 1
     },
     {
-      "id": 78,
-      "name": "B-2023-10-27"
+      "name": "B-2020-12-22",
+      "description": "Business as Usual + Moderate Vaccine Scenario",
+      "round": 1,
+      "id": 2
     },
     {
-      "id": 79,
-      "name": "C-2023-10-27"
+      "name": "C-2020-12-22",
+      "description": "Fatigue and Hesitancy Scenario",
+      "round": 1,
+      "id": 3
     },
     {
-      "id": 80,
-      "name": "D-2023-10-27"
+      "name": "D-2020-12-22",
+      "description": "Counterfactual Scenario",
+      "round": 1,
+      "id": 4
     },
     {
-      "id": 81,
-      "name": "E-2023-10-27"
+      "name": "A-2021-01-22",
+      "description": "Optimistic Scenario, No Variant Strain",
+      "round": 2,
+      "id": 5
+    },
+    {
+      "name": "B-2021-01-22",
+      "description": "Optimistic Scenario, Variant Strain",
+      "round": 2,
+      "id": 6
+    },
+    {
+      "name": "C-2021-01-22",
+      "description": "Fatigue and Hesitancy Scenario, No Variant Strain",
+      "round": 2,
+      "id": 7
+    },
+    {
+      "name": "D-2021-01-22",
+      "description": "Fatigue and Hesitancy Scenario, Variant Strain",
+      "round": 2,
+      "id": 8
+    },
+    {
+      "name": "A-2021-03-05",
+      "description": "High Vaccination, Moderate NPI",
+      "round": 3,
+      "id": 9
+    },
+    {
+      "name": "B-2021-03-05",
+      "description": "High Vaccination, Low NPI",
+      "round": 3,
+      "id": 10
+    },
+    {
+      "name": "C-2021-03-05",
+      "description": "Low Vaccination, Moderate NPI",
+      "round": 3,
+      "id": 11
+    },
+    {
+      "name": "D-2021-03-05",
+      "description": "Low Vaccination & Low NPI",
+      "round": 3,
+      "id": 12
+    },
+    {
+      "name": "A-2021-03-28",
+      "description": "High Vaccination, Moderate NPI",
+      "round": 4,
+      "id": 13
+    },
+    {
+      "name": "B-2021-03-28",
+      "description": "High Vaccination, Low NPI",
+      "round": 4,
+      "id": 14
+    },
+    {
+      "name": "C-2021-03-28",
+      "description": "Low Vaccination, Moderate NPI",
+      "round": 4,
+      "id": 15
+    },
+    {
+      "name": "D-2021-03-28",
+      "description": "Low Vaccination, Low NPI",
+      "round": 4,
+      "id": 16
+    },
+    {
+      "name": "A-2021-05-02",
+      "description": "High Vaccination, Moderate NPI",
+      "round": 5,
+      "id": 17
+    },
+    {
+      "name": "B-2021-05-02",
+      "description": "High Vaccination, Low NPI",
+      "round": 5,
+      "id": 18
+    },
+    {
+      "name": "C-2021-05-02",
+      "description": "Low Vaccination, Moderate NPI",
+      "round": 5,
+      "id": 19
+    },
+    {
+      "name": "D-2021-05-02",
+      "description": "Low Vaccination & Low NPI",
+      "round": 5,
+      "id": 20
+    },
+    {
+      "name": "A-2021-06-08",
+      "description": "High Vaccination, Low Variant Transmissibility Increase",
+      "round": 6,
+      "id": 21
+    },
+    {
+      "name": "B-2021-06-08",
+      "description": "High Vaccination, High Variant Transmissibility Increase",
+      "round": 6,
+      "id": 22
+    },
+    {
+      "name": "C-2021-06-08",
+      "description": "Low Vaccination, Low Variant Transmissibility Increase",
+      "round": 6,
+      "id": 23
+    },
+    {
+      "name": "D-2021-06-08",
+      "description": "Low Vaccination, High Variant Transmissibility Increase",
+      "round": 6,
+      "id": 24
+    },
+    {
+      "name": "A-2021-07-13",
+      "description": "High Vaccination, Low Variant Transmissibility Increase",
+      "round": 7,
+      "id": 25
+    },
+    {
+      "name": "B-2021-07-13",
+      "description": "High Vaccination, High Variant Transmissibility Increase",
+      "round": 7,
+      "id": 26
+    },
+    {
+      "name": "C-2021-07-13",
+      "description": "Low Vaccination, Low Variant Transmissibility Increase",
+      "round": 7,
+      "id": 27
+    },
+    {
+      "name": "D-2021-07-13",
+      "description": "Low Vaccination, High Variant Transmissibility Increase",
+      "round": 7,
+      "id": 28
+    },
+    {
+      "name": "A-2021-08-17",
+      "description": "No Waning",
+      "round": 8,
+      "id": 29
+    },
+    {
+      "name": "B-2021-08-17",
+      "description": "High Protection, Fast Waning",
+      "round": 8,
+      "id": 30
+    },
+    {
+      "name": "C-2021-08-17",
+      "description": "Low Protection, Slow Waning",
+      "round": 8,
+      "id": 31
+    },
+    {
+      "name": "D-2021-08-17",
+      "description": "Low Protection, Fast Waning",
+      "round": 8,
+      "id": 32
+    },
+    {
+      "name": "A-2021-09-14",
+      "description": "Childhood Vaccination, No Variant",
+      "round": 9,
+      "id": 33
+    },
+    {
+      "name": "B-2021-09-14",
+      "description": "No Childhood Vaccination, No Variant",
+      "round": 9,
+      "id": 34
+    },
+    {
+      "name": "C-2021-09-14",
+      "description": "Childhood Vaccination, New Variant",
+      "round": 9,
+      "id": 35
+    },
+    {
+      "name": "D-2021-09-14",
+      "description": "No Childhood Vaccination, New Variant",
+      "round": 9,
+      "id": 36
+    },
+    {
+      "name": "A-2021-11-09",
+      "description": "Optimistic waning, widespread boosters",
+      "round": 10,
+      "id": 37
+    },
+    {
+      "name": "B-2021-11-09",
+      "description": "Optimistic waning, restricted boosters",
+      "round": 10,
+      "id": 38
+    },
+    {
+      "name": "C-2021-11-09",
+      "description": "Pessimistic waning, widespread boosters",
+      "round": 10,
+      "id": 39
+    },
+    {
+      "name": "D-2021-11-09",
+      "description": "Pessimistic waning, restricted boosters",
+      "round": 10,
+      "id": 40
+    },
+    {
+      "name": "A-2021-12-21",
+      "description": "Optimistic severity, High immune escape/Low transmissibility increase",
+      "round": 11,
+      "id": 41
+    },
+    {
+      "name": "B-2021-12-21",
+      "description": "Optimistic severity, Low immune escape/High transmissibility increase",
+      "round": 11,
+      "id": 42
+    },
+    {
+      "name": "C-2021-12-21",
+      "description": "Pessimistic severity, High immune escape/Low transmissibility increase",
+      "round": 11,
+      "id": 43
+    },
+    {
+      "name": "D-2021-12-21",
+      "description": "Pessimistic severity, Low immune escape/High transmissibility increase",
+      "round": 11,
+      "id": 44
+    },
+    {
+      "name": "A-2022-01-09",
+      "description": "Optimistic severity, High immune escape",
+      "round": 12,
+      "id": 45
+    },
+    {
+      "name": "B-2022-01-09",
+      "description": "Optimistic severity, Low immune escape",
+      "round": 12,
+      "id": 46
+    },
+    {
+      "name": "C-2022-01-09",
+      "description": "Pessimistic severity, High immune escape",
+      "round": 12,
+      "id": 47
+    },
+    {
+      "name": "D-2022-01-09",
+      "description": "Pessimistic severity, Low immune escape",
+      "round": 12,
+      "id": 48
+    },
+    {
+      "name": "A-2022-02-25",
+      "description": "Optimistic waning, No immune escape variant",
+      "round": 13,
+      "id": 49
+    },
+    {
+      "name": "B-2022-02-25",
+      "description": "Optimistic waning, New immune escape variant",
+      "round": 13,
+      "id": 50
+    },
+    {
+      "name": "C-2022-02-25",
+      "description": "Pessimistic waning, No immune escape variant",
+      "round": 13,
+      "id": 51
+    },
+    {
+      "name": "D-2022-02-25",
+      "description": "Pessimistic waning, New immune escape variant",
+      "round": 13,
+      "id": 52
+    },
+    {
+      "name": "A-2022-05-09",
+      "description": "Age-restricted booster recommendations, No immune escape variant",
+      "round": 14,
+      "id": 53
+    },
+    {
+      "name": "B-2022-05-09",
+      "description": "Age-restricted booster recommendations, New immune escape variant",
+      "round": 14,
+      "id": 54
+    },
+    {
+      "name": "C-2022-05-09",
+      "description": "Broad booster recommendations, No immune escape variant",
+      "round": 14,
+      "id": 55
+    },
+    {
+      "name": "D-2022-05-09",
+      "description": "Broad booster recommendations, New immune escape variant",
+      "round": 14,
+      "id": 56
+    },
+    {
+      "name": "A-2022-07-19",
+      "description": "Early boosters, No new variant",
+      "round": 15,
+      "id": 57
+    },
+    {
+      "name": "B-2022-07-19",
+      "description": "Early boosters, New immune escape variant",
+      "round": 15,
+      "id": 58
+    },
+    {
+      "name": "C-2022-07-19",
+      "description": "Late boosters, No new variant",
+      "round": 15,
+      "id": 59
+    },
+    {
+      "name": "D-2022-07-19",
+      "description": "Late boosters, New immune escape variant",
+      "round": 15,
+      "id": 60
+    },
+    {
+      "name": "A-2022-10-29",
+      "description": "High boosters, Moderate immune escape variant",
+      "round": 16,
+      "id": 61
+    },
+    {
+      "name": "B-2022-10-29",
+      "description": "High boosters, High immune escape variant",
+      "round": 16,
+      "id": 62
+    },
+    {
+      "name": "C-2022-10-29",
+      "description": "Low boosters, Moderate immune escape variant",
+      "round": 16,
+      "id": 63
+    },
+    {
+      "name": "D-2022-10-29",
+      "description": "Low boosters, High immune escape variant",
+      "round": 16,
+      "id": 64
+    },
+    {
+      "name": "A-2023-04-16",
+      "description": "No booster, low immune escape",
+      "round": 17,
+      "id": 65
+    },
+    {
+      "name": "B-2023-04-16",
+      "description": "No booster, high immune escape",
+      "round": 17,
+      "id": 66
+    },
+    {
+      "name": "C-2023-04-16",
+      "description": "65+ booster, low immune escape",
+      "round": 17,
+      "id": 67
+    },
+    {
+      "name": "D-2023-04-16",
+      "description": "65+ booster, high immune escape",
+      "round": 17,
+      "id": 68
+    },
+    {
+      "name": "E-2023-04-16",
+      "description": "All booster, low immune escape",
+      "round": 17,
+      "id": 69
+    },
+    {
+      "name": "F-2023-04-16",
+      "description": "All booster, high immune escape",
+      "round": 17,
+      "id": 70
+    },
+    {
+      "name": "A-2024-03-01",
+      "description": "No booster, low immune escape",
+      "round": 18,
+      "id": 71
+    },
+    {
+      "name": "B-2024-03-01",
+      "description": "No booster, high immune escape",
+      "round": 18,
+      "id": 72
+    },
+    {
+      "name": "C-2024-03-01",
+      "description": "High-risk booster, low immune escape",
+      "round": 18,
+      "id": 73
+    },
+    {
+      "name": "D-2024-03-01",
+      "description": "High-risk  booster, high immune escape",
+      "round": 18,
+      "id": 74
+    },
+    {
+      "name": "E-2024-03-01",
+      "description": "All booster, low immune escape",
+      "round": 18,
+      "id": 75
+    },
+    {
+      "name": "F-2024-03-01",
+      "description": "All booster, high immune escape",
+      "round": 18,
+      "id": 76
+    },
+    {
+      "name": "A-2025-04-01",
+      "description": "No booster, no immunization timing (counterfactual)",
+      "round": 19,
+      "id": 77
+    },
+    {
+      "name": "B-2025-04-01",
+      "description": "65+ and high-risk booster, classic immunization timing",
+      "round": 19,
+      "id": 78
+    },
+    {
+      "name": "C-2025-04-01",
+      "description": "65+ and high-risk booster, early immunization",
+      "round": 19,
+      "id": 79
+    },
+    {
+      "name": "D-2025-04-01",
+      "description": "All booster, classic immunization timing",
+      "round": 19,
+      "id": 80
+    },
+    {
+      "name": "E-2025-04-01",
+      "description": "All booster, early immunization",
+      "round": 19,
+      "id": 81
     }
   ],
   "models": [
     {
-      "id": 1,
-      "name": "Ensemble_LOP",
-      "color": "rgba(103, 72, 106, 1)"
-    },
-    {
-      "id": 2,
-      "name": "Ensemble_LOP_untrimmed",
-      "color": "rgba(136, 174, 225, 1)"
-    },
-    {
       "id": 3,
       "name": "Ensemble",
       "color": "rgba(169, 169, 255, 1)"
-    },
-    {
-      "id": 4,
-      "name": "UT-ImmunoSEIRS",
-      "color": "rgba(163, 165, 0, 1)"
-    },
-    {
-      "id": 5,
-      "name": "NotreDame-FRED",
-      "color": "rgba(0, 191, 125, 1)"
     },
     {
       "id": 6,
@@ -60,39 +504,9 @@
       "color": "rgba(108, 218, 250, 1)"
     },
     {
-      "id": 8,
-      "name": "UVA-EpiHiperRSV",
-      "color": "rgba(0, 72, 251, 1)"
-    },
-    {
-      "id": 9,
-      "name": "NIH-RSV_WIN",
-      "color": "rgba(254, 110, 12, 1)"
-    },
-    {
-      "id": 10,
-      "name": "PSI-PROF",
-      "color": "rgba(226, 50, 7, 1)"
-    },
-    {
-      "id": 11,
-      "name": "NIH-RSV_MSIRS",
-      "color": "rgba(1, 100, 32, 1)"
-    },
-    {
       "id": 12,
       "name": "MOBS_NEU-GLEAM_RSV",
       "color": "rgba(175, 128, 255, 1)"
-    },
-    {
-      "id": 13,
-      "name": "NIH-RSV_Phenomenological",
-      "color": "rgba(252, 209, 7, 1)"
-    },
-    {
-      "id": 14,
-      "name": "CEPH-MetaRSV",
-      "color": "rgba(139, 58, 58, 1)"
     },
     {
       "id": 15,
@@ -100,119 +514,39 @@
       "color": "rgba(1, 150, 200, 1)"
     },
     {
-      "id": 16,
-      "name": "Ensemble_LOP_all",
-      "color": "rgba(75, 75, 75, 1)"
-    },
-    {
-      "id": 17,
-      "name": "NIH-RSV_WIN_old",
-      "color": "rgba(170, 51, 106, 1)"
-    },
-    {
-      "id": 18,
-      "name": "UNCC-Hierbin",
-      "color": "rgba(170, 51, 106, 1)"
-    },
-    {
-      "id": 19,
-      "name": "UT-ImmunoSEIRS-2",
-      "color": "rgba(163, 165, 0, 1)"
-    },
-    {
-      "id": 20,
-      "name": "NotreDame-FRED-2",
-      "color": "rgba(0, 191, 125, 1)"
-    },
-    {
-      "id": 21,
-      "name": "USC-SIkJalpha-2",
-      "color": "rgba(255, 103, 164, 1)"
-    },
-    {
-      "id": 22,
-      "name": "CU-RSV_SVIRS-2",
-      "color": "rgba(108, 218, 250, 1)"
-    },
-    {
-      "id": 23,
-      "name": "UVA-EpiHiperRSV-2",
-      "color": "rgba(0, 72, 251, 1)"
-    },
-    {
-      "id": 24,
-      "name": "NIH-RSV_WIN-2",
-      "color": "rgba(254, 110, 12, 1)"
-    },
-    {
-      "id": 25,
-      "name": "PSI-PROF-2",
-      "color": "rgba(226, 50, 7, 1)"
-    },
-    {
-      "id": 26,
-      "name": "NIH-RSV_MSIRS-2",
-      "color": "rgba(1, 100, 32, 1)"
-    },
-    {
-      "id": 27,
-      "name": "MOBS_NEU-GLEAM_RSV-2",
-      "color": "rgba(175, 128, 255, 1)"
-    },
-    {
-      "id": 28,
-      "name": "NIH-RSV_Phenomenological-2",
-      "color": "rgba(252, 209, 7, 1)"
-    },
-    {
       "id": 29,
-      "name": "CEPH-MetaRSV-2",
+      "name": "CEPH-MetaRSV",
       "color": "rgba(139, 58, 58, 1)"
     },
     {
       "id": 30,
-      "name": "JHU_UNC-flepiMoP-2",
+      "name": "JHU_UNC-flepiMoP",
       "color": "rgba(1, 150, 200, 1)"
     },
     {
       "id": 31,
-      "name": "Ensemble_LOP_all-2",
+      "name": "Ensemble_LOP_all",
       "color": "rgba(75, 75, 75, 1)"
     },
     {
       "id": 32,
-      "name": "UNCC-Hierbin-2",
+      "name": "UNCC-Hierbin",
       "color": "rgba(170, 51, 106, 1)"
     },
     {
       "id": 33,
-      "name": "UT-ImmunoSEIRS-3",
+      "name": "UT-ImmunoSEIRS",
       "color": "rgba(163, 165, 0, 1)"
     },
     {
       "id": 34,
-      "name": "NotreDame-FRED-3",
+      "name": "NotreDame-FRED",
       "color": "rgba(0, 191, 125, 1)"
     },
     {
       "id": 35,
-      "name": "USC-SIkJalpha-3",
+      "name": "USC-SIkJalpha",
       "color": "rgba(255, 103, 164, 1)"
-    },
-    {
-      "id": 36,
-      "name": "CU-RSV_SVIRS-3",
-      "color": "rgba(108, 218, 250, 1)"
-    },
-    {
-      "id": 37,
-      "name": "UVA-EpiHiperRSV-3",
-      "color": "rgba(0, 72, 251, 1)"
-    },
-    {
-      "id": 38,
-      "name": "NIH-RSV_WIN-3",
-      "color": "rgba(254, 110, 12, 1)"
     }
   ],
   "model_colors": {

@@ -19,7 +19,7 @@ controls:
   location_name: US
   target: incident_hospitalization
   model_names: ["Ensemble"]
-  scenario_names: ["A-2023-10-27", "B-2023-10-27"]
+  scenario_ids: [77, 78]
   scenario_variables:
     - name: Vaccination Strategy
       options: ["High risk", "All ages"]
@@ -29,6 +29,7 @@ controls:
   x_start_date: "2025-01-01"
   x_axis: target_end_date
   y_axis: value
+  columns: 1
   round_num: 19
   zoom:
     x:

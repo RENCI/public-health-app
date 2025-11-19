@@ -26,10 +26,7 @@ default_control_values = dict(
   theme='light',
   plot_type='line',
   round_num=19,
-  scenario_names=[
-    'A-2023-10-27',
-    'B-2023-10-27',
-  ],
+  scenario_ids=[77, 78],
   scenario_variables=[
     {
       'name': 'Vaccination Strategy',
@@ -58,7 +55,7 @@ def visualization_editor(controls=None, show_controls=True):
   init_theme: str = controls.get('theme', 'light')
   init_plot_type: str = controls['plot_type']
   init_round_num: int = controls['round_num']
-  init_scenario_names: list[str] = controls['scenario_names']
+  init_scenario_ids: list[int] = controls['scenario_ids']
   init_scenario_variables: list[dict] = controls['scenario_variables']
   init_model_names: list[str] = controls['model_names']
   init_location_name: str = controls['location_name']
@@ -75,7 +72,7 @@ def visualization_editor(controls=None, show_controls=True):
     theme=init_theme,
     plot_type=init_plot_type,
     round_num=init_round_num,
-    scenario_names=init_scenario_names,
+    scenario_ids=init_scenario_ids,
     scenario_variables=init_scenario_variables,
     model_names=init_model_names,
     location_name=init_location_name,
@@ -144,7 +141,7 @@ def visualization_editor(controls=None, show_controls=True):
               dmc.Grid(
                 [
                   dmc.GridCol(
-                    scenarios_select(value=init_scenario_names),
+                    scenarios_select(value=[str(scenario_id) for scenario_id in init_scenario_ids]),
                     span=dict(base=12),
                   ),
                   dmc.GridCol(
@@ -214,7 +211,7 @@ def update_graph_figure(
 
 
 @callback(
-  Output('chart-controls-store', 'data'),
+  Output('chart-controls-store', 'data', allow_duplicate=True),
   Input('theme-store', 'data'),
   Input('scenarios-select', 'value'),
   Input('models-select', 'value'),
@@ -231,7 +228,7 @@ def update_graph_figure(
 )
 def update_chart_controls(
   theme: str,
-  scenario_names: list[str],
+  scenario_ids: list[str],
   model_names: list[str],
   location_name: str,
   target: str,
@@ -243,7 +240,7 @@ def update_chart_controls(
   initial_chart_controls: dict[str, Any] | None,
   current_chart_controls: dict[str, Any] | None,
 ):
-  if not (scenario_names and model_names and location_name and target and age_group):
+  if not (scenario_ids and model_names and location_name and target and age_group):
     raise exceptions.PreventUpdate
 
   if relayout and 'xaxis.range' in relayout and 'yaxis.range' in relayout:
@@ -262,7 +259,7 @@ def update_chart_controls(
 
   new_chart_controls = dict(
     theme=theme,
-    scenario_names=scenario_names,
+    scenario_ids=[int(scenario_id) for scenario_id in scenario_ids],
     model_names=model_names,
     location_name=location_name,
     target=target,
@@ -278,6 +275,19 @@ def update_chart_controls(
     **current_chart_controls,
     **initial_chart_controls,
     **new_chart_controls,
+  }
+
+
+@callback(
+  Output('chart-controls-store', 'data', allow_duplicate=True),
+  Input('round-select', 'value'),
+  prevent_initial_call=True,
+)
+def update_chart_controls_for_round(round_number: str):
+  if not round_number:
+    raise exceptions.PreventUpdate
+  return default_control_values | {
+    'round_num': int(round_number),
   }
 
 

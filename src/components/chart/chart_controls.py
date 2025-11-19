@@ -18,7 +18,7 @@ class ChartControls:
     theme: str,
     plot_type: str,
     round_num: int,
-    scenario_names: list[str],
+    scenario_ids: list[int],
     scenario_variables: list[dict],
     model_names: list[str],
     location_name: str,
@@ -27,6 +27,7 @@ class ChartControls:
     x_axis: str | None = None,
     y_axis: str | None = None,
     x_start_date: str | None = None,
+    columns: int = 1,
     zoom: dict | None = None,
     annotations: list[dict] | None = None,
     uncertainty_interval: str | None = None,
@@ -36,7 +37,7 @@ class ChartControls:
     self.plot_type = PlotType(plot_type)
     self.round_num = round_num
     self.pathogen = pathogen
-    self.scenarios = [Scenario(name=scenario_name) for scenario_name in scenario_names]
+    self.scenarios = [Scenario(id=scenario_id) for scenario_id in scenario_ids]
     self.scenario_variables = [ScenarioVariable(**var) for var in scenario_variables]
     self.models = [Model(model_name) for model_name in model_names]
     self.location = Location(location_name)
@@ -45,6 +46,7 @@ class ChartControls:
     self.x_axis = x_axis
     self.y_axis = y_axis
     self.x_start_date = datetime.strptime(x_start_date, '%Y-%m-%d') if x_start_date else None
+    self.columns = columns
     self.annotations = (
       [Annotation.from_dict(annotation) for annotation in annotations] if annotations else None
     )
@@ -63,7 +65,7 @@ class ChartControls:
       theme=data['theme'],
       plot_type=data['plot_type'],
       round_num=data['round_num'],
-      scenario_names=data['scenario_names'],
+      scenario_ids=data['scenario_ids'],
       scenario_variables=data['scenario_variables'],
       model_names=data['model_names'],
       location_name=data['location_name'],
@@ -72,6 +74,7 @@ class ChartControls:
       x_axis=data['x_axis'],
       y_axis=data['y_axis'],
       x_start_date=data['x_start_date'],
+      columns=data.get('columns', 1),
       zoom=data.get('zoom', None),
       annotations=data.get('annotations', None),
       uncertainty_interval=data.get('uncertainty_interval', None),

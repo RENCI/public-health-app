@@ -1,5 +1,6 @@
 id: seasonal-burden-and-trajectory-copy
 title: Dolore consequat minim cupidatat velit labore tempor amet officia consequat proident commodo esse nisi non anim
+summary: Dolore consequat minim cupidatat velit labore tempor amet officia consequat proident commodo esse nisi non anim
 description: >
   - Lorem ipsum ex qui reprehenderit in excepteur magna cupidatat tempor officia laborum elit non dolore excepteur cillum fugiat voluptate laboris.
   - Est velit proident minim do dolor non non ullamco dolore quis.
@@ -15,7 +16,7 @@ controls:
   location_name: US
   target: Incident Hospitalization
   model_names: ["Ensemble"]
-  scenario_names: ["A-2023-10-27", "B-2023-10-27"]
+  scenario_ids: [77, 78]
   scenario_variables:
     - name: Vaccination Strategy
       options: ["High risk", "All ages"]
