@@ -20,7 +20,7 @@ function slugify(str) {
 
   function setHighlight(labelEls) {
     labelEls.forEach(label => {
-      label.style.textShadow = `-0.05ex 0 0 black, 0.05ex 0 0 black`;
+      label.style.textShadow = `-0.05ex 0 0 var(--mantine-color-text), 0.05ex 0 0 var(--mantine-color-text)`;
     });
   }
 
