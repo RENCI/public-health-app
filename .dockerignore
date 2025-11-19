@@ -1,7 +1,22 @@
+# Git
 .git
+.gitignore
+
+# Python
 __pycache__/
 .venv
+*.pyc
+*.pyo
+*.pyd
+
+# ruff
+.ruff_cache
+
+# VSCode
 .vscode
-.gitignore
+
+# Documentation
 README.md
+
+# k8s
 k8s
