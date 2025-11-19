@@ -58,8 +58,8 @@ insight_toolbar = toolbar(
 
 
 loading_insight = [
+  dmc.Space(h=16),
   dmc.Title(id='insight-view-title', order=1, children=dmc.Skeleton(h=85)),
-  dmc.Divider(my=24),
   html.Div(
     id='insight-view-figure-container',
     children=dmc.Stack(
@@ -97,28 +97,6 @@ download_button = dmc.ActionIcon(
   size='lg',
   loading=False,
 )
-
-def insight_heading(round_number: str, round_date: str, round_name: str):
-  return dmc.Stack(
-    [
-      dmc.Text(
-        f'Round {round_number}',
-        style=dict(fontSize='var(--mantine-h3-font-size'),
-        c='dimmed',
-        fw=700,
-        mb=8,
-      ),
-      dmc.Flex(
-        [
-          dmc.Text(round_name, style=dict(fontSize='var(--mantine-h2-font-size'), fw=700),
-          dmc.Text(f'Date completed: {round_date}', c='dimmed', style=dict(fontStyle='italic')),
-        ],
-        justify='space-between',
-        align='flex-end',
-      ),
-    ],
-    gap=0,
-  )
 
 def annotations_list(annotations: list):
   if len(annotations) == 0:
@@ -232,12 +210,7 @@ def show_insight_details(pathname, custom_insights, theme):
 
     return [
       dmc.Space(h=16),
-      insight_heading(
-        round_number=round_number,
-        round_date=this_round.get('date'),
-        round_name=this_round.get('name'),
-      ),
-      dmc.Title(f'Insight: {insight.get("title", "Untitled Insight")}', order=1),
+      dmc.Title(insight.get('title', 'Untitled Insight'), order=1, mb=16),
       dmc.Text(insight.get('summary', 'Summary not found')),
       html.Div(
         visualization_editor(controls=controls, show_controls=False),

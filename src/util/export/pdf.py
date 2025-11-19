@@ -94,12 +94,14 @@ def generate_insight_pdf(insight):
   body = f"""
     <header>
       <div class="header-title">
-        <h1 class="title">Round {round_number}<br />Insight Report:<br />{title}</h1>
-        <div class="subtitle">Round completed: {round_date}</div>
+        <h1 class="title">Round {round_number}<br />Insight Report</h1>
+        <div class="round-title">Round completed: {round_date}</div>
       </div>
       <img src="{LOGO_URI}" alt="SMH Logo" class="header-smh-logo" />
     </header>
     <main>
+      <h1>{title}</h1>
+
       {summary}
       <br />
 
