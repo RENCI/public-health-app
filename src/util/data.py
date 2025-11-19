@@ -51,6 +51,7 @@ def load_rounds():
       'name': details.get('name'),
       'report': details.get('report', ''),
       'insights': insights,
+      'methods': details.get('methods'),
     }
 
   return rounds
