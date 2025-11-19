@@ -124,9 +124,7 @@ def annotations_list(annotations: list):
   if len(annotations) == 0:
     return dmc.Box('')
 
-  list_items = [
-    dmc.Title('Annotations', order=2),
-  ]
+  list_items = []
 
   date_annotations = [
     dmc.ListItem(
@@ -245,12 +243,24 @@ def show_insight_details(pathname, custom_insights, theme):
         visualization_editor(controls=controls, show_controls=False),
         style=dict(margin='24px 0'),
       ),
-      dmc.Stack(annotations_list(annotations), id='annotations-list-container'),
-      dmc.Title('Description', order=2, my=12),
-      dcc.Markdown(
-        markdown.markdown(insight.get('description', ''), extensions=['extra']),
-        dangerously_allow_html=True,
-      ),
+      dmc.Grid([
+        dmc.GridCol([
+          dmc.Title('Discussion', order=2, my=12),
+          dcc.Markdown(
+            markdown.markdown(insight.get('description', ''), extensions=['extra']),
+            dangerously_allow_html=True,
+            style=dict(lineHeight=2),
+          ),
+        ], span=dict(base=12, md=7 if len(annotations) else 12)),
+        dmc.GridCol(
+          dmc.Card(
+            dmc.Stack(annotations_list(annotations), id='annotations-list-container'),
+            variant='soft',
+            p='lg',
+          ),
+          span=dict(base=12, md=5),
+        ) if len(annotations) else None,
+      ]),
       dcc.Download(id='insight-pdf-download'),
       insight_yaml_modal(insight),
     ]
