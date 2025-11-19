@@ -35,6 +35,9 @@ class BoxplotChart(Chart):
     max_date: pd.Timestamp = pd.Timestamp.min
     for scenario in self.controls.scenarios:
       scenario_df = self._raw_df.query('scenario_id == @scenario.id')
+      if scenario_df.empty or scenario_df['target_end_date'].empty:
+        print(f'Scenario {scenario.id} has either no data or target_end_date column')
+        return None, None
       scenario_min_date = scenario_df['target_end_date'].min()
       scenario_max_date = scenario_df['target_end_date'].max()
       if scenario_min_date < min_date:
@@ -215,7 +218,11 @@ class BoxplotChart(Chart):
       f'Pathogen: {self.controls.pathogen}'
       + f' | Location: {self.controls.location.name}'
       + f' | Age group: {self.controls.age_group.display_value}'
-      + f' | During: {self._start_date_str} - {self._end_date_str}'
+      + (
+        f' | During: {self._start_date_str} - {self._end_date_str}'
+        if self._start_date_str and self._end_date_str
+        else ''
+      )
     )
 
   def _reload_data(self):

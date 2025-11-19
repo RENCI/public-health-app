@@ -12,7 +12,7 @@ layout = dmc.AppShell(
     custom_insights_store,
     dcc.Store(id='selected-round-store', storage_type='local', data='19'),
     dcc.Clipboard(id='clipboard', style=dict(display='none')),
-    dcc.Location(id='url', refresh=False),
+    dcc.Location(id='url', refresh='callback-nav'),
     dmc.AppShellHeader(header),
     dmc.AppShellMain(dash.page_container, id='page-content'),
     notifications,

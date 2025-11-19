@@ -1,44 +1,37 @@
-id: vaccination-impact-copy-copy
+id: two
 title: Ut occaecat veniam sit irure adipisicing occaecat quis et est sed ut aliquip sunt.
-summary: Ut occaecat veniam sit irure adipisicing occaecat quis et est sed ut aliquip sunt.
+summary: All vaccination strategies are projected to significantly reduce disease burden. The greatest benefits will be seen if vaccines are offered to all ages.
 description: >
-  - Nostrud sunt nostrud cupidatat cillum sit consectetur culpa ut culpa ex sint dolore in quis esse pariatur sunt.
-  - Lorem ipsum pariatur excepteur aliquip ut do fugiat quis eiusmod eu amet consectetur anim culpa est pariatur ullamco cillum sunt duis.
-  - Qui aute dolore nisi nisi exercitation ut labore pariatur in nulla ad excepteur sunt qui dolor in nostrud.
-    Lorem ipsum irure non velit sed sed dolore proident exercitation veniam.
+  - **Both vaccination strategies are projected to significantly reduce disease burden compared to no vaccination.**
+  - **Compared to no vaccination, vaccination of high-risk groups reduces hospitalizations by 13% (8-17%) and deaths by 16% (11-23%)**, over the full time period. Vaccinating high-risk groups would result in 90,000 (53,000-126,000) fewer hospitalizations and 7,000 (4,000-9,000) fewer deaths nationally over the projection period, compared to no vaccination.
+  - **Vaccination for all age groups increases these reductions to 116,000 (69,000-163,000) hospitalizations and 9,000 (5,000-12,000) deaths averted.**
+    As compared to vaccinating only 65+ and high-risk individuals, vaccinating all ages would prevent an extra 26,000 hospitalizations and 1,000 deaths.
 image_url: assets/images/insight-preview/insight-5.png
 template: default
-created_at: 2025-05-18T22:45:12Z
-updated_at: 2025-05-18T22:45:12Z
+created_at: "2025-05-18T22:45:12Z"
+updated_at: "2025-05-18T22:45:12Z"
 controls:
-  plot_type: line
+  plot_type: boxplot
   location_name: US
-  target: Incident Hospitalization
+  target: incident_hospitalization
   model_names: ["Ensemble"]
   scenario_ids: [77, 78]
   scenario_variables:
     - name: Vaccination Strategy
       options: ["High risk", "All ages"]
       selected_option: High risk
-  uncertainty_interval: "95%"
   age_group: "0-130"
-  x_start_date: "2025-01-01"
-  x_axis: target_end_date
-  y_axis: value
+  x_axis: value
   round_num: 19
-  zoom:
-    x:
-      min: "2025-01-01"
-      max: "2026-06-30"
-    y:
-      min: 0
-      max: 65_000
-  annotations:
-    - type: vertical
-      value: "2025-10-01"
-      label: Some Policy change
-      color: "#993366"
-    - type: horizontal
-      value: 17_000
-      label: Value for seasonal-burden-and-trajectory insight
-      color: "#663399"
+  # zoom:
+  #   x:
+  #     min: "2025-01-01"
+  #     max: "2026-06-30"
+  #   y:
+  #     min: 0
+  #     max: 65_000
+  # annotations:
+  # - type: horizontal
+  #   value: 19_000
+  #   label: Value for vaccination-impact insight
+  #   color: "#886622"

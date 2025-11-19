@@ -314,33 +314,25 @@ def round_summary():
   )
 
 
-# @callback(
-#   Output('url', 'pathname'),
-#   Input('selected-round-store', 'data'),
-#   Input('url', 'pathname'),
-# )
-# def update_url_after_round_change(round_number, pathname):
-#   if not round_number:
-#     return no_update
-
-#   return f'/round/{round_number}'
-
-
 @callback(
   Output('round-heading', 'children'),
   Output('round-overview', 'children'),
   Output('insights-list', 'children'),
   Output('round-methods', 'children'),
+  Output('url', 'pathname'),
   Input('selected-round-store', 'data'),
   Input('url', 'pathname'),
 )
 def update_round_summary(round_number, pathname):
+  if pathname != '/':
+    return no_update, no_update, no_update, no_update, no_update
+
   if not round_number:
-    return 'No round selected', '...', []
+    return 'No round selected', '...', [], [], no_update
   rounds = load_rounds()
   this_round = rounds.get(round_number)
   if not this_round:
-    return dmc.Text(f'Round {round_number}'), dmc.Text('No data.'), [], []
+    return dmc.Text(f'Round {round_number}'), dmc.Text('No data.'), [], [], no_update
 
   round_name = this_round.get('name')
   round_date = this_round.get('date')
@@ -357,6 +349,7 @@ def update_round_summary(round_number, pathname):
     dcc.Markdown(report),
     [insight_button(i) for i in insights],
     dcc.Markdown(methods),
+    '/',  # go to home page when round is changed
   )
 
 
