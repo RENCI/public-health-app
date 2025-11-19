@@ -20,13 +20,41 @@ function slugify(str) {
 
   function setHighlight(labelEls) {
     labelEls.forEach(label => {
-      label.style.textShadow = `-0.05ex 0 0 var(--mantine-color-text), 0.05ex 0 0 var(--mantine-color-text)`;
+      const parent = label.parentNode;
+      const existing = parent.querySelector('rect.annotation-bg');
+
+      // avoid duplicates
+      if (!existing) {
+        const bbox = label.getBBox();
+
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.classList.add('annotation-bg');
+
+        const padding = 4; // around the text
+
+        rect.setAttribute('x', bbox.x - padding);
+        rect.setAttribute('y', bbox.y - padding);
+        rect.setAttribute('width', bbox.width + padding * 2);
+        rect.setAttribute('height', bbox.height + padding * 2);
+        rect.setAttribute('rx', 4);
+        rect.setAttribute('ry', 4);
+
+        // use annotation color OR default
+        const bgColor = label.style.fill || label.getAttribute('fill') || '#ddd';
+        rect.setAttribute('fill', bgColor);
+        rect.setAttribute('opacity', 0.25);
+
+        // insert behind text
+        parent.insertBefore(rect, label);
+      }
     });
   }
 
   function clearHighlight(labelEls) {
     labelEls.forEach(label => {
-            label.style.textShadow = '';
+      const parent = label.parentNode;
+      const rect = parent.querySelector('rect.annotation-bg');
+      if (rect) rect.remove();
     });
   }
 
