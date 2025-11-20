@@ -131,7 +131,6 @@ def save_custom_insight(
   round_number: str,
   current_chart_controls: dict[str, Any] | None = None,
 ):
-  print(dict(thumbnail_data=thumbnail_data))
   # validation
   if not (title and title.strip() and description and description.strip()):
     raise exceptions.PreventUpdate
