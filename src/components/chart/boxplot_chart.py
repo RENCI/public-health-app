@@ -182,7 +182,9 @@ class BoxplotChart(Chart):
       y_paper = (y_top + y_bottom) / 2
 
       # Wrap text if it's too long for the subplot height
-      wrapped_text = self._wrap_vertical_text(scenario.description, row_height, SCENARIO_AXIS_LABEL_FONT_SIZE)
+      wrapped_text = self._wrap_vertical_text(
+        scenario.description, row_height, SCENARIO_AXIS_LABEL_FONT_SIZE
+      )
 
       self._fig.add_annotation(
         text=wrapped_text,
@@ -204,7 +206,7 @@ class BoxplotChart(Chart):
     self._fig.update_xaxes(showspikes=False)
     self._fig.update_yaxes(showspikes=False)
 
-    # calculate largest x-axis range across all scenarios and use it for all subplots
+    # calculate global min/max across all subplots for synchronized axes
     should_use_zoom = (
       self.controls.zoom is not None
       and self.controls.zoom.x is not None
@@ -214,35 +216,63 @@ class BoxplotChart(Chart):
       and self.controls.zoom.y.get('min') is not None
       and self.controls.zoom.y.get('max') is not None
     )
-    if self.controls.x_axis and not should_use_zoom:
-      for scenario in self.controls.scenarios:
-        scenario_df = df.query('scenario_id == @scenario.id')
-        scenario_x_values = scenario_df[self.controls.x_axis]
-        if scenario_x_values.empty:
-          continue
-        x_min = scenario_x_values.min()
-        x_max = scenario_x_values.max()
-        if x_min is not None and x_max is not None and (x_min < x_max):
-          self._fig.update_xaxes(range=[x_min, x_max])
-          break
-    elif self.controls.y_axis and not should_use_zoom:
-      for scenario in self.controls.scenarios:
-        scenario_df = df.query('scenario_id == @scenario.id')
-        scenario_y_values = scenario_df[self.controls.y_axis]
-        if scenario_y_values.empty:
-          continue
-        y_min = scenario_y_values.min()
-        y_max = scenario_y_values.max()
-        if y_min is not None and y_max is not None and (y_min < y_max):
-          self._fig.update_yaxes(range=[y_min, y_max])
-          break
-    elif should_use_zoom:
-      self._fig.update_xaxes(
-        range=[self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
-      )
-      self._fig.update_yaxes(
-        range=[self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
-      )
+
+    if should_use_zoom:
+      x_range = [self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
+      y_range = [self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
+    else:
+      x_min = None
+      x_max = None
+      y_min = None
+      y_max = None
+
+      if self.controls.x_axis:
+        for scenario in self.controls.scenarios:
+          scenario_df = df.query('scenario_id == @scenario.id')
+          scenario_x_values = scenario_df[self.controls.x_axis]
+          if scenario_x_values.empty:
+            continue
+          scenario_x_min = scenario_x_values.min()
+          scenario_x_max = scenario_x_values.max()
+          if scenario_x_min is not None and scenario_x_max is not None:
+            if x_min is None or scenario_x_min < x_min:
+              x_min = scenario_x_min
+            if x_max is None or scenario_x_max > x_max:
+              x_max = scenario_x_max
+
+      if self.controls.y_axis:
+        for scenario in self.controls.scenarios:
+          scenario_df = df.query('scenario_id == @scenario.id')
+          scenario_y_values = scenario_df[self.controls.y_axis]
+          if scenario_y_values.empty:
+            continue
+          scenario_y_min = scenario_y_values.min()
+          scenario_y_max = scenario_y_values.max()
+          if scenario_y_min is not None and scenario_y_max is not None:
+            if y_min is None or scenario_y_min < y_min:
+              y_min = scenario_y_min
+            if y_max is None or scenario_y_max > y_max:
+              y_max = scenario_y_max
+
+      if x_min is not None and x_max is not None and y_min is not None and y_max is not None:
+        x_range = [x_min, x_max]
+        y_range = [y_min, y_max]
+      elif x_min is not None and x_max is not None:
+        x_range = [x_min, x_max]
+        y_range = None
+      elif y_min is not None and y_max is not None:
+        x_range = None
+        y_range = [y_min, y_max]
+      else:
+        x_range = None
+        y_range = None
+
+    if x_range is not None or y_range is not None:
+      for i in range(1, num_rows + 1):
+        if x_range is not None:
+          self._fig.update_xaxes(range=x_range, row=i, col=1)
+        if y_range is not None:
+          self._fig.update_yaxes(range=y_range, row=i, col=1)
 
     # Add x-axis label only to the last row (bottom plot)
     if num_rows > 1:

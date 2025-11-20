@@ -62,6 +62,14 @@ class LineChart(Chart):
     # filter for given age group
     df = df.query('age_group == @self.controls.age_group.input_value')
 
+    # load gold standard data once (same for all scenarios)
+    gold_std_df = Chart.collect_gold_std_data(self.controls.round_num)
+    gold_std_df['time_value'] = pd.to_datetime(gold_std_df['time_value'])
+    gold_std_df = gold_std_df.set_index('time_value')
+    gold_std_df = gold_std_df.query('age_group == @self.controls.age_group.input_value')
+    gold_std_df = gold_std_df.query('geo_value_fullname == @self.controls.location.name')
+    gold_std_df = gold_std_df.loc[self.controls.x_start_date or gold_std_df.index.min() :]
+
     # create subplots
     self._fig = make_subplots(
       rows=num_rows,
@@ -101,16 +109,6 @@ class LineChart(Chart):
           col=1,
         )
 
-      # load gold standard data (the actual data up to present day, not projections)
-      gold_std_df = Chart.collect_gold_std_data(self.controls.round_num)
-      gold_std_df['time_value'] = pd.to_datetime(gold_std_df['time_value'])
-      gold_std_df = gold_std_df.set_index('time_value')
-      gold_std_df = gold_std_df.query('age_group == @self.controls.age_group.input_value')
-      gold_std_df = gold_std_df.query('geo_value_fullname == @self.controls.location.name')
-
-      # filter gold standard data to start from x_start_date
-      gold_std_df = gold_std_df.loc[self.controls.x_start_date or gold_std_df.index.min() :]
-
       # add gold standard line
       self._fig.add_trace(
         go.Scatter(
@@ -134,25 +132,88 @@ class LineChart(Chart):
     self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
     self._fig.update_yaxes(showspikes=True, spikemode='across')
 
-    # update zoom ranges
-    if (
+    # calculate global min/max across all subplots for synchronized axes
+    has_zoom = (
       self.controls.zoom is not None
       and self.controls.zoom.x is not None
       and self.controls.zoom.x.get('min') is not None
       and self.controls.zoom.x.get('max') is not None
-    ):
-      self._fig.update_xaxes(
-        range=[self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
-      )
-    if (
-      self.controls.zoom is not None
       and self.controls.zoom.y is not None
       and self.controls.zoom.y.get('min') is not None
       and self.controls.zoom.y.get('max') is not None
-    ):
-      self._fig.update_yaxes(
-        range=[self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
-      )
+    )
+
+    if has_zoom:
+      x_range = [self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
+      y_range = [self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
+    else:
+      x_min = None
+      x_max = None
+      y_min = None
+      y_max = None
+
+      for scenario in self.controls.scenarios:
+        scenario_df = df.query('scenario_id == @scenario.id')
+        if not scenario_df.empty:
+          scenario_x_values = scenario_df.index
+          if x_min is None or scenario_x_values.min() < x_min:
+            x_min = scenario_x_values.min()
+          if x_max is None or scenario_x_values.max() > x_max:
+            x_max = scenario_x_values.max()
+
+          for model in self.controls.models:
+            model_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
+            if not model_data.empty:
+              model_y_values = model_data[self.controls.y_axis]
+              if y_min is None or model_y_values.min() < y_min:
+                y_min = model_y_values.min()
+              if y_max is None or model_y_values.max() > y_max:
+                y_max = model_y_values.max()
+
+            if self.controls.uncertainty_interval is not None:
+              for lower_q, upper_q in self.controls.uncertainty_interval.get_bounds():
+                lower_model_data = scenario_df.query(
+                  'type_id == @lower_q and model_name == @model.id'
+                )
+                upper_model_data = scenario_df.query(
+                  'type_id == @upper_q and model_name == @model.id'
+                )
+                if not lower_model_data.empty:
+                  lower_y_values = lower_model_data[self.controls.y_axis]
+                  if y_min is None or lower_y_values.min() < y_min:
+                    y_min = lower_y_values.min()
+                if not upper_model_data.empty:
+                  upper_y_values = upper_model_data[self.controls.y_axis]
+                  if y_max is None or upper_y_values.max() > y_max:
+                    y_max = upper_y_values.max()
+
+      if not gold_std_df.empty:
+        gold_std_x_values = gold_std_df.index
+        if x_min is None or gold_std_x_values.min() < x_min:
+          x_min = gold_std_x_values.min()
+        if x_max is None or gold_std_x_values.max() > x_max:
+          x_max = gold_std_x_values.max()
+
+        gold_std_y_values = gold_std_df['value']
+        if y_min is None or gold_std_y_values.min() < y_min:
+          y_min = gold_std_y_values.min()
+        if y_max is None or gold_std_y_values.max() > y_max:
+          y_max = gold_std_y_values.max()
+
+      if x_min is not None and x_max is not None and y_min is not None and y_max is not None:
+        x_range = [x_min, x_max]
+        y_range = [y_min, y_max]
+        y_range_span = y_max - y_min
+        y_range[1] = y_max + (y_range_span * 0.02)
+      else:
+        x_range = None
+        y_range = None
+
+    if x_range is not None and y_range is not None:
+      for i in range(1, num_rows + 1):
+        self._fig.update_xaxes(range=x_range, row=i, col=1)
+        self._fig.update_yaxes(range=y_range, row=i, col=1)
+
     self._fig.update_yaxes(title_text=self.controls.target.display_value)
 
     self._fig.update_layout(
