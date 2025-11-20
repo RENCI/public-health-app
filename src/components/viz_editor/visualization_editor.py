@@ -110,6 +110,7 @@ def visualization_editor(controls=None, show_controls=True):
   chart = chart_manager.get_chart(chart_controls)
   figure = chart.get_fig() if chart else go.Figure()
   graph = dcc.Graph(id='graph', figure=figure)
+  caption = dmc.Text(id='caption', children='...', style=dict(fontStyle='italic'), mt='md', size='sm', c='grey')
 
   if not chart:
     return html.Div(
@@ -129,6 +130,7 @@ def visualization_editor(controls=None, show_controls=True):
           initial_page_load_chart_controls_store,
           chart_extent_store,
           graph,
+          caption,
         ],
         id='visualization-column',
         span=dict(base=12, xl=8, lg=7),
@@ -184,6 +186,7 @@ def visualization_editor(controls=None, show_controls=True):
 
 @callback(
   Output('graph', 'figure'),
+  Output('caption', 'children'),
   Input('chart-controls-store', 'data'),
   # prevent_initial_call=True,
 )
@@ -202,7 +205,7 @@ def update_graph_figure(
     if not chart:
       raise Exception('Chart not found')
 
-    return chart.get_fig()
+    return chart.get_fig(), chart.build_caption()
   except Exception as e:
     import traceback
 

@@ -18,6 +18,8 @@ from src.components.chart.chart_properties import (
   Zoom,
 )
 from src.components.enums import AgeGroup, DataType, Target
+from src.util.formatting import to_natural_list
+
 
 BASE_DATA_DIR = Path(__file__).resolve().parent.parent.parent / 'data' / 'rounds'
 
@@ -40,6 +42,30 @@ class Chart(ABC):
     )
     self._fig: go.Figure = self._create_empty_figure()
     self.set_theme()
+
+  def build_caption(self) -> str:
+    """
+    Construct a human-readable caption for the chart based on the current controls.
+    """
+    target = self.controls.target.display_value + "s"
+    age_group = self.controls.age_group.display_value.replace('Ages ', '')
+    scenarios = to_natural_list([s.description for s in self.controls.scenarios])
+    models = to_natural_list([m.name for m in self.controls.models])
+    round_num = self.controls.round_num
+    location = self.controls.location.name
+
+    caption = f'Projected {target} for ages {age_group}'
+    if scenarios:
+      caption += f' under the {scenarios} Scenarios'
+    if models:
+      caption += f', using models {models}'
+    caption += f', for Round {round_num} in {location}.'
+
+    if self.controls.uncertainty_interval:
+      uncertainty = self.controls.uncertainty_interval.display_value
+      caption += f' Intervals represent {uncertainty} certainty.'
+
+    return caption
 
   def _create_empty_figure(self) -> go.Figure:
     return go.Figure()
