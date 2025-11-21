@@ -30,13 +30,13 @@ controls:
   y_axis: value
   columns: 1
   round_num: 19
-  zoom:
-    x:
-      min: "2025-01-01"
-      max: "2026-06-30"
-    y:
-      min: 0
-      max: 65_000
+  # zoom:
+  #   x:
+  #     min: "2025-01-01"
+  #     max: "2026-06-30"
+  #   y:
+  #     min: 0
+  #     max: 65_000
   annotations:
     - type: vertical
       label: Time of max w/ no booster

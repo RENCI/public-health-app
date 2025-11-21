@@ -315,18 +315,6 @@ def round_summary():
   )
 
 
-# @callback(
-#   Output('url', 'pathname'),
-#   Input('selected-round-store', 'data'),
-#   Input('url', 'pathname'),
-# )
-# def update_url_after_round_change(round_number, pathname):
-#   if not round_number:
-#     return no_update
-
-#   return f'/round/{round_number}'
-
-
 @callback(
   Output('round-heading', 'children'),
   Output('round-overview', 'children'),

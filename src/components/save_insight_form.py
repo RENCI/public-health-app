@@ -108,6 +108,7 @@ clientside_callback(
   Input('save-insight-button', 'n_clicks'),
 )
 
+
 @callback(
   Output('custom-insights-store', 'data', allow_duplicate=True),
   Output('insight-title-input', 'error'),
@@ -137,11 +138,7 @@ def save_custom_insight(
 
   now = datetime.datetime.now(datetime.timezone.utc).isoformat()
   new_id = f'custom-{uuid.uuid4()}'
-  image_url = (
-    thumbnail_data
-    or 'https://placehold.co/400?text=Visualization'
-  )
-  print(dict(image_url=image_url))
+  image_url = thumbnail_data or 'https://placehold.co/400?text=Visualization'
   new_item = dict(
     id=new_id,
     title=title.strip(),

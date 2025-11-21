@@ -6,6 +6,7 @@ from dash import Input, Output, State, callback, dcc, exceptions, html
 
 from src.components.chart import ChartControls
 from src.components.chart.chart_instance_manager import ChartInstanceManager
+from src.util.constants import DEFAULT_CONTROL_VALUES
 
 from .controls import (
   age_group_select,
@@ -22,34 +23,9 @@ from .controls import (
 chart_manager = ChartInstanceManager()
 
 
-default_control_values = dict(
-  theme='light',
-  plot_type='line',
-  round_num=19,
-  scenario_ids=[77, 78],
-  scenario_variables=[
-    {
-      'name': 'Vaccination Strategy',
-      'options': ['High risk', 'All ages'],
-      'selected_option': 'All ages',
-    }
-  ],
-  model_names=['Ensemble'],
-  location_name='US',
-  target='incident_hospitalization',
-  x_axis='target_end_date',
-  y_axis='value',
-  x_start_date='2025-01-01',
-  age_group='0-130',
-  uncertainty_interval='95%',
-  annotations=None,
-  zoom=None,
-)
-
-
 def visualization_editor(controls=None, show_controls=True):
   if not controls:
-    controls = default_control_values
+    controls = DEFAULT_CONTROL_VALUES
     print('No controls provided, using default values')
 
   init_theme: str = controls.get('theme', 'light')
@@ -90,7 +66,7 @@ def visualization_editor(controls=None, show_controls=True):
   chart_controls_store = dcc.Store(
     id='chart-controls-store',
     storage_type='local',
-    data=default_control_values,
+    data=DEFAULT_CONTROL_VALUES,
   )
 
   # This is kind of a hack used to update the chart-controls-store when the page is loaded
@@ -105,7 +81,7 @@ def visualization_editor(controls=None, show_controls=True):
     data=figure_control_values,
   )
 
-  controls_dict = {**default_control_values, **figure_control_values}
+  controls_dict = {**DEFAULT_CONTROL_VALUES, **figure_control_values}
   chart_controls = ChartControls.from_dict(controls_dict)
   chart = chart_manager.get_chart(chart_controls)
   figure = chart.get_fig() if chart else go.Figure()
@@ -194,7 +170,7 @@ def update_graph_figure(
     raise exceptions.PreventUpdate
 
   try:
-    chart_controls = ChartControls.from_dict({**default_control_values, **current_chart_controls})
+    chart_controls = ChartControls.from_dict({**DEFAULT_CONTROL_VALUES, **current_chart_controls})
 
     # Get or create chart instance using the manager
     chart = chart_manager.get_chart(chart_controls)
@@ -243,19 +219,51 @@ def update_chart_controls(
   if not (scenario_ids and model_names and location_name and target and age_group):
     raise exceptions.PreventUpdate
 
-  if relayout and 'xaxis.range' in relayout and 'yaxis.range' in relayout:
-    new_zoom = {
-      'x': {
-        'min': relayout.get('xaxis.range[0]'),
-        'max': relayout.get('xaxis.range[1]'),
-      },
-      'y': {
-        'min': relayout.get('yaxis.range[0]'),
-        'max': relayout.get('yaxis.range[1]'),
-      },
-    }
-  else:
-    new_zoom = None
+  new_zoom = None
+  if relayout:
+    x_range_min = None
+    x_range_max = None
+    y_range_min = None
+    y_range_max = None
+
+    for key in relayout.keys():
+      if key.startswith('xaxis') and '.range' in key:
+        if key.endswith('.range[0]'):
+          x_range_min = relayout.get(key)
+          range_key_1 = key.replace('.range[0]', '.range[1]')
+          x_range_max = relayout.get(range_key_1)
+        elif key.endswith('.range') and isinstance(relayout.get(key), list):
+          x_range = relayout.get(key)
+          if x_range and len(x_range) >= 2:
+            x_range_min = x_range[0]
+            x_range_max = x_range[1]
+      elif key.startswith('yaxis') and '.range' in key:
+        if key.endswith('.range[0]'):
+          y_range_min = relayout.get(key)
+          range_key_1 = key.replace('.range[0]', '.range[1]')
+          y_range_max = relayout.get(range_key_1)
+        elif key.endswith('.range') and isinstance(relayout.get(key), list):
+          y_range = relayout.get(key)
+          if y_range and len(y_range) >= 2:
+            y_range_min = y_range[0]
+            y_range_max = y_range[1]
+
+    if (
+      x_range_min is not None
+      and x_range_max is not None
+      and y_range_min is not None
+      and y_range_max is not None
+    ):
+      new_zoom = {
+        'x': {
+          'min': x_range_min,
+          'max': x_range_max,
+        },
+        'y': {
+          'min': y_range_min,
+          'max': y_range_max,
+        },
+      }
 
   new_chart_controls = dict(
     theme=theme,
@@ -271,23 +279,10 @@ def update_chart_controls(
   # initial_chart_controls must come after current_chart_controls;
   # see initial_page_load_chart_controls_store comment above for more details
   return {
-    **default_control_values,
+    **DEFAULT_CONTROL_VALUES,
     **current_chart_controls,
     **initial_chart_controls,
     **new_chart_controls,
-  }
-
-
-@callback(
-  Output('chart-controls-store', 'data', allow_duplicate=True),
-  Input('round-select', 'value'),
-  prevent_initial_call=True,
-)
-def update_chart_controls_for_round(round_number: str):
-  if not round_number:
-    raise exceptions.PreventUpdate
-  return default_control_values | {
-    'round_num': int(round_number),
   }
 
 
@@ -298,15 +293,48 @@ def update_chart_controls_for_round(round_number: str):
 def sync_zoom_store(relayout):
   if not relayout:
     raise exceptions.PreventUpdate
-  if 'xaxis.range[0]' in relayout and 'yaxis.range[0]' in relayout:
+
+  x_range_min = None
+  x_range_max = None
+  y_range_min = None
+  y_range_max = None
+
+  for key in relayout.keys():
+    if key.startswith('xaxis') and '.range' in key:
+      if key.endswith('.range[0]'):
+        x_range_min = relayout.get(key)
+        range_key_1 = key.replace('.range[0]', '.range[1]')
+        x_range_max = relayout.get(range_key_1)
+      elif key.endswith('.range') and isinstance(relayout.get(key), list):
+        x_range = relayout.get(key)
+        if x_range and len(x_range) >= 2:
+          x_range_min = x_range[0]
+          x_range_max = x_range[1]
+    elif key.startswith('yaxis') and '.range' in key:
+      if key.endswith('.range[0]'):
+        y_range_min = relayout.get(key)
+        range_key_1 = key.replace('.range[0]', '.range[1]')
+        y_range_max = relayout.get(range_key_1)
+      elif key.endswith('.range') and isinstance(relayout.get(key), list):
+        y_range = relayout.get(key)
+        if y_range and len(y_range) >= 2:
+          y_range_min = y_range[0]
+          y_range_max = y_range[1]
+
+  if (
+    x_range_min is not None
+    and x_range_max is not None
+    and y_range_min is not None
+    and y_range_max is not None
+  ):
     return {
       'x': {
-        'min': relayout.get('xaxis.range[0]'),
-        'max': relayout.get('xaxis.range[1]'),
+        'min': x_range_min,
+        'max': x_range_max,
       },
       'y': {
-        'min': relayout.get('yaxis.range[0]'),
-        'max': relayout.get('yaxis.range[1]'),
+        'min': y_range_min,
+        'max': y_range_max,
       },
     }
   else:
@@ -318,12 +346,11 @@ def sync_zoom_store(relayout):
   Output('zoom-x-max', 'value'),
   Output('zoom-y-min', 'value'),
   Output('zoom-y-max', 'value'),
-  Input('use-chart-zoom-button', 'n_clicks'),
-  State('chart-extent-store', 'data'),
+  Input('chart-extent-store', 'data'),
   prevent_initial_call=True,
 )
-def apply_current_zoom(n_clicks, current_zoom):
-  if not n_clicks or not current_zoom:
+def apply_current_zoom(current_zoom):
+  if not current_zoom:
     raise exceptions.PreventUpdate
 
   return (

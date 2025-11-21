@@ -30,8 +30,3 @@ controls:
   #   y:
   #     min: 0
   #     max: 65_000
-  # annotations:
-  # - type: horizontal
-  #   value: 19_000
-  #   label: Value for vaccination-impact insight
-  #   color: "#886622"

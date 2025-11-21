@@ -7,6 +7,8 @@ from src.components.chart.chart_controls import ChartControls
 from src.components.enums import UncertaintyInterval
 from src.util.constants import get_model_by_name, get_model_color_by_name
 
+SCENARIO_AXIS_LABEL_FONT_SIZE = 10
+
 
 class BoxplotChart(Chart):
   """Chart class for displaying boxplot visualizations"""
@@ -46,6 +48,60 @@ class BoxplotChart(Chart):
     if max_date == pd.Timestamp.min:
       raise ValueError('No end date found for scenarios')
     return min_date.strftime('%Y-%m-%d'), max_date.strftime('%Y-%m-%d')
+
+  def _wrap_vertical_text(self, text: str, row_height: float, font_size: int) -> str:
+    """
+    Wrap text for vertical display based on available subplot height.
+
+    Args:
+      text: The text to wrap
+      row_height: Height of the row in paper coordinates (0-1)
+      font_size: Font size in pixels
+
+    Returns:
+      Text with <br> tags for line breaks
+    """
+    if not text:
+      # TODO: add debug logging
+      return ''
+
+    # Estimate characters per line based on row height
+    # Figure height calculation matches refresh_fig method
+    num_rows = len(self.controls.scenarios)
+    figure_height_px = 400 + (200 * max(0, num_rows - 1))
+    row_height_px = row_height * figure_height_px
+
+    # Estimate characters that fit: account for font size and some padding
+    # For vertical text, each character is roughly font_size pixels tall
+    # Use 80% of available height to leave some padding
+    max_chars_per_line = int((row_height_px * 0.8) / font_size)
+
+    # Ensure minimum of 10 characters per line for readability
+    max_chars_per_line = max(10, max_chars_per_line)
+
+    # If text fits in one line, return as-is
+    if len(text) <= max_chars_per_line:
+      return text
+
+    # Split text into words and build lines
+    words = text.split()
+    lines: list[str] = []
+    current_line = ''
+
+    for word in words:
+      # If adding this word would exceed the limit, start a new line
+      test_line = f'{current_line} {word}'.strip() if current_line else word
+      if len(test_line) <= max_chars_per_line:
+        current_line = test_line
+      else:
+        if current_line:
+          lines.append(current_line)
+        current_line = word
+
+    if current_line:
+      lines.append(current_line)
+
+    return '<br>'.join(lines)
 
   def __hash__(self):
     """
@@ -93,7 +149,6 @@ class BoxplotChart(Chart):
     for i, scenario in enumerate(self.controls.scenarios, start=1):
       scenario_df = df.query('scenario_id == @scenario.id')
       # second_scenario_df = second_df.query('scenario_id == @scenario.id')
-      scenario_display_name = f'Scenario {scenario.name.split()[0][0].upper()}'
       trace = go.Box(
         marker_color=get_model_color_by_name('Ensemble'),
         name='',
@@ -125,8 +180,14 @@ class BoxplotChart(Chart):
       y_top = 1.0 - ((i - 1) * (row_height + vertical_spacing))
       y_bottom = y_top - row_height
       y_paper = (y_top + y_bottom) / 2
+
+      # Wrap text if it's too long for the subplot height
+      wrapped_text = self._wrap_vertical_text(
+        scenario.description, row_height, SCENARIO_AXIS_LABEL_FONT_SIZE
+      )
+
       self._fig.add_annotation(
-        text=scenario_display_name,
+        text=wrapped_text,
         xref='paper',
         yref='paper',
         x=x_paper,
@@ -135,7 +196,7 @@ class BoxplotChart(Chart):
         yanchor='middle',
         textangle=-90,
         showarrow=False,
-        font=dict(size=12),
+        font=dict(size=SCENARIO_AXIS_LABEL_FONT_SIZE),
       )
 
     # plot annotations
@@ -145,7 +206,7 @@ class BoxplotChart(Chart):
     self._fig.update_xaxes(showspikes=False)
     self._fig.update_yaxes(showspikes=False)
 
-    # calculate largest x-axis range across all scenarios and use it for all subplots
+    # calculate global min/max across all subplots for synchronized axes
     should_use_zoom = (
       self.controls.zoom is not None
       and self.controls.zoom.x is not None
@@ -155,35 +216,63 @@ class BoxplotChart(Chart):
       and self.controls.zoom.y.get('min') is not None
       and self.controls.zoom.y.get('max') is not None
     )
-    if self.controls.x_axis and not should_use_zoom:
-      for scenario in self.controls.scenarios:
-        scenario_df = df.query('scenario_id == @scenario.id')
-        scenario_x_values = scenario_df[self.controls.x_axis]
-        if scenario_x_values.empty:
-          continue
-        x_min = scenario_x_values.min()
-        x_max = scenario_x_values.max()
-        if x_min is not None and x_max is not None and (x_min < x_max):
-          self._fig.update_xaxes(range=[x_min, x_max])
-          break
-    elif self.controls.y_axis and not should_use_zoom:
-      for scenario in self.controls.scenarios:
-        scenario_df = df.query('scenario_id == @scenario.id')
-        scenario_y_values = scenario_df[self.controls.y_axis]
-        if scenario_y_values.empty:
-          continue
-        y_min = scenario_y_values.min()
-        y_max = scenario_y_values.max()
-        if y_min is not None and y_max is not None and (y_min < y_max):
-          self._fig.update_yaxes(range=[y_min, y_max])
-          break
-    elif should_use_zoom:
-      self._fig.update_xaxes(
-        range=[self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
-      )
-      self._fig.update_yaxes(
-        range=[self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
-      )
+
+    if should_use_zoom:
+      x_range = [self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
+      y_range = [self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
+    else:
+      x_min = None
+      x_max = None
+      y_min = None
+      y_max = None
+
+      if self.controls.x_axis:
+        for scenario in self.controls.scenarios:
+          scenario_df = df.query('scenario_id == @scenario.id')
+          scenario_x_values = scenario_df[self.controls.x_axis]
+          if scenario_x_values.empty:
+            continue
+          scenario_x_min = scenario_x_values.min()
+          scenario_x_max = scenario_x_values.max()
+          if scenario_x_min is not None and scenario_x_max is not None:
+            if x_min is None or scenario_x_min < x_min:
+              x_min = scenario_x_min
+            if x_max is None or scenario_x_max > x_max:
+              x_max = scenario_x_max
+
+      if self.controls.y_axis:
+        for scenario in self.controls.scenarios:
+          scenario_df = df.query('scenario_id == @scenario.id')
+          scenario_y_values = scenario_df[self.controls.y_axis]
+          if scenario_y_values.empty:
+            continue
+          scenario_y_min = scenario_y_values.min()
+          scenario_y_max = scenario_y_values.max()
+          if scenario_y_min is not None and scenario_y_max is not None:
+            if y_min is None or scenario_y_min < y_min:
+              y_min = scenario_y_min
+            if y_max is None or scenario_y_max > y_max:
+              y_max = scenario_y_max
+
+      if x_min is not None and x_max is not None and y_min is not None and y_max is not None:
+        x_range = [x_min, x_max]
+        y_range = [y_min, y_max]
+      elif x_min is not None and x_max is not None:
+        x_range = [x_min, x_max]
+        y_range = None
+      elif y_min is not None and y_max is not None:
+        x_range = None
+        y_range = [y_min, y_max]
+      else:
+        x_range = None
+        y_range = None
+
+    if x_range is not None or y_range is not None:
+      for i in range(1, num_rows + 1):
+        if x_range is not None:
+          self._fig.update_xaxes(range=x_range, row=i, col=1)
+        if y_range is not None:
+          self._fig.update_yaxes(range=y_range, row=i, col=1)
 
     # Add x-axis label only to the last row (bottom plot)
     if num_rows > 1:
