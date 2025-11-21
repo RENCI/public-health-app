@@ -114,10 +114,10 @@ class LineChart(Chart):
         go.Scatter(
           x=gold_std_df.index,
           y=gold_std_df['value'],
-          mode='lines',
+          mode='lines+markers',
           name='Gold standard',
-          line=dict(color='black', dash='dot'),
-          marker=dict(symbol='diamond'),
+          line=dict(color='#999', dash='solid', width=1),
+          marker=dict(color='var(--mantine-color-text)', symbol='diamond'),
           legendgroup='Gold standard',
           showlegend=(i == 1),
         ),
