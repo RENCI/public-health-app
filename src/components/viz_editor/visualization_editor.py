@@ -110,7 +110,7 @@ def visualization_editor(controls=None, show_controls=True):
   chart = chart_manager.get_chart(chart_controls)
   figure = chart.get_fig() if chart else go.Figure()
   graph = dcc.Graph(id='graph', figure=figure)
-  caption = dmc.Text(id='caption', children='...', style=dict(fontStyle='italic'), mt='md', size='sm', c='grey')
+  caption = dmc.Text(id='caption', children=chart.build_caption(), style=dict(fontStyle='italic'), mt='md', size='sm', c='grey')
 
   if not chart:
     return html.Div(
@@ -120,7 +120,7 @@ def visualization_editor(controls=None, show_controls=True):
     )
 
   if not show_controls:
-    return graph
+    return [graph, caption]
 
   return dmc.Grid(
     [
