@@ -15,18 +15,7 @@ class BoxplotChart(Chart):
 
   def __init__(self, controls: ChartControls):
     super().__init__(controls)
-    self._raw_df = Chart.collect_data(
-      self.controls.data_type,
-      self.controls.round_num,
-      self.controls.location.name,
-      'incident_hospitalization',
-    )
-    # self._second_raw_df = Chart.collect_data(
-    #   self.controls.data_type,
-    #   self.controls.round_num,
-    #   self.controls.location.name,
-    #   'incident_death',
-    # )
+    self._reload_data()
     self._start_date_str, self._end_date_str = self._calculate_data_time_range()
     self._fig = go.Figure()
 
@@ -43,10 +32,10 @@ class BoxplotChart(Chart):
         min_date = scenario_min_date
       if scenario_max_date > max_date:
         max_date = scenario_max_date
-    if min_date == pd.Timestamp.max:
-      raise ValueError('No start date found for scenarios')
-    if max_date == pd.Timestamp.min:
-      raise ValueError('No end date found for scenarios')
+      if min_date == pd.Timestamp.max:
+        raise ValueError(f'No start date found for scenario {scenario.name}')
+      if max_date == pd.Timestamp.min:
+        raise ValueError(f'No end date found for scenario {scenario.name}')
     return min_date.strftime('%Y-%m-%d'), max_date.strftime('%Y-%m-%d')
 
   def _wrap_vertical_text(self, text: str, row_height: float, font_size: int) -> str:
@@ -103,15 +92,11 @@ class BoxplotChart(Chart):
 
     return '<br>'.join(lines)
 
-  def __hash__(self):
-    """
-    Generate a unique hash for chart instances based on their parameters.
-    This creates a deterministic string representation that can be used as a key.
-    """
-    return hash(self.get_key(self.controls))
-
   def __eq__(self, other):
     return isinstance(other, BoxplotChart) and self.controls == other.controls
+
+  def __hash__(self):
+    return hash(self.get_key())
 
   def refresh_fig(self) -> go.Figure:
     # handle empty properties
@@ -135,20 +120,16 @@ class BoxplotChart(Chart):
 
     # start with the raw dataframe
     df = self._raw_df
-    # second_df = self._second_raw_df
 
     # filter for given age group
     df = df.query('age_group == @self.controls.age_group.input_value')
-    # second_df = second_df.query('age_group == @self.controls.age_group.input_value')
 
     # filter for ensemble model, specifically
     ensemble_model_id = get_model_by_name('Ensemble')['id']
     df = df.query('model_name == @ensemble_model_id')
-    # second_df = second_df.query('model_name == @ensemble_model_id')
 
     for i, scenario in enumerate(self.controls.scenarios, start=1):
       scenario_df = df.query('scenario_id == @scenario.id')
-      # second_scenario_df = second_df.query('scenario_id == @scenario.id')
       trace = go.Box(
         marker_color=get_model_color_by_name('Ensemble'),
         name='',

@@ -31,13 +31,7 @@ class Chart(ABC):
     constructors.
     """
     self.controls = controls
-
-    self._raw_df = Chart.collect_data(
-      self.controls.data_type,
-      self.controls.round_num,
-      self.controls.location.name,
-      self.controls.target.input_value,
-    )
+    self.load_data()
     self._fig: go.Figure = self._create_empty_figure()
     self.set_theme()
 
@@ -62,9 +56,20 @@ class Chart(ABC):
   def refresh_fig(self) -> go.Figure:
     pass
 
-  @abstractmethod
-  def _reload_data(self):
-    pass
+  def load_data(self):
+    self._raw_df = Chart.collect_data(
+      self.controls.data_type,
+      self.controls.round_num,
+      self.controls.location.name,
+      self.controls.target.input_value,
+    )
+    self._gold_std_df = Chart.collect_gold_std_data(self.controls.round_num)
+    self._gold_std_df = self._gold_std_df.query('age_group == @self.controls.age_group.input_value')
+    self._gold_std_df = self._gold_std_df.query(
+      'geo_value_fullname == @self.controls.location.name'
+    )
+    self._gold_std_df = self._gold_std_df.set_index('time_value')
+    self._gold_std_df = self._gold_std_df[self._gold_std_df.index >= pd.to_datetime('2024-09-01')]
 
   @abstractmethod
   def get_title(self) -> str:
@@ -74,33 +79,60 @@ class Chart(ABC):
   def get_subtitle(self) -> str:
     pass
 
-  @staticmethod
-  def get_key(controls: ChartControls) -> str:
+  def get_key(self) -> str:
     """
     Generate a unique string key from chart controls.
     This creates a deterministic string representation that can be used as a dictionary key.
     """
     # Create a deterministic string representation of the chart parameters
     key_components = [
-      str(controls.plot_type),
-      str(controls.round_num),
-      str(sorted([s.name for s in controls.scenarios])),
-      str(sorted([m.name for m in controls.models])),
-      str(controls.location.name),
-      str(controls.target.input_value),
-      str(controls.age_group.input_value),
-      str(controls.uncertainty_interval.display_value if controls.uncertainty_interval else ''),
-      str(controls.zoom.x.get('min') if controls.zoom and controls.zoom.x.get('min') else ''),
-      str(controls.zoom.x.get('max') if controls.zoom and controls.zoom.x.get('max') else ''),
-      str(controls.zoom.y.get('min') if controls.zoom and controls.zoom.y.get('min') else ''),
-      str(controls.zoom.y.get('max') if controls.zoom and controls.zoom.y.get('max') else ''),
-      str(sorted([a.get_key() for a in controls.annotations]) if controls.annotations else []),
+      str(self.controls.plot_type),
+      str(self.controls.round_num),
+      str(sorted([s.name for s in self.controls.scenarios])),
+      str(sorted([m.name for m in self.controls.models])),
+      str(self.controls.location.name),
+      str(self.controls.target.input_value),
+      str(self.controls.age_group.input_value),
+      str(
+        self.controls.uncertainty_interval.display_value
+        if self.controls.uncertainty_interval
+        else ''
+      ),
+      str(
+        self.controls.zoom.x.get('min')
+        if self.controls.zoom and self.controls.zoom.x.get('min')
+        else ''
+      ),
+      str(
+        self.controls.zoom.x.get('max')
+        if self.controls.zoom and self.controls.zoom.x.get('max')
+        else ''
+      ),
+      str(
+        self.controls.zoom.y.get('min')
+        if self.controls.zoom and self.controls.zoom.y.get('min')
+        else ''
+      ),
+      str(
+        self.controls.zoom.y.get('max')
+        if self.controls.zoom and self.controls.zoom.y.get('max')
+        else ''
+      ),
+      str(
+        sorted([a.get_key() for a in self.controls.annotations])
+        if self.controls.annotations
+        else []
+      ),
     ]
     # Use a deterministic string key
     return '|'.join(key_components)
 
   @abstractmethod
   def __hash__(self) -> int:
+    """
+    Generate a unique hash for chart instances based on their parameters.
+    This creates a deterministic string representation that can be used as a key.
+    """
     pass
 
   @abstractmethod
@@ -121,17 +153,17 @@ class Chart(ABC):
     # Only update if the controls have changed
     if controls != self.controls:
       self.controls = controls
-      self._reload_data()
+      self.load_data()
       self.refresh_fig()
 
   def update_round_num(self, round_num: int):
     self.controls.round_num = round_num
-    self._reload_data()
+    self.load_data()
     self.refresh_fig()
 
   def update_pathogen(self, pathogen: str):
     self.controls.pathogen = pathogen
-    self._reload_data()
+    self.load_data()
     self.refresh_fig()
 
   def update_scenarios(self, scenario_names: list[str]):
@@ -144,17 +176,17 @@ class Chart(ABC):
 
   def update_location(self, location_name: str):
     self.controls.location = Location(location_name)
-    self._reload_data()
+    self.load_data()
     self.refresh_fig()
 
   def update_target(self, target: str):
     self.controls.target = Target.from_input_value(target)
-    self._reload_data()
+    self.load_data()
     self.refresh_fig()
 
   def update_age_group(self, age_group: str):
     self.controls.age_group = AgeGroup.from_input_value(age_group)
-    self._reload_data()
+    self.load_data()
     self.refresh_fig()
 
   def update_annotations(self, annotations: list[dict[str, Any]] | None):

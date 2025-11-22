@@ -14,20 +14,15 @@ class LineChart(Chart):
 
   def __init__(self, controls: ChartControls):
     super().__init__(controls)
-    self._raw_df[self.controls.x_axis] = pd.to_datetime(self._raw_df[self.controls.x_axis])
     self._raw_df = self._raw_df.set_index(self.controls.x_axis)
 
     self.refresh_fig()
 
-  def __hash__(self):
-    """
-    Generate a unique hash for chart instances based on their parameters.
-    This creates a deterministic string representation that can be used as a key.
-    """
-    return hash(self.get_key(self.controls))
-
   def __eq__(self, other):
     return isinstance(other, LineChart) and self.controls == other.controls
+
+  def __hash__(self):
+    return hash(self.get_key())
 
   def refresh_fig(self) -> go.Figure:
     # handle empty properties
@@ -61,14 +56,6 @@ class LineChart(Chart):
 
     # filter for given age group
     df = df.query('age_group == @self.controls.age_group.input_value')
-
-    # load gold standard data once (same for all scenarios)
-    gold_std_df = Chart.collect_gold_std_data(self.controls.round_num)
-    gold_std_df['time_value'] = pd.to_datetime(gold_std_df['time_value'])
-    gold_std_df = gold_std_df.set_index('time_value')
-    gold_std_df = gold_std_df.query('age_group == @self.controls.age_group.input_value')
-    gold_std_df = gold_std_df.query('geo_value_fullname == @self.controls.location.name')
-    gold_std_df = gold_std_df.loc[self.controls.x_start_date or gold_std_df.index.min() :]
 
     # create subplots
     self._fig = make_subplots(
@@ -112,8 +99,8 @@ class LineChart(Chart):
       # add gold standard line
       self._fig.add_trace(
         go.Scatter(
-          x=gold_std_df.index,
-          y=gold_std_df['value'],
+          x=self._gold_std_df.index,
+          y=self._gold_std_df['value'],
           mode='lines+markers',
           name='Gold standard',
           line=dict(color='#999', dash='solid', width=1),
@@ -133,6 +120,35 @@ class LineChart(Chart):
     self._fig.update_yaxes(showspikes=True, spikemode='across')
 
     # calculate global min/max across all subplots for synchronized axes
+    x_range, y_range = self._calculate_x_y_axis_ranges(df, self._gold_std_df)
+
+    if x_range is not None and y_range is not None:
+      for i in range(1, num_rows + 1):
+        self._fig.update_xaxes(range=x_range, row=i, col=1)
+        self._fig.update_yaxes(range=y_range, row=i, col=1)
+
+    self._fig.update_yaxes(title_text=self.controls.target.display_value)
+
+    self._fig.update_layout(
+      hovermode='x unified',
+      height=chart_total_height + 180,
+      title=self.get_title(),
+      title_subtitle_text=self.get_subtitle(),
+      uirevision=self.__hash__(),
+    )
+
+    self.set_theme()
+
+    return self._fig
+
+  def _calculate_x_y_axis_ranges(
+    self, df: pd.DataFrame, gold_std_df: pd.DataFrame
+  ) -> tuple[list[float] | None, list[float] | None]:
+    """
+    Calculate the x and y axis ranges for the chart.
+    Logic:
+      - Zoom should follow the data
+    """
     has_zoom = (
       self.controls.zoom is not None
       and self.controls.zoom.x is not None
@@ -208,25 +224,7 @@ class LineChart(Chart):
       else:
         x_range = None
         y_range = None
-
-    if x_range is not None and y_range is not None:
-      for i in range(1, num_rows + 1):
-        self._fig.update_xaxes(range=x_range, row=i, col=1)
-        self._fig.update_yaxes(range=y_range, row=i, col=1)
-
-    self._fig.update_yaxes(title_text=self.controls.target.display_value)
-
-    self._fig.update_layout(
-      hovermode='x unified',
-      height=chart_total_height + 180,
-      title=self.get_title(),
-      title_subtitle_text=self.get_subtitle(),
-      uirevision=self.__hash__(),
-    )
-
-    self.set_theme()
-
-    return self._fig
+    return x_range, y_range
 
   def get_fig(self) -> go.Figure:
     return self._fig
