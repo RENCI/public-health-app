@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from src.components.chart.chart_properties import (
   Annotation,
   Location,
@@ -26,7 +24,6 @@ class ChartControls:
     age_group: str,
     x_axis: str | None = None,
     y_axis: str | None = None,
-    x_start_date: str | None = None,
     columns: int = 1,
     zoom: dict | None = None,
     annotations: list[dict] | None = None,
@@ -45,7 +42,6 @@ class ChartControls:
     self.age_group = AgeGroup.from_input_value(age_group)
     self.x_axis = x_axis
     self.y_axis = y_axis
-    self.x_start_date = datetime.strptime(x_start_date, '%Y-%m-%d') if x_start_date else None
     self.columns = columns
     self.annotations = (
       [Annotation.from_dict(annotation) for annotation in annotations] if annotations else None
@@ -73,7 +69,6 @@ class ChartControls:
       age_group=data['age_group'],
       x_axis=data['x_axis'],
       y_axis=data['y_axis'],
-      x_start_date=data['x_start_date'],
       columns=data.get('columns', 1),
       zoom=data.get('zoom', None),
       annotations=data.get('annotations', None),

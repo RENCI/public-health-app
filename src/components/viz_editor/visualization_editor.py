@@ -37,7 +37,6 @@ def visualization_editor(controls=None, show_controls=True):
   init_location_name: str = controls['location_name']
   init_target: str = controls['target']
   init_age_group: str = controls['age_group']
-  init_x_start_date: str | None = controls.get('x_start_date', None)
   init_x_axis: str = controls.get('x_axis', None)
   init_y_axis: str = controls.get('y_axis', None)
   init_uncertainty_interval: str | None = controls.get('uncertainty_interval', None)
@@ -56,7 +55,6 @@ def visualization_editor(controls=None, show_controls=True):
     age_group=init_age_group,
     x_axis=init_x_axis,
     y_axis=init_y_axis,
-    x_start_date=init_x_start_date,
     zoom=init_zoom,
     annotations=init_annotations,
     uncertainty_interval=init_uncertainty_interval,

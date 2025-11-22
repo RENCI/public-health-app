@@ -27,7 +27,6 @@ controls:
       selected_option: High risk
   uncertainty_interval: "95%"
   age_group: "0-130"
-  x_start_date: "2025-01-01"
   x_axis: target_end_date
   y_axis: value
   round_num: 19

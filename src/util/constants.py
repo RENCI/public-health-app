@@ -30,7 +30,6 @@ DEFAULT_CONTROL_VALUES = dict(
   target='incident_hospitalization',
   x_axis='target_end_date',
   y_axis='value',
-  x_start_date='2025-01-01',
   age_group='0-130',
   uncertainty_interval='95%',
   annotations=None,
