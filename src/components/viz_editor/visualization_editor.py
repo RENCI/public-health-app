@@ -4,9 +4,7 @@ import dash_mantine_components as dmc
 import plotly.graph_objects as go
 from dash import Input, Output, State, callback, dcc, exceptions, html
 
-from src.components.chart import ChartControls
-from src.components.chart.chart_instance_manager import ChartInstanceManager
-from src.util.constants import DEFAULT_CONTROL_VALUES
+from src.components.chart import DEFAULT_CONTROL_VALUES, ChartControls, ChartInstanceManager, Zoom
 
 from .controls import (
   age_group_select,
@@ -27,6 +25,8 @@ def visualization_editor(controls=None, show_controls=True):
   if not controls:
     controls = DEFAULT_CONTROL_VALUES
     print('No controls provided, using default values')
+
+  # Initial values for controls
 
   init_theme: str = controls.get('theme', 'light')
   init_plot_type: str = controls['plot_type']
@@ -60,12 +60,19 @@ def visualization_editor(controls=None, show_controls=True):
     uncertainty_interval=init_uncertainty_interval,
   )
 
-  chart_extent_store = dcc.Store(id='chart-extent-store', storage_type='local')
+  # Stores
+
+  # current_zoom_store persists in local storage so zoom persists on refresh
+  # saved_zoom_store is in memory and gets initialized from controls (insight saved_zoom)
+  current_zoom_store = dcc.Store(id='current-zoom-store', data=init_zoom, storage_type='memory')
+  saved_zoom_store = dcc.Store(id='saved-zoom-store', data=init_zoom, storage_type='local')
+
   chart_controls_store = dcc.Store(
     id='chart-controls-store',
     storage_type='local',
     data=DEFAULT_CONTROL_VALUES,
   )
+  chart_loading_store = dcc.Store(id='chart-loading-store', data=False)
 
   # This is kind of a hack used to update the chart-controls-store when the page is loaded
   # for the first time. This is necessary because the callback that updates the
@@ -88,21 +95,118 @@ def visualization_editor(controls=None, show_controls=True):
   if not chart:
     return html.Div(
       id='insight-visualization-figure',
-      children=graph,
+      children=[
+        chart_loading_store,
+        html.Div(
+          [
+            html.Div(
+              graph,
+              id='chart-wrapper',
+              style={'opacity': '1', 'transition': 'opacity 0.2s'},
+            ),
+            html.Div(
+              dmc.Center(
+                dmc.Loader(size='lg', variant='bars'),
+                style={'minHeight': '400px', 'width': '100%'},
+              ),
+              id='chart-loading-spinner',
+              style={
+                'display': 'none',
+                'position': 'absolute',
+                'top': '0',
+                'left': '0',
+                'right': '0',
+                'bottom': '0',
+                'zIndex': '1000',
+                'backgroundColor': 'rgba(255, 255, 255, 0.8)',
+              },
+            ),
+          ],
+          id='chart-container',
+          style={'position': 'relative'},
+        ),
+      ],
       style={'min-height': '45vh'},
     )
 
+  # Insight page (no controls)
   if not show_controls:
-    return graph
+    return html.Div(
+      [
+        current_zoom_store,
+        saved_zoom_store,
+        chart_controls_store,
+        initial_page_load_chart_controls_store,
+        chart_loading_store,
+        html.Div(
+          [
+            html.Div(
+              graph,
+              id='chart-wrapper',
+              style={'opacity': '1', 'transition': 'opacity 0.2s'},
+            ),
+            html.Div(
+              dmc.Center(
+                dmc.Loader(size='lg', variant='bars'),
+                style={'minHeight': '400px', 'width': '100%'},
+              ),
+              id='chart-loading-spinner',
+              style={
+                'display': 'none',
+                'position': 'absolute',
+                'top': '0',
+                'left': '0',
+                'right': '0',
+                'bottom': '0',
+                'zIndex': '1000',
+                'backgroundColor': 'rgba(255, 255, 255, 0.8)',
+              },
+            ),
+          ],
+          id='chart-container',
+          style={'position': 'relative'},
+        ),
+      ],
+    )
 
+  # Explorer page (with controls)
   return dmc.Grid(
     [
       dmc.GridCol(
         [
+          current_zoom_store,
+          saved_zoom_store,
           chart_controls_store,
           initial_page_load_chart_controls_store,
-          chart_extent_store,
-          graph,
+          chart_loading_store,
+          html.Div(
+            [
+              html.Div(
+                graph,
+                id='chart-wrapper',
+                style={'opacity': '1', 'transition': 'opacity 0.2s'},
+              ),
+              html.Div(
+                dmc.Center(
+                  dmc.Loader(size='lg', variant='bars'),
+                  style={'minHeight': '400px', 'width': '100%'},
+                ),
+                id='chart-loading-spinner',
+                style={
+                  'display': 'none',
+                  'position': 'absolute',
+                  'top': '0',
+                  'left': '0',
+                  'right': '0',
+                  'bottom': '0',
+                  'zIndex': '1000',
+                  'backgroundColor': 'rgba(255, 255, 255, 0.8)',
+                },
+              ),
+            ],
+            id='chart-container',
+            style={'position': 'relative'},
+          ),
         ],
         id='visualization-column',
         span=dict(base=12, xl=8, lg=7),
@@ -157,9 +261,22 @@ def visualization_editor(controls=None, show_controls=True):
 
 
 @callback(
-  Output('graph', 'figure'),
+  Output('chart-loading-store', 'data'),
   Input('chart-controls-store', 'data'),
-  # prevent_initial_call=True,
+  prevent_initial_call=True,
+)
+def set_chart_loading(current_chart_controls: dict[str, Any] | None):
+  """Set loading state to True when chart controls change."""
+  if not current_chart_controls:
+    raise exceptions.PreventUpdate
+  return True
+
+
+@callback(
+  Output('graph', 'figure'),
+  Output('chart-loading-store', 'data', allow_duplicate=True),
+  Input('chart-controls-store', 'data'),
+  prevent_initial_call=True,
 )
 def update_graph_figure(
   current_chart_controls: dict[str, Any],
@@ -168,7 +285,7 @@ def update_graph_figure(
     raise exceptions.PreventUpdate
 
   try:
-    chart_controls = ChartControls.from_dict({**DEFAULT_CONTROL_VALUES, **current_chart_controls})
+    chart_controls = ChartControls.from_dict(current_chart_controls)
 
     # Get or create chart instance using the manager
     chart = chart_manager.get_chart(chart_controls)
@@ -176,119 +293,136 @@ def update_graph_figure(
     if not chart:
       raise Exception('Chart not found')
 
-    return chart.get_fig()
+    figure = chart.get_fig()
+    # Set loading to False when figure is ready
+    return figure, False
   except Exception as e:
     import traceback
 
     print(traceback.print_exception(e))
-    return go.Figure(layout=go.Layout(title='Error loading chart'))
+    error_figure = go.Figure(layout=go.Layout(title='Error loading chart'))
+    return error_figure, False
 
 
 @callback(
   Output('chart-controls-store', 'data', allow_duplicate=True),
-  Input('theme-store', 'data'),
-  Input('scenarios-select', 'value'),
-  Input('models-select', 'value'),
-  Input('location-select', 'value'),
-  Input('target-select', 'value'),
-  Input('age-group-select', 'value'),
-  Input('uncertainty-interval-select', 'value'),
-  Input('zoom-store', 'data'),
-  Input('annotations-store', 'data'),
-  Input('graph', 'relayoutData'),
-  Input('initial-page-load-chart-controls-store', 'data'),
-  State('chart-controls-store', 'data'),
+  Input('chart-controls-store', 'data'),
+  Input('saved-zoom-store', 'data'),
+  Input('current-zoom-store', 'data'),
   prevent_initial_call=True,
 )
-def update_chart_controls(
-  theme: str,
-  scenario_ids: list[str],
-  model_names: list[str],
-  location_name: str,
-  target: str,
-  age_group: str,
-  uncertainty_interval: str | None,
-  zoom: dict[str, dict[str, Any]] | None,
-  annotations: list[dict[str, Any]] | None,
-  relayout: dict[str, Any] | None,
-  initial_chart_controls: dict[str, Any] | None,
+def update_chart_controls_with_zoom(
   current_chart_controls: dict[str, Any] | None,
+  saved_zoom: dict[str, dict[str, Any]] | None,
+  current_zoom: dict[str, dict[str, Any]] | None,
 ):
-  if not (scenario_ids and model_names and location_name and target and age_group):
+  if not current_chart_controls:
     raise exceptions.PreventUpdate
+  return {**current_chart_controls, 'saved_zoom': saved_zoom, 'current_zoom': current_zoom}
 
-  new_zoom = None
-  if relayout:
-    x_range_min = None
-    x_range_max = None
-    y_range_min = None
-    y_range_max = None
 
-    for key in relayout.keys():
-      if key.startswith('xaxis') and '.range' in key:
-        if key.endswith('.range[0]'):
-          x_range_min = relayout.get(key)
-          range_key_1 = key.replace('.range[0]', '.range[1]')
-          x_range_max = relayout.get(range_key_1)
-        elif key.endswith('.range') and isinstance(relayout.get(key), list):
-          x_range = relayout.get(key)
-          if x_range and len(x_range) >= 2:
-            x_range_min = x_range[0]
-            x_range_max = x_range[1]
-      elif key.startswith('yaxis') and '.range' in key:
-        if key.endswith('.range[0]'):
-          y_range_min = relayout.get(key)
-          range_key_1 = key.replace('.range[0]', '.range[1]')
-          y_range_max = relayout.get(range_key_1)
-        elif key.endswith('.range') and isinstance(relayout.get(key), list):
-          y_range = relayout.get(key)
-          if y_range and len(y_range) >= 2:
-            y_range_min = y_range[0]
-            y_range_max = y_range[1]
+# Initialize current_zoom from saved_zoom on first load if current_zoom doesn't exist
+@callback(
+  Output('current-zoom-store', 'data', allow_duplicate=True),
+  Input('saved-zoom-store', 'data'),
+  State('current-zoom-store', 'data'),
+  prevent_initial_call=True,
+)
+def initialize_current_zoom_from_saved(
+  saved_zoom: dict[str, dict[str, Any]] | None,
+  current_zoom: dict[str, dict[str, Any]] | None,
+):
+  # If current_zoom doesn't exist but saved_zoom does, initialize current_zoom from saved_zoom
+  if not current_zoom and saved_zoom:
+    return saved_zoom
+  raise exceptions.PreventUpdate
 
-    if (
-      x_range_min is not None
-      and x_range_max is not None
-      and y_range_min is not None
-      and y_range_max is not None
-    ):
-      new_zoom = {
-        'x': {
-          'min': x_range_min,
-          'max': x_range_max,
-        },
-        'y': {
-          'min': y_range_min,
-          'max': y_range_max,
-        },
-      }
 
-  new_chart_controls = dict(
-    theme=theme,
-    scenario_ids=[int(scenario_id) for scenario_id in scenario_ids],
-    model_names=model_names,
-    location_name=location_name,
-    target=target,
-    age_group=age_group,
-    uncertainty_interval=uncertainty_interval,
-    zoom=new_zoom,
-    annotations=annotations,
-  )
-  # initial_chart_controls must come after current_chart_controls;
-  # see initial_page_load_chart_controls_store comment above for more details
-  return {
-    **DEFAULT_CONTROL_VALUES,
-    **current_chart_controls,
-    **initial_chart_controls,
-    **new_chart_controls,
-  }
+# Initialize zoom controls from current_zoom_store on page load
+@callback(
+  Output('zoom-x-min', 'value'),
+  Output('zoom-x-max', 'value'),
+  Output('zoom-y-min', 'value'),
+  Output('zoom-y-max', 'value'),
+  Input('current-zoom-store', 'data'),
+  State('saved-zoom-store', 'data'),
+)
+def initialize_zoom_controls(
+  current_zoom: dict[str, dict[str, Any]] | None,
+  saved_zoom: dict[str, dict[str, Any]] | None,
+):
+  # On first load: if current_zoom exists (from local storage), use it
+  # Otherwise, if saved_zoom exists (from insight), use it
+  # Otherwise, use defaults (will be calculated by chart)
+
+  if current_zoom:
+    x_data = current_zoom.get('x', {})
+    y_data = current_zoom.get('y', {})
+    return (
+      x_data.get('min'),
+      x_data.get('max'),
+      y_data.get('min'),
+      y_data.get('max'),
+    )
+
+  if saved_zoom:
+    x_data = saved_zoom.get('x', {})
+    y_data = saved_zoom.get('y', {})
+    return (
+      x_data.get('min'),
+      x_data.get('max'),
+      y_data.get('min'),
+      y_data.get('max'),
+    )
+
+  # Default values (will be overridden by chart calculation)
+  return '2025-01-01', '2026-06-30', 0, 65000
 
 
 @callback(
-  Output('chart-extent-store', 'data'),
-  Input('graph', 'relayoutData'),
+  Output('chart-loading-spinner', 'style'),
+  Output('chart-wrapper', 'style'),
+  Input('chart-loading-store', 'data'),
 )
-def sync_zoom_store(relayout):
+def update_chart_loading_display(is_loading: bool):
+  """Show/hide loading spinner overlay and adjust chart opacity based on loading state."""
+  if is_loading:
+    return (
+      {
+        'display': 'block',
+        'position': 'absolute',
+        'top': '0',
+        'left': '0',
+        'right': '0',
+        'bottom': '0',
+        'zIndex': '1000',
+        'backgroundColor': 'rgba(255, 255, 255, 0.8)',
+      },
+      {'opacity': '0.5', 'transition': 'opacity 0.2s'},
+    )
+  else:
+    return (
+      {
+        'display': 'none',
+        'position': 'absolute',
+        'top': '0',
+        'left': '0',
+        'right': '0',
+        'bottom': '0',
+        'zIndex': '1000',
+        'backgroundColor': 'rgba(255, 255, 255, 0.8)',
+      },
+      {'opacity': '1', 'transition': 'opacity 0.2s'},
+    )
+
+
+# If the zoom is manually changed through the chart, change only current_zoom, not saved_zoom
+@callback(
+  Output('current-zoom-store', 'data', allow_duplicate=True),
+  Input('graph', 'relayoutData'),
+  prevent_initial_call=True,
+)
+def update_current_zoom_from_chart(relayout: dict[str, Any] | None):
   if not relayout:
     raise exceptions.PreventUpdate
 
@@ -325,35 +459,8 @@ def sync_zoom_store(relayout):
     and y_range_min is not None
     and y_range_max is not None
   ):
-    return {
-      'x': {
-        'min': x_range_min,
-        'max': x_range_max,
-      },
-      'y': {
-        'min': y_range_min,
-        'max': y_range_max,
-      },
-    }
+    # Convert to Zoom object and back to dict for consistency
+    zoom = Zoom(x_min=x_range_min, x_max=x_range_max, y_min=y_range_min, y_max=y_range_max)
+    return zoom.to_dict() if zoom.is_valid() else None
   else:
     return None
-
-
-@callback(
-  Output('zoom-x-min', 'value'),
-  Output('zoom-x-max', 'value'),
-  Output('zoom-y-min', 'value'),
-  Output('zoom-y-max', 'value'),
-  Input('chart-extent-store', 'data'),
-  prevent_initial_call=True,
-)
-def apply_current_zoom(current_zoom):
-  if not current_zoom:
-    raise exceptions.PreventUpdate
-
-  return (
-    current_zoom['x'].get('min'),
-    current_zoom['x'].get('max'),
-    current_zoom['y'].get('min'),
-    current_zoom['y'].get('max'),
-  )

@@ -5,7 +5,7 @@ from plotly.subplots import make_subplots
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
 from src.components.chart.chart_properties import Model
-from src.components.enums import UncertaintyInterval
+from src.components.enums import DataType, UncertaintyInterval
 from src.util.constants import get_model_color_with_uncertainty_interval
 
 
@@ -35,21 +35,21 @@ class LineChart(Chart):
       self._create_empty_figure()
       return self._fig
 
-    # update layout
     num_rows = len(self.controls.scenarios)
-    # Define fixed dimensions
-    SUBPLOT_HEIGHT = 300  # Fixed height per subplot in pixels
-    FIXED_SPACING = 50  # Fixed spacing between subplots in pixels
 
-    # Calculate total figure height accounting for fixed spacing
+    # define fixed dimensions
+    SUBPLOT_HEIGHT = 300  # fixed height per subplot in pixels
+    FIXED_SPACING = 60  # fixed spacing between subplots in pixels
+
+    # calculate total figure height accounting for fixed spacing
     chart_total_height = (SUBPLOT_HEIGHT * num_rows) + (FIXED_SPACING * (num_rows - 1))
 
-    # Calculate vertical_spacing as a fraction of total height
-    # This ensures the actual pixel spacing remains constant
+    # calculate vertical_spacing as a fraction of total height
+    # this ensures the actual pixel spacing remains constant
     if num_rows > 1:
       vertical_spacing = FIXED_SPACING / chart_total_height
     else:
-      vertical_spacing = 0  # No spacing needed for single subplot
+      vertical_spacing = 0  # no spacing needed for single subplot
 
     # start with the raw dataframe
     df = self._raw_df
@@ -68,49 +68,14 @@ class LineChart(Chart):
 
     # add traces for each scenario
     for i, scenario in enumerate(self.controls.scenarios, start=1):
-      # filter for given scenario
       scenario_df = df.query('scenario_id == @scenario.id')
-
-      # decide whether to add uncertainty intervals
-      should_add_uncertainty_intervals = self.controls.uncertainty_interval is not None
 
       # add traces for each model
       for model in self.controls.models:
-        # add uncertainty intervals if necessary
-        if should_add_uncertainty_intervals:
-          self._plot_uncertainty_interval(scenario_df=scenario_df, model=model, row_num=i)
+        self._plot_uncertainty_interval(scenario_df, model, row_num=i)
+        self._plot_primary_line(scenario_df, model, row_num=i)
 
-        # add main line (0.5 quantile)
-        primary_line_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
-        self._fig.add_trace(
-          go.Scatter(
-            x=primary_line_data.index,
-            y=primary_line_data[self.controls.y_axis],
-            mode='lines',
-            name=f'Model {model.name}',
-            legendgroup=f'Model {model.name}',
-            showlegend=(i == 1),
-            line=dict(color=model.color),
-          ),
-          row=i,
-          col=1,
-        )
-
-      # add gold standard line
-      self._fig.add_trace(
-        go.Scatter(
-          x=self._gold_std_df.index,
-          y=self._gold_std_df['value'],
-          mode='lines+markers',
-          name='Gold standard',
-          line=dict(color='#999', dash='solid', width=1),
-          marker=dict(color='var(--mantine-color-text)', symbol='diamond'),
-          legendgroup='Gold standard',
-          showlegend=(i == 1),
-        ),
-        row=i,
-        col=1,
-      )
+      self._plot_gold_standard_line(self._gold_std_df, row_num=i)
 
     # plot annotations
     self._plot_annotations()
@@ -119,16 +84,12 @@ class LineChart(Chart):
     self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
     self._fig.update_yaxes(showspikes=True, spikemode='across')
 
-    # calculate global min/max across all subplots for synchronized axes
-    x_range, y_range = self._calculate_x_y_axis_ranges(df, self._gold_std_df)
-
-    if x_range is not None and y_range is not None:
-      for i in range(1, num_rows + 1):
-        self._fig.update_xaxes(range=x_range, row=i, col=1)
-        self._fig.update_yaxes(range=y_range, row=i, col=1)
+    # calculate chart min/max across all subplots for synchronized axes
+    self._set_axes_ranges(df, self._gold_std_df, num_rows)
 
     self._fig.update_yaxes(title_text=self.controls.target.display_value)
 
+    # add title, subtitle, and height to the figure layout
     self._fig.update_layout(
       hovermode='x unified',
       height=chart_total_height + 180,
@@ -141,90 +102,148 @@ class LineChart(Chart):
 
     return self._fig
 
-  def _calculate_x_y_axis_ranges(
+  def _set_axes_ranges(self, df: pd.DataFrame, gold_std_df: pd.DataFrame, num_rows: int):
+    x_range, y_range = self._calculate_axes_ranges(df, gold_std_df)
+    if x_range is not None and y_range is not None:
+      for i in range(1, num_rows + 1):
+        self._fig.update_xaxes(range=x_range, row=i, col=1)
+        self._fig.update_yaxes(range=y_range, row=i, col=1)
+
+  def _calculate_axes_ranges(
     self, df: pd.DataFrame, gold_std_df: pd.DataFrame
   ) -> tuple[list[float] | None, list[float] | None]:
     """
-    Calculate the x and y axis ranges for the chart.
-    Logic:
-      - Zoom should follow the data
+    Calculate the x and y axis ranges for all subplots in the chart.
+    Zoom logic:
+      * If current_zoom is set in the controls, use it
+      * If saved_zoom is set in the controls but not current_zoom, set current_zoom to saved_zoom and use it
+      * If neither current_zoom nor saved_zoom is set, calculate the ranges from the data, then
+        set both zooms to the calculated ranges
+      * If the Use Chart Zoom button is pressed, set both zooms to the current axis values
+      * If the zoom is manually changed through either the chart or the controls, do not change saved_zoom, only current_zoom
+      * If the insight is saved, set saved_zoom to current_zoom
     """
-    has_zoom = (
-      self.controls.zoom is not None
-      and self.controls.zoom.x is not None
-      and self.controls.zoom.x.get('min') is not None
-      and self.controls.zoom.x.get('max') is not None
-      and self.controls.zoom.y is not None
-      and self.controls.zoom.y.get('min') is not None
-      and self.controls.zoom.y.get('max') is not None
+    has_current_zoom = (
+      self.controls.current_zoom is not None and self.controls.current_zoom.is_valid()
     )
 
-    if has_zoom:
-      x_range = [self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
-      y_range = [self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
+    if has_current_zoom:
+      x_range = [self.controls.current_zoom.x.min, self.controls.current_zoom.x.max]
+      y_range = [self.controls.current_zoom.y.min, self.controls.current_zoom.y.max]
+      return x_range, y_range
+
+    has_saved_zoom = self.controls.saved_zoom is not None and self.controls.saved_zoom.is_valid()
+
+    if has_saved_zoom:
+      # Set current_zoom to saved_zoom for first load
+      self.controls.current_zoom = self.controls.saved_zoom
+      x_range = [self.controls.saved_zoom.x.min, self.controls.saved_zoom.x.max]
+      y_range = [self.controls.saved_zoom.y.min, self.controls.saved_zoom.y.max]
+      return x_range, y_range
+
+    x_min = None
+    x_max = None
+    y_min = None
+    y_max = None
+    x_range = None
+    y_range = None
+
+    # calculate x and y axis ranges from data
+    for scenario in self.controls.scenarios:
+      scenario_df = df.query('scenario_id == @scenario.id')
+      if not scenario_df.empty:
+        scenario_x_values = scenario_df.index
+        if x_min is None or scenario_x_values.min() < x_min:
+          x_min = scenario_x_values.min()
+        if x_max is None or scenario_x_values.max() > x_max:
+          x_max = scenario_x_values.max()
+
+        for model in self.controls.models:
+          model_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
+          if not model_data.empty:
+            model_y_values = model_data[self.controls.y_axis]
+            if y_min is None or model_y_values.min() < y_min:
+              y_min = model_y_values.min()
+            if y_max is None or model_y_values.max() > y_max:
+              y_max = model_y_values.max()
+
+          if self.controls.uncertainty_interval is not None:
+            for lower_q, upper_q in self.controls.uncertainty_interval.get_bounds():
+              lower_model_data = scenario_df.query(
+                'type_id == @lower_q and model_name == @model.id'
+              )
+              upper_model_data = scenario_df.query(
+                'type_id == @upper_q and model_name == @model.id'
+              )
+              if not lower_model_data.empty:
+                lower_y_values = lower_model_data[self.controls.y_axis]
+                if y_min is None or lower_y_values.min() < y_min:
+                  y_min = lower_y_values.min()
+              if not upper_model_data.empty:
+                upper_y_values = upper_model_data[self.controls.y_axis]
+                if y_max is None or upper_y_values.max() > y_max:
+                  y_max = upper_y_values.max()
+
+    if not gold_std_df.empty:
+      gold_std_x_values = gold_std_df.index
+      if x_min is None or gold_std_x_values.min() < x_min:
+        x_min = gold_std_x_values.min()
+      if x_max is None or gold_std_x_values.max() > x_max:
+        x_max = gold_std_x_values.max()
+
+      gold_std_y_values = gold_std_df['value']
+      if y_min is None or gold_std_y_values.min() < y_min:
+        y_min = gold_std_y_values.min()
+      if y_max is None or gold_std_y_values.max() > y_max:
+        y_max = gold_std_y_values.max()
+
+    if x_min is not None and x_max is not None and y_min is not None and y_max is not None:
+      x_range = [x_min, x_max]
+      y_range = [y_min, y_max]
+      y_range_span = y_max - y_min
+      y_range[1] = y_max + (y_range_span * 0.02)
+      # Set current_zoom to calculated values (but don't set saved_zoom)
+      from src.components.chart.chart_properties import Zoom
+
+      self.controls.current_zoom = Zoom(
+        x_min=x_range[0], x_max=x_range[1], y_min=y_range[0], y_max=y_range[1]
+      )
     else:
-      x_min = None
-      x_max = None
-      y_min = None
-      y_max = None
-
-      for scenario in self.controls.scenarios:
-        scenario_df = df.query('scenario_id == @scenario.id')
-        if not scenario_df.empty:
-          scenario_x_values = scenario_df.index
-          if x_min is None or scenario_x_values.min() < x_min:
-            x_min = scenario_x_values.min()
-          if x_max is None or scenario_x_values.max() > x_max:
-            x_max = scenario_x_values.max()
-
-          for model in self.controls.models:
-            model_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
-            if not model_data.empty:
-              model_y_values = model_data[self.controls.y_axis]
-              if y_min is None or model_y_values.min() < y_min:
-                y_min = model_y_values.min()
-              if y_max is None or model_y_values.max() > y_max:
-                y_max = model_y_values.max()
-
-            if self.controls.uncertainty_interval is not None:
-              for lower_q, upper_q in self.controls.uncertainty_interval.get_bounds():
-                lower_model_data = scenario_df.query(
-                  'type_id == @lower_q and model_name == @model.id'
-                )
-                upper_model_data = scenario_df.query(
-                  'type_id == @upper_q and model_name == @model.id'
-                )
-                if not lower_model_data.empty:
-                  lower_y_values = lower_model_data[self.controls.y_axis]
-                  if y_min is None or lower_y_values.min() < y_min:
-                    y_min = lower_y_values.min()
-                if not upper_model_data.empty:
-                  upper_y_values = upper_model_data[self.controls.y_axis]
-                  if y_max is None or upper_y_values.max() > y_max:
-                    y_max = upper_y_values.max()
-
-      if not gold_std_df.empty:
-        gold_std_x_values = gold_std_df.index
-        if x_min is None or gold_std_x_values.min() < x_min:
-          x_min = gold_std_x_values.min()
-        if x_max is None or gold_std_x_values.max() > x_max:
-          x_max = gold_std_x_values.max()
-
-        gold_std_y_values = gold_std_df['value']
-        if y_min is None or gold_std_y_values.min() < y_min:
-          y_min = gold_std_y_values.min()
-        if y_max is None or gold_std_y_values.max() > y_max:
-          y_max = gold_std_y_values.max()
-
-      if x_min is not None and x_max is not None and y_min is not None and y_max is not None:
-        x_range = [x_min, x_max]
-        y_range = [y_min, y_max]
-        y_range_span = y_max - y_min
-        y_range[1] = y_max + (y_range_span * 0.02)
-      else:
-        x_range = None
-        y_range = None
+      x_range = None
+      y_range = None
     return x_range, y_range
+
+  def _plot_primary_line(self, scenario_df: pd.DataFrame, model: Model, row_num: int):
+    primary_line_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
+    self._fig.add_trace(
+      go.Scatter(
+        x=primary_line_data.index,
+        y=primary_line_data[self.controls.y_axis],
+        mode='lines',
+        name=f'Model {model.name}',
+        legendgroup=f'Model {model.name}',
+        showlegend=(row_num == 1),
+        line=dict(color=model.color),
+      ),
+      row=row_num,
+      col=1,
+    )
+
+  def _plot_gold_standard_line(self, gold_std_df: pd.DataFrame, row_num: int):
+    self._fig.add_trace(
+      go.Scatter(
+        x=gold_std_df.index,
+        y=gold_std_df['value'],
+        mode='lines+markers',
+        name='Gold standard',
+        line=dict(color='#999', dash='solid', width=1),
+        marker=dict(color='var(--mantine-color-text)', symbol='diamond'),
+        legendgroup='Gold standard',
+        showlegend=(row_num == 1),
+      ),
+      row=row_num,
+      col=1,
+    )
 
   def get_fig(self) -> go.Figure:
     return self._fig
@@ -237,8 +256,7 @@ class LineChart(Chart):
 
   def get_subtitle(self) -> str:
     return (
-      f'Pathogen: {self.controls.pathogen}'
-      + f' | Location: {self.controls.location.name}'
+      f'Location: {self.controls.location.name}'
       + f' | Age group: {self.controls.age_group.display_value}'
       + (
         f' | Uncertainty interval: {self.controls.uncertainty_interval.display_value}'
@@ -253,7 +271,7 @@ class LineChart(Chart):
     This is called by individual update methods when data-dependent fields change.
     """
     new_raw_df = Chart.collect_data(
-      self.controls.data_type,
+      DataType.QUANTILE,
       self.controls.round_num,
       self.controls.location.name,
       self.controls.target.input_value,
@@ -272,6 +290,11 @@ class LineChart(Chart):
     self.refresh_fig()
 
   def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int):
+    if (
+      self.controls.uncertainty_interval is None
+      or self.controls.uncertainty_interval == UncertaintyInterval.NONE
+    ):
+      return
     for lower_q, upper_q in self.controls.uncertainty_interval.get_bounds():
       lower_model = scenario_df.query('type_id == @lower_q and model_name == @model.id')
       upper_model = scenario_df.query('type_id == @upper_q and model_name == @model.id')

@@ -6,27 +6,7 @@ import dash_mantine_components as dmc
 from dash import Input, Output, State, callback, clientside_callback, dcc, exceptions
 from dash_iconify import DashIconify
 
-default_control_values = {
-  'theme': 'light',
-  'plot_type': 'line',
-  'round_num': 19,
-  'pathogen': 'covid',
-  'scenario_ids': [77, 78],
-  'scenario_variables': [
-    {
-      'name': 'Vaccination Strategy',
-      'options': ['High risk', 'All ages'],
-      'selected_option': 'All ages',
-    }
-  ],
-  'model_names': ['Ensemble'],
-  'location_name': 'US',
-  'target': 'incident_hospitalization',
-  'age_group': '0-130',
-  'x_axis': 'target_end_date',
-  'y_axis': 'value',
-  'zoom': None,
-}
+from src.components.chart import DEFAULT_CONTROL_VALUES
 
 form_toggle_button = dmc.Button(
   'Save as New Insight',
@@ -120,6 +100,7 @@ clientside_callback(
   State('insight-description-input', 'value'),
   State('selected-round-store', 'data'),
   State('chart-controls-store', 'data'),
+  State('current-zoom-store', 'data'),
   suppress_callback_exceptions=True,
   prevent_initial_call=True,
 )
@@ -130,6 +111,7 @@ def save_custom_insight(
   description: str,
   round_number: str,
   current_chart_controls: dict[str, Any] | None = None,
+  current_zoom: dict[str, Any] | None = None,
 ):
   # validation
   if not (title and title.strip() and description and description.strip()):
@@ -138,6 +120,17 @@ def save_custom_insight(
   now = datetime.datetime.now(datetime.timezone.utc).isoformat()
   new_id = f'custom-{uuid.uuid4()}'
   image_url = thumbnail_data or 'https://placehold.co/400?text=Visualization'
+
+  # Save current_zoom as saved_zoom (zoom) in the insight
+  controls_to_save = {
+    **DEFAULT_CONTROL_VALUES,
+    'round': round_number,
+    **(current_chart_controls or {}),
+  }
+  # Override zoom with current_zoom (saving current_zoom as saved_zoom)
+  if current_zoom:
+    controls_to_save['zoom'] = current_zoom
+
   new_item = dict(
     id=new_id,
     title=title.strip(),
@@ -145,11 +138,7 @@ def save_custom_insight(
     image_url=image_url,
     created_at=now,
     updated_at=now,
-    controls={
-      'round': round_number,
-      **default_control_values,
-      **(current_chart_controls or {}),
-    },
+    controls=controls_to_save,
   )
 
   notification = {

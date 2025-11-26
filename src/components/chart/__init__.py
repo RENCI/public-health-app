@@ -1,24 +1,39 @@
-from src.components.chart.chart_properties import PlotType
-
 from .boxplot_chart import BoxplotChart
 from .chart import Chart
-from .chart_controls import ChartControls
+from .chart_controls import DEFAULT_CONTROL_VALUES, ChartControls
+from .chart_instance_manager import ChartInstanceManager, create_chart
+from .chart_properties import (
+  Annotation,
+  DatetimeAxisRange,
+  FloatAxisRange,
+  HorizontalAnnotation,
+  Location,
+  Model,
+  PlotType,
+  Scenario,
+  ScenarioVariable,
+  VerticalAnnotation,
+  Zoom,
+)
 from .line_chart import LineChart
 
-
-def create_chart(controls: ChartControls) -> Chart:
-  plot_type = controls.plot_type
-  if plot_type == PlotType.LINE:
-    return LineChart(controls)
-  elif plot_type == PlotType.BOXPLOT:
-    return BoxplotChart(controls)
-  else:
-    raise ValueError(f'Invalid plot type: {plot_type}')
-
-
 __all__ = [
-  'Chart',
+  'DEFAULT_CONTROL_VALUES',
+  'Annotation',
   'BoxplotChart',
-  'LineChart',
+  'Chart',
   'ChartControls',
+  'ChartInstanceManager',
+  'create_chart',
+  'DatetimeAxisRange',
+  'FloatAxisRange',
+  'HorizontalAnnotation',
+  'LineChart',
+  'Location',
+  'Model',
+  'PlotType',
+  'Scenario',
+  'ScenarioVariable',
+  'VerticalAnnotation',
+  'Zoom',
 ]

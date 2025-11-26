@@ -1,5 +1,5 @@
 import dash_mantine_components as dmc
-from dash import Input, Output, callback
+from dash import Input, Output, State, callback, exceptions
 
 from src.util.constants import get_scenarios_for_round
 
@@ -29,9 +29,12 @@ def scenarios_select(value: list[str] = default_option):
   Output('scenarios-select', 'data'),
   Output('scenarios-select', 'value'),
   Input('selected-round-store', 'data'),
+  State('url', 'pathname'),
   prevent_initial_call=True,
 )
-def update_scenarios_select_for_round(round_number: str):
+def update_scenarios_select_for_round(round_number: str, pathname: str):
+  if not pathname or not pathname.startswith('/explorer'):
+    raise exceptions.PreventUpdate
   if not round_number:
     return [], None
   scenarios = get_scenarios_for_round(int(round_number))

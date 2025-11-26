@@ -4,7 +4,7 @@ from plotly.subplots import make_subplots
 
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
-from src.components.enums import UncertaintyInterval
+from src.components.enums import DataType, UncertaintyInterval
 from src.util.constants import get_model_by_name, get_model_color_by_name
 
 SCENARIO_AXIS_LABEL_FONT_SIZE = 10
@@ -125,7 +125,7 @@ class BoxplotChart(Chart):
     df = df.query('age_group == @self.controls.age_group.input_value')
 
     # filter for ensemble model, specifically
-    ensemble_model_id = get_model_by_name('Ensemble')['id']
+    ensemble_model_id = get_model_by_name('Ensemble')['id']  # noqa: F841
     df = df.query('model_name == @ensemble_model_id')
 
     for i, scenario in enumerate(self.controls.scenarios, start=1):
@@ -188,65 +188,7 @@ class BoxplotChart(Chart):
     self._fig.update_yaxes(showspikes=False)
 
     # calculate global min/max across all subplots for synchronized axes
-    should_use_zoom = (
-      self.controls.zoom is not None
-      and self.controls.zoom.x is not None
-      and self.controls.zoom.x.get('min') is not None
-      and self.controls.zoom.x.get('max') is not None
-      and self.controls.zoom.y is not None
-      and self.controls.zoom.y.get('min') is not None
-      and self.controls.zoom.y.get('max') is not None
-    )
-
-    if should_use_zoom:
-      x_range = [self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
-      y_range = [self.controls.zoom.y.get('min'), self.controls.zoom.y.get('max')]
-    else:
-      x_min = None
-      x_max = None
-      y_min = None
-      y_max = None
-
-      if self.controls.x_axis:
-        for scenario in self.controls.scenarios:
-          scenario_df = df.query('scenario_id == @scenario.id')
-          scenario_x_values = scenario_df[self.controls.x_axis]
-          if scenario_x_values.empty:
-            continue
-          scenario_x_min = scenario_x_values.min()
-          scenario_x_max = scenario_x_values.max()
-          if scenario_x_min is not None and scenario_x_max is not None:
-            if x_min is None or scenario_x_min < x_min:
-              x_min = scenario_x_min
-            if x_max is None or scenario_x_max > x_max:
-              x_max = scenario_x_max
-
-      if self.controls.y_axis:
-        for scenario in self.controls.scenarios:
-          scenario_df = df.query('scenario_id == @scenario.id')
-          scenario_y_values = scenario_df[self.controls.y_axis]
-          if scenario_y_values.empty:
-            continue
-          scenario_y_min = scenario_y_values.min()
-          scenario_y_max = scenario_y_values.max()
-          if scenario_y_min is not None and scenario_y_max is not None:
-            if y_min is None or scenario_y_min < y_min:
-              y_min = scenario_y_min
-            if y_max is None or scenario_y_max > y_max:
-              y_max = scenario_y_max
-
-      if x_min is not None and x_max is not None and y_min is not None and y_max is not None:
-        x_range = [x_min, x_max]
-        y_range = [y_min, y_max]
-      elif x_min is not None and x_max is not None:
-        x_range = [x_min, x_max]
-        y_range = None
-      elif y_min is not None and y_max is not None:
-        x_range = None
-        y_range = [y_min, y_max]
-      else:
-        x_range = None
-        y_range = None
+    x_range, y_range = self._calculate_axes_ranges(df, num_rows)
 
     if x_range is not None or y_range is not None:
       for i in range(1, num_rows + 1):
@@ -294,12 +236,96 @@ class BoxplotChart(Chart):
     This is called by individual update methods when data-dependent fields change.
     """
     new_raw_df = Chart.collect_data(
-      self.controls.data_type,
+      DataType.QUANTILE,
       self.controls.round_num,
       self.controls.location.name,
       self.controls.target.input_value,
     )
     self._raw_df = new_raw_df
+
+  def _calculate_axes_ranges(
+    self, df: pd.DataFrame, num_rows: int
+  ) -> tuple[list[float] | None, list[float] | None]:
+    """
+    Calculate the x and y axis ranges for all subplots in the chart.
+    This is a stub implementation - full implementation to be added later.
+    Zoom logic:
+      * If current_zoom is set in the controls, use it
+      * If saved_zoom is set in the controls but not current_zoom, set current_zoom to saved_zoom and use it
+      * If neither current_zoom nor saved_zoom is set, calculate the ranges from the data
+    """
+    has_current_zoom = (
+      self.controls.current_zoom is not None and self.controls.current_zoom.is_valid()
+    )
+
+    if has_current_zoom:
+      x_range = [self.controls.current_zoom.x.min, self.controls.current_zoom.x.max]
+      y_range = [self.controls.current_zoom.y.min, self.controls.current_zoom.y.max]
+      return x_range, y_range
+
+    has_saved_zoom = self.controls.saved_zoom is not None and self.controls.saved_zoom.is_valid()
+
+    if has_saved_zoom:
+      # Set current_zoom to saved_zoom for first load
+      self.controls.current_zoom = self.controls.saved_zoom
+      x_range = [self.controls.saved_zoom.x.min, self.controls.saved_zoom.x.max]
+      y_range = [self.controls.saved_zoom.y.min, self.controls.saved_zoom.y.max]
+      return x_range, y_range
+
+    # Calculate from data (stub - full implementation to be added)
+    x_min = None
+    x_max = None
+    y_min = None
+    y_max = None
+
+    if self.controls.x_axis:
+      for scenario in self.controls.scenarios:
+        scenario_df = df.query('scenario_id == @scenario.id')
+        scenario_x_values = scenario_df[self.controls.x_axis]
+        if scenario_x_values.empty:
+          continue
+        scenario_x_min = scenario_x_values.min()
+        scenario_x_max = scenario_x_values.max()
+        if scenario_x_min is not None and scenario_x_max is not None:
+          if x_min is None or scenario_x_min < x_min:
+            x_min = scenario_x_min
+          if x_max is None or scenario_x_max > x_max:
+            x_max = scenario_x_max
+
+    if self.controls.y_axis:
+      for scenario in self.controls.scenarios:
+        scenario_df = df.query('scenario_id == @scenario.id')
+        scenario_y_values = scenario_df[self.controls.y_axis]
+        if scenario_y_values.empty:
+          continue
+        scenario_y_min = scenario_y_values.min()
+        scenario_y_max = scenario_y_values.max()
+        if scenario_y_min is not None and scenario_y_max is not None:
+          if y_min is None or scenario_y_min < y_min:
+            y_min = scenario_y_min
+          if y_max is None or scenario_y_max > y_max:
+            y_max = scenario_y_max
+
+    if x_min is not None and x_max is not None and y_min is not None and y_max is not None:
+      x_range = [x_min, x_max]
+      y_range = [y_min, y_max]
+      # Set current_zoom to calculated values (but don't set saved_zoom)
+      from src.components.chart.chart_properties import Zoom
+
+      self.controls.current_zoom = Zoom(
+        x_min=x_range[0], x_max=x_range[1], y_min=y_range[0], y_max=y_range[1]
+      )
+    elif x_min is not None and x_max is not None:
+      x_range = [x_min, x_max]
+      y_range = None
+    elif y_min is not None and y_max is not None:
+      x_range = None
+      y_range = [y_min, y_max]
+    else:
+      x_range = None
+      y_range = None
+
+    return x_range, y_range
 
   def update_uncertainty_interval(self, uncertainty_interval: str | None):
     """

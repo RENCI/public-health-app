@@ -155,12 +155,157 @@ class PlotType(StrEnum):
 
 
 @dataclass
-class AxisRange:
-  min: str | None
-  max: str | None
+class DatetimeAxisRange:
+  min: datetime
+  max: datetime
+
+  def __init__(self, min: str | datetime | None, max: str | datetime | None):
+    def parse_value(value: str | datetime | None) -> datetime:
+      if value is None:
+        raise ValueError('Value for DatetimeAxisRange cannot be None.')
+      if isinstance(value, datetime):
+        return value
+      if not isinstance(value, str) or value == '':
+        raise ValueError(f'Value "{value}" for DatetimeAxisRange cannot be empty.')
+
+      # First try ISO format parsing (handles formats like "2024-11-02T00:00:00")
+      # This handles various ISO 8601 formats including with/without microseconds and timezone
+      try:
+        # Handle 'Z' timezone indicator by replacing with +00:00
+        iso_value = value.replace('Z', '+00:00') if value.endswith('Z') else value
+        return datetime.fromisoformat(iso_value)
+      except (ValueError, AttributeError):
+        pass
+
+      # Try multiple datetime formats
+      datetime_formats = [
+        '%Y-%m-%dT%H:%M:%S.%f',  # 2024-11-02T00:00:00.000000
+        '%Y-%m-%dT%H:%M:%S',  # 2024-11-02T00:00:00
+        '%Y-%m-%dT%H:%M',  # 2024-11-02T00:00
+        '%Y-%m-%d %H:%M:%S.%f',  # 2025-09-30 12:00:34.1455
+        '%Y-%m-%d %H:%M:%S',  # 2025-09-30 12:00:34
+        '%Y-%m-%d %H:%M',  # 2025-09-30 12:00
+        '%Y-%m-%d',  # 2025-09-30
+        '%Y/%m/%d %H:%M:%S.%f',  # 2025/09/30 12:00:34.1455
+        '%Y/%m/%d %H:%M:%S',  # 2025/09/30 12:00:34
+        '%Y/%m/%d %H:%M',  # 2025/09/30 12:00
+        '%Y/%m/%d',  # 2025/09/30
+        '%m/%d/%Y %H:%M:%S.%f',  # 09/30/2025 12:00:34.1455
+        '%m/%d/%Y %H:%M:%S',  # 09/30/2025 12:00:34
+        '%m/%d/%Y %H:%M',  # 09/30/2025 12:00
+        '%m/%d/%Y',  # 09/30/2025
+      ]
+
+      for fmt in datetime_formats:
+        try:
+          return datetime.strptime(value, fmt)
+        except ValueError:
+          continue
+
+      raise ValueError(f'Value "{value}" for DateAxisRange cannot be converted to datetime.')
+
+    self.min = parse_value(min)
+    self.max = parse_value(max)
+
+  def to_dict(self) -> dict[str, str]:
+    """Convert DatetimeAxisRange to dictionary format for storage."""
+    return {
+      'min': self.min.strftime('%Y-%m-%d'),
+      'max': self.max.strftime('%Y-%m-%d'),
+    }
+
+  def is_valid(self) -> bool:
+    """Check if the DatetimeAxisRange object is valid by ensuring all min and max values are set."""
+    return self.min is not None and self.max is not None
+
+
+@dataclass
+class FloatAxisRange:
+  min: float
+  max: float
+
+  def __init__(self, min: str | float | None, max: str | float | None):
+    def parse_value(value: str | float | None) -> float:
+      if value is None:
+        raise ValueError('Value for FloatAxisRange cannot be None.')
+      if isinstance(value, float):
+        return value
+      if isinstance(value, int):
+        return float(value)
+      if not isinstance(value, str) or value == '':
+        raise ValueError(f'Value "{value}" for FloatAxisRange cannot be empty.')
+
+      try:
+        return float(value)
+      except ValueError:
+        raise ValueError(f'Value "{value}" for FloatAxisRange cannot be converted to float.')
+
+    self.min = parse_value(min)
+    self.max = parse_value(max)
+
+  def to_dict(self) -> dict[str, float]:
+    """Convert FloatAxisRange to dictionary format for storage."""
+    return {'min': self.min, 'max': self.max}
+
+  def is_valid(self) -> bool:
+    """Check if the FloatAxisRange object is valid by ensuring all min and max values are set."""
+    return self.min is not None and self.max is not None
 
 
 @dataclass
 class Zoom:
-  x: AxisRange
-  y: AxisRange
+  x: DatetimeAxisRange
+  y: FloatAxisRange
+
+  def __init__(
+    self,
+    x: DatetimeAxisRange | None = None,
+    y: FloatAxisRange | None = None,
+    x_min: str | datetime | None = None,
+    x_max: str | datetime | None = None,
+    y_min: str | float | None = None,
+    y_max: str | float | None = None,
+  ):
+    """Initialize Zoom object.
+
+    Can be initialized either by:
+    - Passing DatetimeAxisRange and FloatAxisRange objects: x=DatetimeAxisRange(...), y=FloatAxisRange(...)
+    - Passing individual values: x_min, x_max (datetime/str), y_min, y_max (float/str)
+    """
+    if x is not None and y is not None:
+      self.x = x
+      self.y = y
+    elif x_min is not None and x_max is not None and y_min is not None and y_max is not None:
+      self.x = DatetimeAxisRange(min=x_min, max=x_max)
+      self.y = FloatAxisRange(min=y_min, max=y_max)
+    else:
+      raise ValueError(
+        'Zoom must be initialized with either (x, y) DatetimeAxisRange/FloatAxisRange objects or'
+        + ' (x_min, x_max, y_min, y_max) values.'
+      )
+
+  @classmethod
+  def from_dict(cls, data: dict[str, Any] | None) -> Self | None:
+    """Create Zoom object from dictionary."""
+    if not data or not data.get('x') or not data.get('y'):
+      return None
+    try:
+      x_data = data['x']
+      y_data = data['y']
+      zoom = cls(
+        x_min=x_data.get('min'),
+        x_max=x_data.get('max'),
+        y_min=y_data.get('min'),
+        y_max=y_data.get('max'),
+      )
+      return zoom if zoom.is_valid() else None
+    except (ValueError, KeyError, TypeError):
+      return None
+
+  def to_dict(self) -> dict[str, dict[str, str | float]]:
+    """Convert Zoom to dictionary format for storage in Dash Store."""
+    return {'x': self.x.to_dict(), 'y': self.y.to_dict()}
+
+  def is_valid(self) -> bool:
+    """Check if the Zoom object is valid by ensuring all x and y values are set."""
+    return self.x and self.x.is_valid() and self.y and self.y.is_valid()

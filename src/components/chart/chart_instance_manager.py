@@ -1,8 +1,20 @@
 from functools import lru_cache
 
-from src.components.chart import create_chart
+from src.components.chart.boxplot_chart import BoxplotChart
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
+from src.components.chart.chart_properties import PlotType
+from src.components.chart.line_chart import LineChart
+
+
+def create_chart(controls: ChartControls) -> Chart:
+  plot_type = controls.plot_type
+  if plot_type == PlotType.LINE:
+    return LineChart(controls)
+  elif plot_type == PlotType.BOXPLOT:
+    return BoxplotChart(controls)
+  else:
+    raise ValueError(f'Invalid plot type: {plot_type}')
 
 
 class ChartInstanceManager:
@@ -35,9 +47,7 @@ class ChartInstanceManager:
     """
     # Get chart from LRU cache
     chart = self._create_chart(controls)
-
-    # Update the chart with current controls (in case they changed)
-    chart.update_controls(controls)
+    chart.update_zoom(saved_zoom=controls.saved_zoom, current_zoom=controls.current_zoom)
 
     return chart
 

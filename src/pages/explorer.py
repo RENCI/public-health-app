@@ -1,3 +1,5 @@
+from typing import Any
+
 import dash_mantine_components as dmc
 from dash import (
   Input,
@@ -10,9 +12,9 @@ from dash import (
 )
 from dash_iconify import DashIconify
 
-from src.components.toolbar import toolbar, toolbar_button
+from src.components.chart import DEFAULT_CONTROL_VALUES
 from src.components.save_insight_form import save_insight_form
-from src.components.toolbar import toolbar
+from src.components.toolbar import toolbar, toolbar_button
 from src.components.viz_editor import visualization_editor
 from src.data.rounds.round19 import get_insight
 from src.util import get_query_param
@@ -86,3 +88,58 @@ def render_or_reset_explorer(reset_clicks, search, custom_insights):
   starter_id = get_query_param(search, 'starter')
 
   return insight_editor(starter_id, custom_insights)
+
+
+@callback(
+  Output('chart-controls-store', 'data', allow_duplicate=True),
+  Input('theme-store', 'data'),
+  Input('scenarios-select', 'value'),
+  Input('models-select', 'value'),
+  Input('location-select', 'value'),
+  Input('target-select', 'value'),
+  Input('age-group-select', 'value'),
+  Input('uncertainty-interval-select', 'value'),
+  Input('annotations-store', 'data'),
+  State('initial-page-load-chart-controls-store', 'data'),
+  State('chart-controls-store', 'data'),
+  State('url', 'pathname'),
+  prevent_initial_call=True,
+)
+def update_chart_controls(
+  theme: str,
+  scenario_ids: list[str],
+  model_names: list[str],
+  location_name: str,
+  target: str,
+  age_group: str,
+  uncertainty_interval: str | None,
+  annotations: list[dict[str, Any]] | None,
+  initial_chart_controls: dict[str, Any] | None,
+  current_chart_controls: dict[str, Any] | None,
+  pathname: str,
+):
+  if not pathname or not pathname.startswith('/explorer'):
+    raise exceptions.PreventUpdate
+  if not (scenario_ids and model_names and location_name and target and age_group):
+    raise exceptions.PreventUpdate
+
+  # saved_zoom comes from insight (stored in zoom field), current_zoom is the live state
+  # We need to keep saved_zoom in the zoom field, and pass current_zoom separately
+  new_chart_controls = dict(
+    theme=theme,
+    scenario_ids=[int(scenario_id) for scenario_id in scenario_ids],
+    model_names=model_names,
+    location_name=location_name,
+    target=target,
+    age_group=age_group,
+    uncertainty_interval=uncertainty_interval,
+    annotations=annotations,
+  )
+  # initial_chart_controls must come after current_chart_controls;
+  # see initial_page_load_chart_controls_store comment above for more details
+  return {
+    **DEFAULT_CONTROL_VALUES,
+    **current_chart_controls,
+    **initial_chart_controls,
+    **new_chart_controls,
+  }

@@ -1,7 +1,7 @@
 import dash_mantine_components as dmc
 from dash import Input, Output, callback, exceptions
 
-from src.util.constants import DEFAULT_CONTROL_VALUES
+from src.components.chart import DEFAULT_CONTROL_VALUES
 from src.util.data import load_rounds
 
 rounds = load_rounds()

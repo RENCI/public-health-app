@@ -13,28 +13,6 @@ from src.util.colors import replace_opacity
 _CONSTANTS: Optional[dict[str, Any]] = None
 _LOCATIONS: Optional[dict[str, tuple[str, str, int]]] = None
 
-DEFAULT_CONTROL_VALUES = dict(
-  theme='light',
-  plot_type='line',
-  round_num=19,
-  scenario_ids=[77, 78],
-  scenario_variables=[
-    {
-      'name': 'Vaccination Strategy',
-      'options': ['High risk', 'All ages'],
-      'selected_option': 'All ages',
-    }
-  ],
-  model_names=['Ensemble'],
-  location_name='US',
-  target='incident_hospitalization',
-  x_axis='target_end_date',
-  y_axis='value',
-  age_group='0-130',
-  uncertainty_interval='95%',
-  annotations=None,
-  zoom=None,
-)
 
 def load_constants() -> None:
   """Load constants from JSON file."""

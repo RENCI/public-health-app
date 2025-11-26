@@ -7,7 +7,7 @@ from typing import Any, Self
 import pandas as pd
 import plotly.graph_objects as go
 
-from src.components.chart.chart_controls import ChartControls
+from src.components.chart.chart_controls import DEFAULT_CONTROL_VALUES, ChartControls
 from src.components.chart.chart_properties import (
   Annotation,
   HorizontalAnnotation,
@@ -58,7 +58,7 @@ class Chart(ABC):
 
   def load_data(self):
     self._raw_df = Chart.collect_data(
-      self.controls.data_type,
+      DataType.QUANTILE,
       self.controls.round_num,
       self.controls.location.name,
       self.controls.target.input_value,
@@ -99,23 +99,23 @@ class Chart(ABC):
         else ''
       ),
       str(
-        self.controls.zoom.x.get('min')
-        if self.controls.zoom and self.controls.zoom.x.get('min')
+        self.controls.saved_zoom.x.min
+        if self.controls.saved_zoom and self.controls.saved_zoom.x.min
         else ''
       ),
       str(
-        self.controls.zoom.x.get('max')
-        if self.controls.zoom and self.controls.zoom.x.get('max')
+        self.controls.saved_zoom.x.max
+        if self.controls.saved_zoom and self.controls.saved_zoom.x.max
         else ''
       ),
       str(
-        self.controls.zoom.y.get('min')
-        if self.controls.zoom and self.controls.zoom.y.get('min')
+        self.controls.saved_zoom.y.min
+        if self.controls.saved_zoom and self.controls.saved_zoom.y.min
         else ''
       ),
       str(
-        self.controls.zoom.y.get('max')
-        if self.controls.zoom and self.controls.zoom.y.get('max')
+        self.controls.saved_zoom.y.max
+        if self.controls.saved_zoom and self.controls.saved_zoom.y.max
         else ''
       ),
       str(
@@ -197,9 +197,21 @@ class Chart(ABC):
     # since annotations are not data-dependent
     self.refresh_fig()
 
-  def update_zoom(self, zoom: dict[str, dict[str, Any]] | None):
-    self.controls.zoom = Zoom(zoom['x'], zoom['y']) if zoom else Zoom()
+  def update_zoom(self, saved_zoom: Zoom | None, current_zoom: Zoom | None):
+    """Update both saved_zoom and current_zoom, which then refreshes the figure."""
+    self.update_saved_zoom(saved_zoom)
+    self.update_current_zoom(current_zoom)
+
+  def update_current_zoom(self, current_zoom: Zoom | None):
+    """Update current_zoom and refresh the figure with unified axes."""
+    if current_zoom:
+      self.controls.current_zoom = current_zoom
     self.refresh_fig()
+
+  def update_saved_zoom(self, saved_zoom: Zoom | None):
+    """Update saved_zoom without refreshing the figure."""
+    if saved_zoom:
+      self.controls.saved_zoom = saved_zoom
 
   def _plot_annotations(self):
     if not self.controls.annotations:
@@ -237,16 +249,14 @@ class Chart(ABC):
   @lru_cache(maxsize=128)
   def _build_dataset_path(
     data_type: DataType = DataType.QUANTILE,
-    round_number: int = 1,
-    location_name: str = 'US',
-    target_value: str = 'incident_hospitalization',
+    round_number: int = DEFAULT_CONTROL_VALUES.get('round_num'),
+    location_name: str = DEFAULT_CONTROL_VALUES.get('location_name'),
+    target_value: str = DEFAULT_CONTROL_VALUES.get('target'),
     part: int = 0,
   ) -> Path:
-    part = str(part)
-    round_fragment = f'round{round_number}'
     path = (
       BASE_DATA_DIR
-      / round_fragment
+      / f'round{round_number}'
       / target_value
       / location_name
       / data_type.get_path_value()
