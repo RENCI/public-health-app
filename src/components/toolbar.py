@@ -1,18 +1,21 @@
+from enum import StrEnum
+
 import dash_mantine_components as dmc
 from dash import html
 
+class IconPlacement(StrEnum):
+  left = 'left'
+  right = 'right'
 
-def toolbar_button(children, icon, **kwargs):
+def toolbar_button(children, icon, icon_placement: IconPlacement = IconPlacement.left, **kwargs):
   defaults = dict(
-    leftSection=icon,
     variant='light',
     size='xs',
   )
-
-  # remove conflicting keys from kwargs so defaults win, unless overridden
-  for key in list(defaults.keys()):
-    if key in kwargs:
-      pass
+  if icon_placement == 'left':
+    defaults['leftSection'] = icon
+  if icon_placement == 'right':
+    defaults['rightSection'] = icon
 
   # merge defaults with incoming overrides
   final_props = {**defaults, **kwargs}
@@ -23,7 +26,6 @@ def toolbar_button(children, icon, **kwargs):
 def toolbar(
   left=None,
   right=None,
-  *,
   variant='soft',
   p='xs',
   mt=16,
@@ -31,6 +33,7 @@ def toolbar(
   gap='xs',
   justify='space-between',
   align='center',
+  **kwargs,
 ):
   '''
   Toolbar component.
@@ -86,4 +89,5 @@ def toolbar(
     p=p,
     mt=mt,
     mb=mb,
+    **kwargs
   )

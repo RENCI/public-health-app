@@ -1,0 +1,12 @@
+.insight-navbar-container {
+  height: 45px; /* placeholder bc the toolbar is positioned absolutely */
+}
+
+.insight-navbar {
+  position: absolute;
+  top: 45px;
+  left: 0;
+  right: 0;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  background-color: transparent;
+}
