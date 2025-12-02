@@ -88,7 +88,8 @@ class ChartControls:
     self.uncertainty_interval = (
       UncertaintyInterval.from_display_value(uncertainty_interval) if uncertainty_interval else None
     )
-    # If saved_zoom or current_zoom is provided, initialize with it, otherwise set both to None
+    # If saved_zoom is provided, initialize with it
+    # Otherwise, if current_zoom is provided, initialize with it and copy it to saved_zoom
     self.saved_zoom = Zoom.from_dict(saved_zoom) if saved_zoom else None
     self.current_zoom = Zoom.from_dict(current_zoom) if current_zoom else None
 

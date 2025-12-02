@@ -1,3 +1,4 @@
+import copy
 from typing import Any
 
 import dash_mantine_components as dmc
@@ -64,8 +65,16 @@ def visualization_editor(controls=None, show_controls=True):
 
   # current_zoom_store persists in local storage so zoom persists on refresh
   # saved_zoom_store is in memory and gets initialized from controls (insight saved_zoom)
-  current_zoom_store = dcc.Store(id='current-zoom-store', data=init_zoom, storage_type='memory')
-  saved_zoom_store = dcc.Store(id='saved-zoom-store', data=init_zoom, storage_type='local')
+  current_zoom_store = dcc.Store(
+    id='current-zoom-store',
+    data=copy.deepcopy(init_zoom) if init_zoom else None,
+    storage_type='local',
+  )
+  saved_zoom_store = dcc.Store(
+    id='saved-zoom-store',
+    data=copy.deepcopy(init_zoom) if init_zoom else None,
+    storage_type='session',
+  )
 
   chart_controls_store = dcc.Store(
     id='chart-controls-store',
@@ -91,6 +100,15 @@ def visualization_editor(controls=None, show_controls=True):
   chart = chart_manager.get_chart(chart_controls)
   figure = chart.get_fig() if chart else go.Figure()
   graph = dcc.Graph(id='graph', figure=figure)
+
+  if current_zoom_store.data is None:
+    current_zoom_store.data = (
+      chart.controls.current_zoom.to_dict() if chart.controls.current_zoom else None
+    )
+  if saved_zoom_store.data is None:
+    saved_zoom_store.data = (
+      chart.controls.saved_zoom.to_dict() if chart.controls.saved_zoom else None
+    )
 
   if not chart:
     return html.Div(
@@ -318,10 +336,11 @@ def update_chart_controls_with_zoom(
 ):
   if not current_chart_controls:
     raise exceptions.PreventUpdate
+  if saved_zoom is None and current_zoom is not None:
+    saved_zoom = copy.deepcopy(current_zoom)
   return {**current_chart_controls, 'saved_zoom': saved_zoom, 'current_zoom': current_zoom}
 
 
-# Initialize current_zoom from saved_zoom on first load if current_zoom doesn't exist
 @callback(
   Output('current-zoom-store', 'data', allow_duplicate=True),
   Input('saved-zoom-store', 'data'),
@@ -332,51 +351,10 @@ def initialize_current_zoom_from_saved(
   saved_zoom: dict[str, dict[str, Any]] | None,
   current_zoom: dict[str, dict[str, Any]] | None,
 ):
-  # If current_zoom doesn't exist but saved_zoom does, initialize current_zoom from saved_zoom
-  if not current_zoom and saved_zoom:
-    return saved_zoom
+  """If current_zoom doesn't exist but saved_zoom does, copy saved_zoom to current_zoom."""
+  if current_zoom is None and saved_zoom is not None:
+    return copy.deepcopy(saved_zoom)
   raise exceptions.PreventUpdate
-
-
-# Initialize zoom controls from current_zoom_store on page load
-@callback(
-  Output('zoom-x-min', 'value'),
-  Output('zoom-x-max', 'value'),
-  Output('zoom-y-min', 'value'),
-  Output('zoom-y-max', 'value'),
-  Input('current-zoom-store', 'data'),
-  State('saved-zoom-store', 'data'),
-)
-def initialize_zoom_controls(
-  current_zoom: dict[str, dict[str, Any]] | None,
-  saved_zoom: dict[str, dict[str, Any]] | None,
-):
-  # On first load: if current_zoom exists (from local storage), use it
-  # Otherwise, if saved_zoom exists (from insight), use it
-  # Otherwise, use defaults (will be calculated by chart)
-
-  if current_zoom:
-    x_data = current_zoom.get('x', {})
-    y_data = current_zoom.get('y', {})
-    return (
-      x_data.get('min'),
-      x_data.get('max'),
-      y_data.get('min'),
-      y_data.get('max'),
-    )
-
-  if saved_zoom:
-    x_data = saved_zoom.get('x', {})
-    y_data = saved_zoom.get('y', {})
-    return (
-      x_data.get('min'),
-      x_data.get('max'),
-      y_data.get('min'),
-      y_data.get('max'),
-    )
-
-  # Default values (will be overridden by chart calculation)
-  return '2025-01-01', '2026-06-30', 0, 65000
 
 
 @callback(
@@ -452,15 +430,8 @@ def update_current_zoom_from_chart(relayout: dict[str, Any] | None):
         if y_range and len(y_range) >= 2:
           y_range_min = y_range[0]
           y_range_max = y_range[1]
-
-  if (
-    x_range_min is not None
-    and x_range_max is not None
-    and y_range_min is not None
-    and y_range_max is not None
-  ):
-    # Convert to Zoom object and back to dict for consistency
+  try:
     zoom = Zoom(x_min=x_range_min, x_max=x_range_max, y_min=y_range_min, y_max=y_range_max)
-    return zoom.to_dict() if zoom.is_valid() else None
-  else:
+    return zoom.to_dict()
+  except ValueError:
     return None

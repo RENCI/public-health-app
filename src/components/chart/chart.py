@@ -1,3 +1,4 @@
+import copy
 from abc import ABC, abstractmethod
 from datetime import datetime
 from functools import lru_cache
@@ -10,6 +11,8 @@ import plotly.graph_objects as go
 from src.components.chart.chart_controls import DEFAULT_CONTROL_VALUES, ChartControls
 from src.components.chart.chart_properties import (
   Annotation,
+  DatetimeAxisRange,
+  FloatAxisRange,
   HorizontalAnnotation,
   Location,
   Model,
@@ -205,35 +208,135 @@ class Chart(ABC):
   def update_current_zoom(self, current_zoom: Zoom | None):
     """Update current_zoom and refresh the figure with unified axes."""
     if current_zoom:
-      self.controls.current_zoom = current_zoom
+      self.controls.current_zoom = copy.deepcopy(current_zoom)
     self.refresh_fig()
 
   def update_saved_zoom(self, saved_zoom: Zoom | None):
     """Update saved_zoom without refreshing the figure."""
     if saved_zoom:
-      self.controls.saved_zoom = saved_zoom
+      self.controls.saved_zoom = copy.deepcopy(saved_zoom)
+
+  def _get_axis_type(self, df: pd.DataFrame) -> type[DatetimeAxisRange | FloatAxisRange]:
+    if df.index.dtype == 'datetime64[ns]':
+      return type[DatetimeAxisRange]
+    elif df.index.dtype == 'float64':
+      return type[FloatAxisRange]
+    else:
+      raise ValueError(f'Invalid index type: {df.index.dtype}')
+
+  def _get_x_axis_range(self) -> DatetimeAxisRange | FloatAxisRange | None:
+    """
+    Get the x-axis range as a DatetimeAxisRange or FloatAxisRange object.
+    Returns None if the range cannot be determined.
+    """
+    # Try to get range from current_zoom
+    if self.controls.current_zoom:
+      return self.controls.current_zoom.x
+
+    # Try saved_zoom if current_zoom is not available
+    if self.controls.saved_zoom:
+      return self.controls.saved_zoom.x
+
+    # Try to get range from figure layout
+    xaxis = self._fig.layout.xaxis
+    if hasattr(xaxis, 'range') and xaxis.range:
+      x_min_val = xaxis.range[0]
+      x_max_val = xaxis.range[1]
+      axis_type = self._get_axis_type(self._raw_df)
+      return axis_type(min=x_min_val, max=x_max_val)
+    return None
+
+  def _get_x_axis_midpoint(self) -> float | None:
+    """
+    Calculate the midpoint of the x-axis range in milliseconds.
+    Returns None if the range cannot be determined.
+    """
+    x_range = self._get_x_axis_range()
+    if x_range is not None:
+      return x_range.midpoint_milliseconds()
+    return None
+
+  def _get_y_axis_range(self) -> FloatAxisRange | None:
+    """
+    Get the y-axis range as a FloatAxisRange object.
+    Returns None if the range cannot be determined.
+    """
+    # Try to get range from current_zoom
+    if self.controls.current_zoom:
+      return self.controls.current_zoom.y
+
+    # Try saved_zoom if current_zoom is not available
+    if self.controls.saved_zoom:
+      return self.controls.saved_zoom.y
+
+    # Try to get range from figure layout
+    yaxis = self._fig.layout.yaxis
+    if hasattr(yaxis, 'range') and yaxis.range:
+      y_min_val = yaxis.range[0]
+      y_max_val = yaxis.range[1]
+      try:
+        # Try to create FloatAxisRange from the range values
+        if isinstance(y_min_val, (int, float)) and isinstance(y_max_val, (int, float)):
+          return FloatAxisRange(min=y_min_val, max=y_max_val)
+        elif isinstance(y_min_val, str) and isinstance(y_max_val, str):
+          return FloatAxisRange(min=y_min_val, max=y_max_val)
+      except (ValueError, TypeError):
+        pass
+
+    return None
+
+  def _get_y_axis_midpoint(self) -> float | None:
+    """
+    Calculate the midpoint of the y-axis range.
+    Returns None if the range cannot be determined.
+    """
+    y_range = self._get_y_axis_range()
+    if y_range is not None:
+      return y_range.midpoint()
+    return None
 
   def _plot_annotations(self):
     if not self.controls.annotations:
       return
+
     for annotation in self.controls.annotations:
       if isinstance(annotation, HorizontalAnnotation):
+        y_value = annotation.value or 0
+
+        # Determine annotation position based on whether it's on top or bottom half of y-axis
+        y_midpoint = self._get_y_axis_midpoint()
+        if y_midpoint is not None:
+          if y_value > y_midpoint:
+            annotation_position = 'bottom left'
+          else:
+            annotation_position = 'top left'
+        else:
+          annotation_position = 'bottom left'
+
         self._fig.add_hline(
-          y=annotation.value or 0,
+          y=y_value,
           line_dash='dot',
           line_color=annotation.color,
           line_width=1,
           annotation_text=annotation.label,
+          annotation_position=annotation_position,
         )
       elif isinstance(annotation, VerticalAnnotation):
-        # Convert date to timestamp in milliseconds, as there passing the datetime object directly and adding annotation_text causes a TypeError
-        # See: https://github.com/plotly/plotly.py/issues/3065
-        # Assuming date is in "YYYY-MM-DD" format
         ms = (
-          datetime.strptime(annotation.value, '%Y-%m-%d').timestamp() * 1000
+          DatetimeAxisRange.parse_value(annotation.value).timestamp() * 1000
           if annotation.value
           else None
         )
+
+        # Determine annotation position based on whether it's on left or right half of x-axis
+        x_midpoint = self._get_x_axis_midpoint()
+        if x_midpoint is not None and ms is not None:
+          if ms < x_midpoint:
+            annotation_position = 'top right'
+          else:
+            annotation_position = 'top left'
+        else:
+          annotation_position = 'top left'
 
         self._fig.add_vline(
           x=ms,
@@ -241,6 +344,7 @@ class Chart(ABC):
           line_color=annotation.color,
           line_width=1,
           annotation_text=annotation.label,
+          annotation_position=annotation_position,
         )
       else:
         raise ValueError(f'Invalid annotation type: {annotation.type}')

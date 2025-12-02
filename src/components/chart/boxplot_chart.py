@@ -1,9 +1,12 @@
+import copy
+
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
+from src.components.chart.chart_properties import DatetimeAxisRange, FloatAxisRange
 from src.components.enums import DataType, UncertaintyInterval
 from src.util.constants import get_model_by_name, get_model_color_by_name
 
@@ -245,31 +248,24 @@ class BoxplotChart(Chart):
 
   def _calculate_axes_ranges(
     self, df: pd.DataFrame, num_rows: int
-  ) -> tuple[list[float] | None, list[float] | None]:
+  ) -> tuple[DatetimeAxisRange | FloatAxisRange | None, DatetimeAxisRange | FloatAxisRange | None]:
     """
     Calculate the x and y axis ranges for all subplots in the chart.
-    This is a stub implementation - full implementation to be added later.
     Zoom logic:
       * If current_zoom is set in the controls, use it
       * If saved_zoom is set in the controls but not current_zoom, set current_zoom to saved_zoom and use it
       * If neither current_zoom nor saved_zoom is set, calculate the ranges from the data
     """
-    has_current_zoom = (
-      self.controls.current_zoom is not None and self.controls.current_zoom.is_valid()
-    )
-
-    if has_current_zoom:
-      x_range = [self.controls.current_zoom.x.min, self.controls.current_zoom.x.max]
-      y_range = [self.controls.current_zoom.y.min, self.controls.current_zoom.y.max]
+    if self.controls.current_zoom is not None:
+      x_range = self.controls.current_zoom.x
+      y_range = self.controls.current_zoom.y
       return x_range, y_range
 
-    has_saved_zoom = self.controls.saved_zoom is not None and self.controls.saved_zoom.is_valid()
-
-    if has_saved_zoom:
+    if self.controls.saved_zoom is not None:
       # Set current_zoom to saved_zoom for first load
-      self.controls.current_zoom = self.controls.saved_zoom
-      x_range = [self.controls.saved_zoom.x.min, self.controls.saved_zoom.x.max]
-      y_range = [self.controls.saved_zoom.y.min, self.controls.saved_zoom.y.max]
+      self.controls.current_zoom = copy.deepcopy(self.controls.saved_zoom)
+      x_range = self.controls.saved_zoom.x
+      y_range = self.controls.saved_zoom.y
       return x_range, y_range
 
     # Calculate from data (stub - full implementation to be added)
@@ -278,7 +274,7 @@ class BoxplotChart(Chart):
     y_min = None
     y_max = None
 
-    if self.controls.x_axis:
+    if self.controls.x_axis is not None:
       for scenario in self.controls.scenarios:
         scenario_df = df.query('scenario_id == @scenario.id')
         scenario_x_values = scenario_df[self.controls.x_axis]
@@ -292,7 +288,7 @@ class BoxplotChart(Chart):
           if x_max is None or scenario_x_max > x_max:
             x_max = scenario_x_max
 
-    if self.controls.y_axis:
+    if self.controls.y_axis is not None:
       for scenario in self.controls.scenarios:
         scenario_df = df.query('scenario_id == @scenario.id')
         scenario_y_values = scenario_df[self.controls.y_axis]
@@ -306,16 +302,7 @@ class BoxplotChart(Chart):
           if y_max is None or scenario_y_max > y_max:
             y_max = scenario_y_max
 
-    if x_min is not None and x_max is not None and y_min is not None and y_max is not None:
-      x_range = [x_min, x_max]
-      y_range = [y_min, y_max]
-      # Set current_zoom to calculated values (but don't set saved_zoom)
-      from src.components.chart.chart_properties import Zoom
-
-      self.controls.current_zoom = Zoom(
-        x_min=x_range[0], x_max=x_range[1], y_min=y_range[0], y_max=y_range[1]
-      )
-    elif x_min is not None and x_max is not None:
+    if x_min is not None and x_max is not None:
       x_range = [x_min, x_max]
       y_range = None
     elif y_min is not None and y_max is not None:

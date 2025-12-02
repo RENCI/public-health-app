@@ -1,10 +1,12 @@
+import copy
+
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
-from src.components.chart.chart_properties import Model
+from src.components.chart.chart_properties import DatetimeAxisRange, FloatAxisRange, Model
 from src.components.enums import DataType, UncertaintyInterval
 from src.util.constants import get_model_color_with_uncertainty_interval
 
@@ -106,12 +108,12 @@ class LineChart(Chart):
     x_range, y_range = self._calculate_axes_ranges(df, gold_std_df)
     if x_range is not None and y_range is not None:
       for i in range(1, num_rows + 1):
-        self._fig.update_xaxes(range=x_range, row=i, col=1)
-        self._fig.update_yaxes(range=y_range, row=i, col=1)
+        self._fig.update_xaxes(range=[x_range.min, x_range.max], row=i, col=1)
+        self._fig.update_yaxes(range=[y_range.min, y_range.max], row=i, col=1)
 
   def _calculate_axes_ranges(
     self, df: pd.DataFrame, gold_std_df: pd.DataFrame
-  ) -> tuple[list[float] | None, list[float] | None]:
+  ) -> tuple[DatetimeAxisRange | None, FloatAxisRange | None]:
     """
     Calculate the x and y axis ranges for all subplots in the chart.
     Zoom logic:
@@ -123,22 +125,16 @@ class LineChart(Chart):
       * If the zoom is manually changed through either the chart or the controls, do not change saved_zoom, only current_zoom
       * If the insight is saved, set saved_zoom to current_zoom
     """
-    has_current_zoom = (
-      self.controls.current_zoom is not None and self.controls.current_zoom.is_valid()
-    )
-
-    if has_current_zoom:
-      x_range = [self.controls.current_zoom.x.min, self.controls.current_zoom.x.max]
-      y_range = [self.controls.current_zoom.y.min, self.controls.current_zoom.y.max]
+    if self.controls.current_zoom is not None:
+      x_range = self.controls.current_zoom.x
+      y_range = self.controls.current_zoom.y
       return x_range, y_range
 
-    has_saved_zoom = self.controls.saved_zoom is not None and self.controls.saved_zoom.is_valid()
-
-    if has_saved_zoom:
+    if self.controls.saved_zoom is not None:
       # Set current_zoom to saved_zoom for first load
-      self.controls.current_zoom = self.controls.saved_zoom
-      x_range = [self.controls.saved_zoom.x.min, self.controls.saved_zoom.x.max]
-      y_range = [self.controls.saved_zoom.y.min, self.controls.saved_zoom.y.max]
+      self.controls.current_zoom = copy.deepcopy(self.controls.saved_zoom)
+      x_range = self.controls.saved_zoom.x
+      y_range = self.controls.saved_zoom.y
       return x_range, y_range
 
     x_min = None
@@ -202,16 +198,14 @@ class LineChart(Chart):
       y_range = [y_min, y_max]
       y_range_span = y_max - y_min
       y_range[1] = y_max + (y_range_span * 0.02)
-      # Set current_zoom to calculated values (but don't set saved_zoom)
+      # Set current_zoom and saved_zoom to calculated values
       from src.components.chart.chart_properties import Zoom
 
-      self.controls.current_zoom = Zoom(
-        x_min=x_range[0], x_max=x_range[1], y_min=y_range[0], y_max=y_range[1]
-      )
-    else:
-      x_range = None
-      y_range = None
-    return x_range, y_range
+      zoom = Zoom(x_min=x_range[0], x_max=x_range[1], y_min=y_range[0], y_max=y_range[1])
+      self.controls.current_zoom = zoom
+      self.controls.saved_zoom = zoom
+      return zoom.x, zoom.y
+    return None, None
 
   def _plot_primary_line(self, scenario_df: pd.DataFrame, model: Model, row_num: int):
     primary_line_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')

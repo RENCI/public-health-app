@@ -1,3 +1,4 @@
+import copy
 from typing import Any
 
 import dash_mantine_components as dmc
@@ -26,7 +27,7 @@ def zoom_control(value: dict[str, Any] | None = None):
                 'Reset', id='reset-zoom-button', size='xs', variant='subtle', disabled=False
               ),
               dmc.Button(
-                'Save chart zoom', id='use-chart-zoom-button', size='xs', variant='subtle'
+                'Save chart zoom', id='save-chart-zoom-button', size='xs', variant='subtle'
               ),
             ],
             gap='xs',
@@ -59,7 +60,53 @@ def zoom_control(value: dict[str, Any] | None = None):
   )
 
 
-# Update Reset button disabled state based on whether current_zoom equals saved_zoom
+@callback(
+  Output('saved-zoom-store', 'data'),
+  Output('zoom-x-min', 'value'),
+  Output('zoom-x-max', 'value'),
+  Output('zoom-y-min', 'value'),
+  Output('zoom-y-max', 'value'),
+  Input('current-zoom-store', 'data'),
+  State('saved-zoom-store', 'data'),
+)
+def initialize_saved_zoom_and_zoom_controls(
+  current_zoom_data: dict[str, dict[str, Any]] | None,
+  saved_zoom_data: dict[str, dict[str, Any]] | None,
+):
+  """
+  Initialize zoom UI controls from current_zoom and saved_zoom.
+  If one of current_zoom or saved_zoom is provided, but the other is not, set the other to the provided value.
+  If neither are provided, use default values.
+  """
+  if current_zoom_data is None and saved_zoom_data is None:
+    raise exceptions.PreventUpdate
+
+  current_zoom = None
+  saved_zoom = None
+
+  if current_zoom_data is not None:
+    current_zoom = Zoom.from_dict(current_zoom_data)
+  if saved_zoom_data is not None:
+    saved_zoom = Zoom.from_dict(saved_zoom_data)
+
+  if current_zoom is not None and saved_zoom is None:
+    return (
+      current_zoom.to_dict(),
+      current_zoom.x.min,
+      current_zoom.x.max,
+      current_zoom.y.min,
+      current_zoom.y.max,
+    )
+  else:
+    return (
+      saved_zoom.to_dict(),
+      saved_zoom.x.min,
+      saved_zoom.x.max,
+      saved_zoom.y.min,
+      saved_zoom.y.max,
+    )
+
+
 @callback(
   Output('reset-zoom-button', 'disabled'),
   Input('current-zoom-store', 'data'),
@@ -69,25 +116,13 @@ def update_reset_button_state(
   current_zoom: dict[str, dict[str, Any]] | None,
   saved_zoom: dict[str, dict[str, Any]] | None,
 ):
-  """Disable Reset button when current_zoom equals saved_zoom."""
-  if not current_zoom or not saved_zoom:
+  """Disable Reset button when current_zoom is equal to saved_zoom."""
+  if current_zoom is None:
     return False
+  if saved_zoom is None:
+    return True
 
-  # Compare zoom values
-  current_x = current_zoom.get('x', {})
-  current_y = current_zoom.get('y', {})
-  saved_x = saved_zoom.get('x', {})
-  saved_y = saved_zoom.get('y', {})
-
-  # Check if all values match
-  zoom_equal = (
-    current_x.get('min') == saved_x.get('min')
-    and current_x.get('max') == saved_x.get('max')
-    and current_y.get('min') == saved_y.get('min')
-    and current_y.get('max') == saved_y.get('max')
-  )
-
-  return zoom_equal
+  return Zoom.from_dict(current_zoom) == Zoom.from_dict(saved_zoom)
 
 
 # If the Reset button is pressed, reset current_zoom to saved_zoom and update UI controls
@@ -101,58 +136,54 @@ def update_reset_button_state(
   State('saved-zoom-store', 'data'),
   prevent_initial_call=True,
 )
-def reset_zoom(n_clicks, saved_zoom_data):
+def reset_zoom(n_clicks: int, saved_zoom_data: dict[str, dict[str, Any]] | None):
+  """Reset current_zoom to saved_zoom value when the Reset button is pressed."""
   if not n_clicks or not saved_zoom_data:
     raise exceptions.PreventUpdate
-
-  # Reset current_zoom to saved_zoom value
-  current_zoom_dict = saved_zoom_data
-
-  # Update controls to match saved_zoom
-  x_data = saved_zoom_data.get('x', {})
-  y_data = saved_zoom_data.get('y', {})
-
+  current_zoom = Zoom.from_dict(saved_zoom_data)
+  if current_zoom is None:
+    raise exceptions.PreventUpdate
   return (
-    current_zoom_dict,
-    x_data.get('min'),
-    x_data.get('max'),
-    y_data.get('min'),
-    y_data.get('max'),
+    current_zoom.to_dict(),
+    current_zoom.x.min,
+    current_zoom.x.max,
+    current_zoom.y.min,
+    current_zoom.y.max,
   )
 
 
-# If the Use Chart Zoom button is pressed, update saved_zoom to current_zoom and update UI controls
+# If the Save Chart Zoom button is pressed, update saved_zoom to current_zoom and update UI controls
 @callback(
-  Output('saved-zoom-store', 'data'),
+  Output('saved-zoom-store', 'data', allow_duplicate=True),
   Output('zoom-x-min', 'value', allow_duplicate=True),
   Output('zoom-x-max', 'value', allow_duplicate=True),
   Output('zoom-y-min', 'value', allow_duplicate=True),
   Output('zoom-y-max', 'value', allow_duplicate=True),
-  Input('use-chart-zoom-button', 'n_clicks'),
+  Input('save-chart-zoom-button', 'n_clicks'),
   State('current-zoom-store', 'data'),
   prevent_initial_call=True,
 )
-def use_chart_zoom(n_clicks, current_zoom_data):
+def save_current_chart_zoom(n_clicks: int, current_zoom_data: dict[str, dict[str, Any]] | None):
   if not n_clicks or not current_zoom_data:
     raise exceptions.PreventUpdate
 
-  # Update saved_zoom to current_zoom value
-  saved_zoom_dict = current_zoom_data
+  current_zoom = Zoom.from_dict(current_zoom_data)
+  if current_zoom is None:
+    raise exceptions.PreventUpdate
 
-  # Update UI controls to match current_zoom
-  x_data = current_zoom_data.get('x', {})
-  y_data = current_zoom_data.get('y', {})
+  saved_zoom = copy.deepcopy(current_zoom)
+  if saved_zoom is None:
+    raise exceptions.PreventUpdate
 
   return (
-    saved_zoom_dict,
-    x_data.get('min'),
-    x_data.get('max'),
-    y_data.get('min'),
-    y_data.get('max'),
+    saved_zoom.to_dict(),
+    saved_zoom.x.min,
+    saved_zoom.x.max,
+    saved_zoom.y.min,
+    saved_zoom.y.max,
   )
 
 
-# If the zoom is manually changed through the UI controls, change only current_zoom, not saved_zoom
 @callback(
   Output('current-zoom-store', 'data', allow_duplicate=True),
   Input('zoom-x-min', 'value'),
@@ -161,9 +192,14 @@ def use_chart_zoom(n_clicks, current_zoom_data):
   Input('zoom-y-max', 'value'),
   prevent_initial_call=True,
 )
-def update_current_zoom_from_controls(x_min, x_max, y_min, y_max):
+def update_current_zoom_from_controls(
+  x_min: str | None, x_max: str | None, y_min: float | None, y_max: float | None
+):
+  """Update current_zoom, but not saved_zoom, when the zoom is manually changed through the UI controls."""
   if x_min is None or x_max is None or y_min is None or y_max is None:
     raise exceptions.PreventUpdate
-  # Convert to Zoom object and back to dict for consistency
-  zoom = Zoom(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
-  return zoom.to_dict() if zoom.is_valid() else None
+  try:
+    current_zoom = Zoom(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+    return current_zoom.to_dict()
+  except ValueError:
+    return None
