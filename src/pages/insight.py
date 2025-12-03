@@ -30,8 +30,8 @@ back_button = dmc.Anchor(
   [DashIconify(icon='feather:chevron-left'), 'Back to Round Summary'],
   id='back-to-round-summary',
   href='/',
+  fz='sm',
   style=dict(display='flex', alignItems='center', gap='0.5rem'),
-  mt='sm',
 )
 
 
@@ -92,6 +92,7 @@ explorer_button = dmc.Anchor(
 
 
 insight_toolbar = toolbar(
+  left=[back_button],
   right=[
     insight_yaml_modal_button(),
     download_button,
@@ -177,7 +178,6 @@ def annotations_list(annotations: list):
 layout = dmc.Container(
   children=[
     insight_navbar(),
-    back_button,
     insight_toolbar,
     dmc.Box(id='dummy-output'),
     dmc.Box(
