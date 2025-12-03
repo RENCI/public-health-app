@@ -93,7 +93,7 @@ class LineChart(Chart):
         if should_add_uncertainty_intervals:
           self._plot_uncertainty_interval(scenario_df=scenario_df, model=model, row_num=i)
         else:
-          # add main line
+          # add main line (0.5 quantile)
           primary_line_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
           self._fig.add_trace(
             go.Scatter(
