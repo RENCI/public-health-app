@@ -85,29 +85,30 @@ class LineChart(Chart):
       scenario_df = df.query('scenario_id == @scenario.id')
 
       # decide whether to add uncertainty intervals
-      should_add_uncertainty_intervals = self.controls.uncertainty_interval is not None
+      print(self.controls.uncertainty_interval)
+      should_add_uncertainty_intervals = self.controls.uncertainty_interval is not UncertaintyInterval.NONE
 
       # add traces for each model
       for model in self.controls.models:
         # add uncertainty intervals if necessary
         if should_add_uncertainty_intervals:
           self._plot_uncertainty_interval(scenario_df=scenario_df, model=model, row_num=i)
-
-        # add main line (0.5 quantile)
-        primary_line_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
-        self._fig.add_trace(
-          go.Scatter(
-            x=primary_line_data.index,
-            y=primary_line_data[self.controls.y_axis],
-            mode='lines',
-            name=f'Model {model.name}',
-            legendgroup=f'Model {model.name}',
-            showlegend=(i == 1),
-            line=dict(color=model.color),
-          ),
-          row=i,
-          col=1,
-        )
+        else:
+          # add main line
+          primary_line_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
+          self._fig.add_trace(
+            go.Scatter(
+              x=primary_line_data.index,
+              y=primary_line_data[self.controls.y_axis],
+              mode='lines',
+              name=f'Model {model.name}',
+              legendgroup=f'Model {model.name}',
+              showlegend=(i == 1),
+              line=dict(color=model.color),
+            ),
+            row=i,
+            col=1,
+          )
 
       # add gold standard line
       self._fig.add_trace(
