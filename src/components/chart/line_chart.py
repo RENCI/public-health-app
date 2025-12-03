@@ -85,7 +85,6 @@ class LineChart(Chart):
       scenario_df = df.query('scenario_id == @scenario.id')
 
       # decide whether to add uncertainty intervals
-      print(self.controls.uncertainty_interval)
       should_add_uncertainty_intervals = self.controls.uncertainty_interval is not UncertaintyInterval.NONE
 
       # add traces for each model
