@@ -247,22 +247,30 @@ def compute_navigation(insight_id: str, insights: list[dict], *, wrap=False):
   State('selected-round-store', 'data'),
 )
 def update_insight_nav(pathname, round_number):
-  current_insight_id = pathname.split('/insight/')[-1]
+  try:
+    current_insight_id = pathname.split('/insight/')[-1]
 
-  rounds = load_rounds()
-  insights = rounds[round_number]['insights']
+    if not current_insight_id:
+      raise exceptions.PreventUpdate
 
-  nav = compute_navigation(current_insight_id, insights, wrap=False)
+    rounds = load_rounds()
+    insights = rounds[round_number]['insights']
 
-  prev_href = f'/insight/{nav["prev"]["id"]}' if nav['prev']['id'] else None
-  next_href = f'/insight/{nav["next"]["id"]}' if nav['next']['id'] else None
+    nav = compute_navigation(current_insight_id, insights, wrap=False)
 
-  return (
-    prev_href,
-    nav['prev']['disabled'],
-    next_href,
-    nav['next']['disabled'],
-  )
+    prev_href = f'/insight/{nav["prev"]["id"]}' if nav['prev']['id'] else None
+    next_href = f'/insight/{nav["next"]["id"]}' if nav['next']['id'] else None
+
+    return (
+      prev_href,
+      nav['prev']['disabled'],
+      next_href,
+      nav['next']['disabled'],
+    )
+
+  except Exception as error:
+    print(error)
+    return no_update, no_update, no_update, no_update
 
 
 @callback(

@@ -1,3 +1,15 @@
+/* slide-down animation */
+@keyframes slideDown {
+  0% {
+    transform: translateY(-100%);
+    filter: opacity(0);
+  }
+  100% {
+    transform: translateY(0);
+    filter: opacity(1);
+  }
+}
+
 .insight-navbar-container {
   height: 45px; /* placeholder bc the toolbar is positioned absolutely */
 }
@@ -9,4 +21,7 @@
   right: 0;
   border-bottom: 1px solid var(--mantine-color-default-border);
   background-color: transparent;
+  transform: translateY(-100%);
+  filter: opacity(0);
+  animation: slideDown 0.5s ease forwards;
 }
