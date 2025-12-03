@@ -1,5 +1,6 @@
 id: vaccination-impact
 title: Vaccination Impact
+order: 2
 summary: All vaccination strategies are projected to significantly reduce disease burden. The greatest benefits will be seen if vaccines are offered to all ages.
 description: >
   - **Both vaccination strategies are projected to significantly reduce disease burden compared to no vaccination.**
