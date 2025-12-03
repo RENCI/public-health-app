@@ -298,7 +298,7 @@ def handle_click_download(n_clicks, custom_insights, pathname):
     if not insight:
       raise ValueError(f'Insight {insight_id} not found')
 
-    round_number = insight.get('controls', {}).get('round_number', '18')
+    round_number = insight.get('controls', {}).get('round_num', '18')
     slugified_title = slugify(insight.get('title', ''))
 
     pdf = generate_insight_pdf(insight)
