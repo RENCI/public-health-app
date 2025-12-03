@@ -1,5 +1,6 @@
 import copy
 from abc import ABC, abstractmethod
+from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Self
@@ -271,6 +272,46 @@ class Chart(ABC):
         return None
     return None
 
+  def _set_axes_ranges(
+    self,
+    df: pd.DataFrame,
+    gold_std_df: pd.DataFrame,
+    num_rows: int,
+    current_zoom: Zoom | None = None,
+  ):
+    zoom = self._calculate_axes_ranges(df, gold_std_df, current_zoom)
+    if zoom is not None:
+      for i in range(1, num_rows + 1):
+        self._fig.update_xaxes(range=[zoom.x.min, zoom.x.max], row=i, col=1)
+        self._fig.update_yaxes(range=[zoom.y.min, zoom.y.max], row=i, col=1)
+
+  @abstractmethod
+  def _calculate_axes_ranges(
+    self, df: pd.DataFrame, gold_std_df: pd.DataFrame, current_zoom: Zoom | None = None
+  ) -> Zoom | None:
+    pass
+
+  def calculate_new_x_range(
+    self,
+    data: pd.DataFrame,
+    current_min: float | datetime | None = None,
+    current_max: float | datetime | None = None,
+  ) -> tuple[float | datetime | None, float | datetime | None]:
+    new_min = data.index.min()
+    new_max = data.index.max()
+    min = new_min if current_min is None or new_min < current_min else current_min
+    max = new_max if current_max is None or new_max > current_max else current_max
+    return min, max
+
+  def calculate_new_y_range(
+    self, data: pd.DataFrame, current_min: float | None = None, current_max: float | None = None
+  ) -> tuple[float | None, float | None]:
+    new_min = data[self.controls.y_axis].min()
+    new_max = data[self.controls.y_axis].max()
+    min = new_min if current_min is None or new_min < current_min else current_min
+    max = new_max if current_max is None or new_max > current_max else current_max
+    return min, max
+
   def _get_axis_type(self, df: pd.DataFrame) -> type[DatetimeAxisRange] | type[FloatAxisRange]:
     if df.index.dtype == 'datetime64[ns]':
       return DatetimeAxisRange
@@ -279,30 +320,39 @@ class Chart(ABC):
     else:
       raise ValueError(f'Invalid index type: {df.index.dtype}')
 
-  def _get_x_axis_range(self) -> DatetimeAxisRange | FloatAxisRange | None:
+  def get_current_x_axis_range(self) -> DatetimeAxisRange | FloatAxisRange | None:
     """
     Get the x-axis range as a DatetimeAxisRange or FloatAxisRange object.
     Returns None if the range cannot be determined.
     """
-    # Try saved_zoom first
-    if self.controls.saved_zoom:
-      return self.controls.saved_zoom.x
-
     # Try to get range from figure layout
-    xaxis = self._fig.layout.xaxis
-    if hasattr(xaxis, 'range') and xaxis.range:
-      x_min_val = xaxis.range[0]
-      x_max_val = xaxis.range[1]
+    x_range: list[float] | None = self._fig.layout.xaxis.range
+    if x_range is not None and len(x_range) >= 2:
       axis_type = self._get_axis_type(self._raw_df)
-      return axis_type(min=x_min_val, max=x_max_val)
+      return axis_type(min=x_range[0], max=x_range[1])
     return None
+
+  def get_current_y_axis_range(self) -> FloatAxisRange | None:
+    """
+    Get the y-axis range as a FloatAxisRange object.
+    Returns None if the range cannot be determined.
+    """
+    y_range: list[float] | None = self._fig.layout.yaxis.range
+    if y_range is not None and len(y_range) >= 2:
+      return FloatAxisRange(min=y_range[0], max=y_range[1])
+    return None
+
+  def get_current_axes_ranges(
+    self,
+  ) -> tuple[DatetimeAxisRange | FloatAxisRange | None, FloatAxisRange | None]:
+    return self.get_current_x_axis_range(), self.get_current_y_axis_range()
 
   def _get_x_axis_midpoint(self) -> float | None:
     """
     Calculate the midpoint of the x-axis range in milliseconds.
     Returns None if the range cannot be determined.
     """
-    x_range = self._get_x_axis_range()
+    x_range = self.get_current_x_axis_range()
     if x_range is not None:
       if isinstance(x_range, DatetimeAxisRange):
         return DatetimeAxisRange.datetime_to_milliseconds(x_range.midpoint())
@@ -310,22 +360,12 @@ class Chart(ABC):
         return x_range.midpoint()
     return None
 
-  def _get_y_float_axis_range(self) -> FloatAxisRange | None:
-    """
-    Get the y-axis range as a FloatAxisRange object.
-    Returns None if the range cannot be determined.
-    """
-    yaxis: dict = self._fig.layout.yaxis.range
-    y_min_val = yaxis['range'][0]
-    y_max_val = yaxis['range'][1]
-    return FloatAxisRange(min=y_min_val, max=y_max_val)
-
   def _get_y_axis_midpoint(self) -> float | None:
     """
     Calculate the midpoint of the y-axis range.
     Returns None if the range cannot be determined.
     """
-    y_range = self._get_y_float_axis_range()
+    y_range = self.get_current_y_axis_range()
     if y_range is not None:
       return y_range.midpoint()
     return None
@@ -357,18 +397,22 @@ class Chart(ABC):
           annotation_position=annotation_position,
         )
       elif isinstance(annotation, VerticalAnnotation):
-        ms = (
-          DatetimeAxisRange.datetime_to_milliseconds(
-            DatetimeAxisRange.parse_value(annotation.value)
-          )
-          if annotation.value
-          else None
-        )
+        axis_type = self._get_axis_type(self._raw_df)
+
+        if annotation.value is None:
+          x_value = None
+        elif axis_type == DatetimeAxisRange:
+          parsed_datetime = DatetimeAxisRange.parse_value(annotation.value)
+          x_value = DatetimeAxisRange.datetime_to_milliseconds(parsed_datetime)
+        elif axis_type == FloatAxisRange:
+          x_value = FloatAxisRange.parse_value(annotation.value)
+        else:
+          raise ValueError(f'Invalid axis type: {axis_type}')
 
         # Determine annotation position based on whether it's on left or right half of x-axis
-        x_midpoint_ms = self._get_x_axis_midpoint()
-        if x_midpoint_ms is not None and ms is not None:
-          if ms < x_midpoint_ms:
+        x_midpoint = self._get_x_axis_midpoint()
+        if x_midpoint is not None and x_value is not None:
+          if x_value < x_midpoint:
             annotation_position = 'top right'
           else:
             annotation_position = 'top left'
@@ -376,7 +420,7 @@ class Chart(ABC):
           annotation_position = 'top left'
 
         self._fig.add_vline(
-          x=ms,
+          x=x_value,
           line_dash='dot',
           line_color=annotation.color,
           line_width=1,

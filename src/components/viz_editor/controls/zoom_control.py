@@ -67,7 +67,6 @@ def zoom_control(value: dict[str, Any] | None = None):
   Output('zoom-y-min', 'value'),
   Output('zoom-y-max', 'value'),
   Input('graph', 'relayoutData'),
-  State('saved-zoom-store', 'data'),
 )
 def initialize_saved_zoom_and_zoom_controls(
   relayout_data: dict[str, Any] | None,

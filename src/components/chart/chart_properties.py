@@ -298,7 +298,7 @@ class Zoom:
     """Initialize Zoom object.
 
     Can be initialized either by:
-    - Passing DatetimeAxisRange/FloatAxisRange and FloatAxisRange objects: x=DatetimeAxisRange(...) or FloatAxisRange(...), y=FloatAxisRange(...)
+    - Passing DatetimeAxisRange/FloatAxisRange and FloatAxisRange objects
     - Passing individual values: x_min, x_max (datetime/str/float), y_min, y_max (float/str)
 
     All values must be provided. None values will raise ValueError.
@@ -310,8 +310,10 @@ class Zoom:
       self.x = Zoom._create_x_axis_range(x_min, x_max)
       self.y = FloatAxisRange(min=y_min, max=y_max)
     else:
-      # TODO: log the issue
-      return None
+      raise ValueError(
+        'Unable to create Zoom object from x, y, x_min, x_max, y_min, y_max. '
+        + 'At least one of x, y, x_min, x_max, y_min, y_max must be provided.'
+      )
 
   @staticmethod
   def _create_x_axis_range(

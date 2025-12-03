@@ -1,4 +1,5 @@
 import copy
+from datetime import datetime
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -191,14 +192,7 @@ class BoxplotChart(Chart):
     self._fig.update_yaxes(showspikes=False)
 
     # calculate global min/max across all subplots for synchronized axes
-    x_range, y_range = self._calculate_axes_ranges(df, num_rows, current_zoom)
-
-    if x_range is not None or y_range is not None:
-      for i in range(1, num_rows + 1):
-        if x_range is not None:
-          self._fig.update_xaxes(range=x_range, row=i, col=1)
-        if y_range is not None:
-          self._fig.update_yaxes(range=y_range, row=i, col=1)
+    self._set_axes_ranges(df, self._gold_std_df, num_rows, current_zoom)
 
     # Add x-axis label only to the last row (bottom plot)
     if num_rows > 1:
@@ -248,69 +242,23 @@ class BoxplotChart(Chart):
 
   def _calculate_axes_ranges(
     self, df: pd.DataFrame, num_rows: int, current_zoom: Zoom | None = None
-  ) -> tuple[DatetimeAxisRange | FloatAxisRange | None, DatetimeAxisRange | FloatAxisRange | None]:
-    """
-    Calculate the x and y axis ranges for all subplots in the chart.
-    Zoom logic:
-      * If current_zoom is provided (from relayoutData), use it
-      * Otherwise, if saved_zoom is set, use it
-      * Otherwise, calculate from data
-    """
+  ) -> Zoom | None:
     if current_zoom is not None:
-      x_range = current_zoom.x
-      y_range = current_zoom.y
-      return x_range, y_range
-
+      return current_zoom
     if self.controls.saved_zoom is not None:
-      x_range = self.controls.saved_zoom.x
-      y_range = self.controls.saved_zoom.y
-      return x_range, y_range
+      return self.controls.saved_zoom
+    x_min, x_max, y_min, y_max = self._calculate_initial_ranges_from_projections(df)
 
-    # Calculate from data (stub - full implementation to be added)
+    return Zoom(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+
+  def _calculate_initial_ranges_from_projections(
+    self, df: pd.DataFrame
+  ) -> tuple[float | None, float | None, float | None, float | None]:
     x_min = None
     x_max = None
     y_min = None
     y_max = None
-
-    if self.controls.x_axis is not None:
-      for scenario in self.controls.scenarios:
-        scenario_df = df.query('scenario_id == @scenario.id')
-        scenario_x_values = scenario_df[self.controls.x_axis]
-        if scenario_x_values.empty:
-          continue
-        scenario_x_min = scenario_x_values.min()
-        scenario_x_max = scenario_x_values.max()
-        if scenario_x_min is not None and scenario_x_max is not None:
-          if x_min is None or scenario_x_min < x_min:
-            x_min = scenario_x_min
-          if x_max is None or scenario_x_max > x_max:
-            x_max = scenario_x_max
-
-    if self.controls.y_axis is not None:
-      for scenario in self.controls.scenarios:
-        scenario_df = df.query('scenario_id == @scenario.id')
-        scenario_y_values = scenario_df[self.controls.y_axis]
-        if scenario_y_values.empty:
-          continue
-        scenario_y_min = scenario_y_values.min()
-        scenario_y_max = scenario_y_values.max()
-        if scenario_y_min is not None and scenario_y_max is not None:
-          if y_min is None or scenario_y_min < y_min:
-            y_min = scenario_y_min
-          if y_max is None or scenario_y_max > y_max:
-            y_max = scenario_y_max
-
-    if x_min is not None and x_max is not None:
-      x_range = [x_min, x_max]
-      y_range = None
-    elif y_min is not None and y_max is not None:
-      x_range = None
-      y_range = [y_min, y_max]
-    else:
-      x_range = None
-      y_range = None
-
-    return x_range, y_range
+    return x_min, x_max, y_min, y_max
 
   def update_uncertainty_interval(self, uncertainty_interval: str | None):
     """
