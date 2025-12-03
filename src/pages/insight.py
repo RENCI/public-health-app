@@ -176,8 +176,8 @@ def annotations_list(annotations: list):
 
 layout = dmc.Container(
   children=[
-    insight_navbar(),
     insight_toolbar,
+    insight_navbar(),
     dmc.Box(id='dummy-output'),
     dmc.Box(
       loading_insight,
