@@ -2,6 +2,7 @@ from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
+from math import isclose
 from typing import Any, Self
 
 from src.util.constants import (
@@ -167,7 +168,7 @@ class DatetimeAxisRange:
     self.max = DatetimeAxisRange.parse_value(max)
 
   @staticmethod
-  def parse_value(value: str | datetime) -> datetime:
+  def parse_value(value: Any) -> datetime:
     if value is None:
       raise ValueError('Value for DatetimeAxisRange cannot be None.')
     if isinstance(value, datetime):
@@ -223,9 +224,15 @@ class DatetimeAxisRange:
     time_diff = self.max - self.min
     return self.min + (time_diff / 2)
 
-  def midpoint_milliseconds(self) -> float:
-    """Calculate and return the midpoint in milliseconds (timestamp * 1000) for Plotly compatibility."""
-    return self.midpoint().timestamp() * 1000
+  @staticmethod
+  def datetime_to_milliseconds(datetime: datetime) -> float:
+    """Convert a datetime to milliseconds since epoch."""
+    return datetime.timestamp() * 1000
+
+  @staticmethod
+  def milliseconds_to_datetime(milliseconds: float) -> datetime:
+    """Convert milliseconds since epoch to a datetime."""
+    return datetime.fromtimestamp(milliseconds / 1000)
 
   def __eq__(self, other: Self) -> bool:
     return isinstance(other, DatetimeAxisRange) and self.min == other.min and self.max == other.max
@@ -238,7 +245,7 @@ class FloatAxisRange:
   min: float
   max: float
 
-  def __init__(self, min: str | float | None, max: str | float | None):
+  def __init__(self, min: Any | None, max: Any | None):
     if min is None:
       raise ValueError('min value for FloatAxisRange cannot be None.')
     if max is None:
@@ -247,20 +254,14 @@ class FloatAxisRange:
     self.max = FloatAxisRange.parse_value(max)
 
   @staticmethod
-  def parse_value(value: str | float) -> float:
-    if value is None:
-      raise ValueError('Value for FloatAxisRange cannot be None.')
+  def parse_value(value: Any) -> float:
     if isinstance(value, float):
       return value
     if isinstance(value, int):
       return float(value)
-    if not isinstance(value, str) or value == '':
-      raise ValueError(f'Value "{value}" for FloatAxisRange cannot be empty.')
-
-    try:
-      return float(value)
-    except ValueError:
-      raise ValueError(f'Value "{value}" for FloatAxisRange cannot be converted to float.')
+    raise ValueError(
+      f'Value "{value}" for FloatAxisRange cannot be converted to float: {type(value)}.'
+    )
 
   def to_dict(self) -> dict[str, float]:
     """Convert FloatAxisRange to dictionary format for storage."""
@@ -271,30 +272,34 @@ class FloatAxisRange:
     return (self.min + self.max) / 2
 
   def __eq__(self, other: Self) -> bool:
-    return isinstance(other, FloatAxisRange) and self.min == other.min and self.max == other.max
+    """
+    Compare FloatAxisRange objects with a tolerance of 1e-9 to account for
+    floating point precision issues.
+    """
+    return isclose(self.min, other.min, rel_tol=1e-9) and isclose(self.max, other.max, rel_tol=1e-9)
 
   def __hash__(self) -> int:
     return hash((self.min, self.max))
 
 
 class Zoom:
-  x: DatetimeAxisRange
+  x: DatetimeAxisRange | FloatAxisRange
   y: FloatAxisRange
 
   def __init__(
     self,
-    x: DatetimeAxisRange | None = None,
+    x: DatetimeAxisRange | FloatAxisRange | None = None,
     y: FloatAxisRange | None = None,
-    x_min: str | datetime | None = None,
-    x_max: str | datetime | None = None,
+    x_min: str | datetime | float | None = None,
+    x_max: str | datetime | float | None = None,
     y_min: str | float | None = None,
     y_max: str | float | None = None,
   ):
     """Initialize Zoom object.
 
     Can be initialized either by:
-    - Passing DatetimeAxisRange and FloatAxisRange objects: x=DatetimeAxisRange(...), y=FloatAxisRange(...)
-    - Passing individual values: x_min, x_max (datetime/str), y_min, y_max (float/str)
+    - Passing DatetimeAxisRange/FloatAxisRange and FloatAxisRange objects: x=DatetimeAxisRange(...) or FloatAxisRange(...), y=FloatAxisRange(...)
+    - Passing individual values: x_min, x_max (datetime/str/float), y_min, y_max (float/str)
 
     All values must be provided. None values will raise ValueError.
     """
@@ -302,13 +307,30 @@ class Zoom:
       self.x = x
       self.y = y
     elif x_min is not None and x_max is not None and y_min is not None and y_max is not None:
-      self.x = DatetimeAxisRange(min=x_min, max=x_max)
+      self.x = Zoom._create_x_axis_range(x_min, x_max)
       self.y = FloatAxisRange(min=y_min, max=y_max)
     else:
-      raise ValueError(
-        'Zoom requires either (x, y) axis range objects or all four values (x_min, x_max, y_min, y_max). '
-        'None values are not allowed.'
-      )
+      # TODO: log the issue
+      return None
+
+  @staticmethod
+  def _create_x_axis_range(
+    min_val: str | datetime | float, max_val: str | datetime | float
+  ) -> DatetimeAxisRange | FloatAxisRange:
+    """Create appropriate axis range type based on input values.
+
+    Tries to create DatetimeAxisRange first, falls back to FloatAxisRange if that fails.
+    """
+    if isinstance(min_val, (int, float)) and isinstance(max_val, (int, float)):
+      return FloatAxisRange(min=min_val, max=max_val)
+
+    try:
+      return DatetimeAxisRange(min=min_val, max=max_val)
+    except (ValueError, TypeError):
+      try:
+        return FloatAxisRange(min=min_val, max=max_val)
+      except (ValueError, TypeError) as e:
+        raise ValueError(f'Unable to create axis range from min={min_val}, max={max_val}: {e}')
 
   @classmethod
   def from_dict(cls, data: dict[str, Any] | None) -> Self | None:
@@ -339,7 +361,7 @@ class Zoom:
     return {'x': self.x.to_dict(), 'y': self.y.to_dict()}
 
   def __eq__(self, other: Self) -> bool:
-    return isinstance(other, Zoom) and self.x == other.x and self.y == other.y
+    return self.x == other.x and self.y == other.y
 
   def __hash__(self) -> int:
     return hash((self.x, self.y))

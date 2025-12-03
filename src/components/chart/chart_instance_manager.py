@@ -3,7 +3,7 @@ from functools import lru_cache
 from src.components.chart.boxplot_chart import BoxplotChart
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
-from src.components.chart.chart_properties import PlotType
+from src.components.chart.chart_properties import PlotType, Zoom
 from src.components.chart.line_chart import LineChart
 
 
@@ -35,19 +35,21 @@ class ChartInstanceManager:
     """
     return create_chart(controls)
 
-  def get_chart(self, controls: ChartControls) -> Chart:
+  def get_chart(self, controls: ChartControls, current_zoom: Zoom | None = None) -> Chart:
     """
     Get or create a chart instance with LRU caching.
 
     Args:
       controls: Chart configuration parameters
+      current_zoom: Optional current zoom to apply (calculated from relayoutData in callbacks)
 
     Returns:
       Chart object (either cached or newly created)
     """
-    # Get chart from LRU cache
+    # Get chart from LRU cache (cached without considering current_zoom)
     chart = self._create_chart(controls)
-    chart.update_zoom(saved_zoom=controls.saved_zoom, current_zoom=controls.current_zoom)
+    # Apply saved_zoom and current_zoom to the cached chart
+    chart.update_zoom(saved_zoom=controls.saved_zoom, current_zoom=current_zoom)
 
     return chart
 

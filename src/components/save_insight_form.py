@@ -6,7 +6,7 @@ import dash_mantine_components as dmc
 from dash import Input, Output, State, callback, clientside_callback, dcc, exceptions
 from dash_iconify import DashIconify
 
-from src.components.chart import DEFAULT_CONTROL_VALUES
+from src.components.chart import DEFAULT_CONTROL_VALUES, Chart
 
 form_toggle_button = dmc.Button(
   'Save as New Insight',
@@ -100,7 +100,7 @@ clientside_callback(
   State('insight-description-input', 'value'),
   State('selected-round-store', 'data'),
   State('chart-controls-store', 'data'),
-  State('current-zoom-store', 'data'),
+  State('graph', 'relayoutData'),
   suppress_callback_exceptions=True,
   prevent_initial_call=True,
 )
@@ -111,7 +111,7 @@ def save_custom_insight(
   description: str,
   round_number: str,
   current_chart_controls: dict[str, Any] | None = None,
-  current_zoom: dict[str, Any] | None = None,
+  relayout_data: dict[str, Any] | None = None,
 ):
   # validation
   if not (title and title.strip() and description and description.strip()):
@@ -121,15 +121,17 @@ def save_custom_insight(
   new_id = f'custom-{uuid.uuid4()}'
   image_url = thumbnail_data or 'https://placehold.co/400?text=Visualization'
 
-  # Save current_zoom as saved_zoom (zoom) in the insight
+  # Save chart controls with round number
   controls_to_save = {
     **DEFAULT_CONTROL_VALUES,
     'round': round_number,
     **(current_chart_controls or {}),
   }
-  # Override zoom with current_zoom (saving current_zoom as saved_zoom)
-  if current_zoom:
-    controls_to_save['zoom'] = current_zoom
+  # Override chart controls zoom with current zoom from relayout data
+  if relayout_data:
+    current_zoom = Chart.calculate_zoom_from_relayout(relayout_data)
+    if current_zoom:
+      controls_to_save['zoom'] = current_zoom.to_dict()
 
   new_item = dict(
     id=new_id,

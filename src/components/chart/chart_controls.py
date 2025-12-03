@@ -49,7 +49,6 @@ class ChartControls:
   annotations: list[Annotation] | None
   uncertainty_interval: UncertaintyInterval | None
   saved_zoom: Zoom | None
-  current_zoom: Zoom | None
 
   def __init__(
     self,
@@ -66,7 +65,6 @@ class ChartControls:
     y_axis: str | None = None,
     columns: int = 1,
     saved_zoom: dict | None = DEFAULT_CONTROL_VALUES['zoom'],
-    current_zoom: dict | None = None,
     annotations: list[dict] | None = DEFAULT_CONTROL_VALUES['annotations'],
     uncertainty_interval: str = DEFAULT_CONTROL_VALUES['uncertainty_interval'],
   ):
@@ -89,9 +87,7 @@ class ChartControls:
       UncertaintyInterval.from_display_value(uncertainty_interval) if uncertainty_interval else None
     )
     # If saved_zoom is provided, initialize with it
-    # Otherwise, if current_zoom is provided, initialize with it and copy it to saved_zoom
     self.saved_zoom = Zoom.from_dict(saved_zoom) if saved_zoom else None
-    self.current_zoom = Zoom.from_dict(current_zoom) if current_zoom else None
 
   @classmethod
   def from_dict(cls, data: dict):
@@ -110,7 +106,6 @@ class ChartControls:
       x_axis=data.get('x_axis', DEFAULT_CONTROL_VALUES.get('x_axis')),
       y_axis=data.get('y_axis', DEFAULT_CONTROL_VALUES.get('y_axis')),
       saved_zoom=data.get('zoom', DEFAULT_CONTROL_VALUES['zoom']),
-      current_zoom=data.get('current_zoom', None),
       annotations=data.get('annotations', DEFAULT_CONTROL_VALUES['annotations']),
       uncertainty_interval=data.get(
         'uncertainty_interval', DEFAULT_CONTROL_VALUES['uncertainty_interval']

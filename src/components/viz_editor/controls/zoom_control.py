@@ -1,10 +1,10 @@
-import copy
 from typing import Any
 
 import dash_mantine_components as dmc
+import plotly.graph_objects as go
 from dash import Input, Output, State, callback, exceptions
 
-from src.components.chart import Zoom
+from src.components.chart import Chart, Zoom
 
 
 def zoom_control(value: dict[str, Any] | None = None):
@@ -66,83 +66,22 @@ def zoom_control(value: dict[str, Any] | None = None):
   Output('zoom-x-max', 'value'),
   Output('zoom-y-min', 'value'),
   Output('zoom-y-max', 'value'),
-  Input('current-zoom-store', 'data'),
+  Input('graph', 'relayoutData'),
   State('saved-zoom-store', 'data'),
 )
 def initialize_saved_zoom_and_zoom_controls(
-  current_zoom_data: dict[str, dict[str, Any]] | None,
-  saved_zoom_data: dict[str, dict[str, Any]] | None,
+  relayout_data: dict[str, Any] | None,
 ):
   """
-  Initialize zoom UI controls from current_zoom and saved_zoom.
-  If one of current_zoom or saved_zoom is provided, but the other is not, set the other to the provided value.
-  If neither are provided, use default values.
+  Initialize zoom UI controls from relayoutData.
   """
-  if current_zoom_data is None and saved_zoom_data is None:
+  if relayout_data is None:
     raise exceptions.PreventUpdate
 
-  current_zoom = None
-  saved_zoom = None
-
-  if current_zoom_data is not None:
-    current_zoom = Zoom.from_dict(current_zoom_data)
-  if saved_zoom_data is not None:
-    saved_zoom = Zoom.from_dict(saved_zoom_data)
-
-  if current_zoom is not None and saved_zoom is None:
-    return (
-      current_zoom.to_dict(),
-      current_zoom.x.min,
-      current_zoom.x.max,
-      current_zoom.y.min,
-      current_zoom.y.max,
-    )
-  else:
-    return (
-      saved_zoom.to_dict(),
-      saved_zoom.x.min,
-      saved_zoom.x.max,
-      saved_zoom.y.min,
-      saved_zoom.y.max,
-    )
-
-
-@callback(
-  Output('reset-zoom-button', 'disabled'),
-  Input('current-zoom-store', 'data'),
-  Input('saved-zoom-store', 'data'),
-)
-def update_reset_button_state(
-  current_zoom: dict[str, dict[str, Any]] | None,
-  saved_zoom: dict[str, dict[str, Any]] | None,
-):
-  """Disable Reset button when current_zoom is equal to saved_zoom."""
-  if current_zoom is None:
-    return False
-  if saved_zoom is None:
-    return True
-
-  return Zoom.from_dict(current_zoom) == Zoom.from_dict(saved_zoom)
-
-
-# If the Reset button is pressed, reset current_zoom to saved_zoom and update UI controls
-@callback(
-  Output('current-zoom-store', 'data', allow_duplicate=True),
-  Output('zoom-x-min', 'value', allow_duplicate=True),
-  Output('zoom-x-max', 'value', allow_duplicate=True),
-  Output('zoom-y-min', 'value', allow_duplicate=True),
-  Output('zoom-y-max', 'value', allow_duplicate=True),
-  Input('reset-zoom-button', 'n_clicks'),
-  State('saved-zoom-store', 'data'),
-  prevent_initial_call=True,
-)
-def reset_zoom(n_clicks: int, saved_zoom_data: dict[str, dict[str, Any]] | None):
-  """Reset current_zoom to saved_zoom value when the Reset button is pressed."""
-  if not n_clicks or not saved_zoom_data:
-    raise exceptions.PreventUpdate
-  current_zoom = Zoom.from_dict(saved_zoom_data)
+  current_zoom = Chart.calculate_zoom_from_relayout(relayout_data)
   if current_zoom is None:
     raise exceptions.PreventUpdate
+
   return (
     current_zoom.to_dict(),
     current_zoom.x.min,
@@ -152,7 +91,66 @@ def reset_zoom(n_clicks: int, saved_zoom_data: dict[str, dict[str, Any]] | None)
   )
 
 
-# If the Save Chart Zoom button is pressed, update saved_zoom to current_zoom and update UI controls
+@callback(
+  Output('reset-zoom-button', 'disabled'),
+  Input('graph', 'relayoutData'),
+  State('saved-zoom-store', 'data'),
+)
+def update_reset_button_state(
+  relayout_data: dict[str, Any] | None,
+  saved_zoom_data: dict[str, dict[str, Any]] | None,
+):
+  """Disable Reset button when current_zoom is equal to saved_zoom."""
+  if relayout_data is None:
+    return True
+  if saved_zoom_data is None:
+    return True
+  current_zoom = Chart.calculate_zoom_from_relayout(relayout_data)
+  if current_zoom is None:
+    return True
+  saved_zoom = Zoom.from_dict(saved_zoom_data)
+  if saved_zoom is None:
+    raise exceptions.PreventUpdate
+
+  return current_zoom == saved_zoom
+
+
+@callback(
+  Output('graph', 'figure', allow_duplicate=True),
+  Output('zoom-x-min', 'value', allow_duplicate=True),
+  Output('zoom-x-max', 'value', allow_duplicate=True),
+  Output('zoom-y-min', 'value', allow_duplicate=True),
+  Output('zoom-y-max', 'value', allow_duplicate=True),
+  Input('reset-zoom-button', 'n_clicks'),
+  State('saved-zoom-store', 'data'),
+  State('graph', 'figure'),
+  prevent_initial_call=True,
+)
+def reset_zoom(
+  n_clicks: int,
+  saved_zoom_data: dict[str, dict[str, Any]] | None,
+  current_figure: dict[str, Any] | go.Figure,
+):
+  """Reset current chart zoom and UI controls to saved_zoom value when the Reset button is pressed."""
+  if not n_clicks or saved_zoom_data is None:
+    raise exceptions.PreventUpdate
+
+  if current_figure is None:
+    raise exceptions.PreventUpdate
+
+  figure = go.Figure(current_figure) if isinstance(current_figure, dict) else current_figure
+  figure.update_xaxes(range=[saved_zoom_data['x']['min'], saved_zoom_data['x']['max']])
+  figure.update_yaxes(range=[saved_zoom_data['y']['min'], saved_zoom_data['y']['max']])
+
+  return (
+    figure,
+    saved_zoom_data['x']['min'],
+    saved_zoom_data['x']['max'],
+    saved_zoom_data['y']['min'],
+    saved_zoom_data['y']['max'],
+  )
+
+
 @callback(
   Output('saved-zoom-store', 'data', allow_duplicate=True),
   Output('zoom-x-min', 'value', allow_duplicate=True),
@@ -160,46 +158,55 @@ def reset_zoom(n_clicks: int, saved_zoom_data: dict[str, dict[str, Any]] | None)
   Output('zoom-y-min', 'value', allow_duplicate=True),
   Output('zoom-y-max', 'value', allow_duplicate=True),
   Input('save-chart-zoom-button', 'n_clicks'),
-  State('current-zoom-store', 'data'),
+  State('graph', 'relayoutData'),
   prevent_initial_call=True,
 )
-def save_current_chart_zoom(n_clicks: int, current_zoom_data: dict[str, dict[str, Any]] | None):
-  if not n_clicks or not current_zoom_data:
+def save_current_chart_zoom(n_clicks: int, relayout_data: dict[str, Any] | None):
+  """Save current chart zoom to saved_zoom when the Save Chart Zoom button is pressed."""
+  if not n_clicks or relayout_data is None:
     raise exceptions.PreventUpdate
 
-  current_zoom = Zoom.from_dict(current_zoom_data)
+  current_zoom = Chart.calculate_zoom_from_relayout(relayout_data)
   if current_zoom is None:
     raise exceptions.PreventUpdate
 
-  saved_zoom = copy.deepcopy(current_zoom)
-  if saved_zoom is None:
-    raise exceptions.PreventUpdate
-
   return (
-    saved_zoom.to_dict(),
-    saved_zoom.x.min,
-    saved_zoom.x.max,
-    saved_zoom.y.min,
-    saved_zoom.y.max,
+    current_zoom.to_dict(),
+    current_zoom.x.min,
+    current_zoom.x.max,
+    current_zoom.y.min,
+    current_zoom.y.max,
   )
 
 
 @callback(
-  Output('current-zoom-store', 'data', allow_duplicate=True),
+  Output('graph', 'figure', allow_duplicate=True),
   Input('zoom-x-min', 'value'),
   Input('zoom-x-max', 'value'),
   Input('zoom-y-min', 'value'),
   Input('zoom-y-max', 'value'),
+  State('graph', 'figure'),
   prevent_initial_call=True,
 )
 def update_current_zoom_from_controls(
-  x_min: str | None, x_max: str | None, y_min: float | None, y_max: float | None
+  x_min: str | None,
+  x_max: str | None,
+  y_min: float | None,
+  y_max: float | None,
+  current_figure: dict[str, Any] | go.Figure,
 ):
   """Update current_zoom, but not saved_zoom, when the zoom is manually changed through the UI controls."""
   if x_min is None or x_max is None or y_min is None or y_max is None:
     raise exceptions.PreventUpdate
+
+  if current_figure is None:
+    raise exceptions.PreventUpdate
+
   try:
     current_zoom = Zoom(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
-    return current_zoom.to_dict()
+    figure = go.Figure(current_figure) if isinstance(current_figure, dict) else current_figure
+    figure.update_xaxes(range=[current_zoom.x.min, current_zoom.x.max])
+    figure.update_yaxes(range=[current_zoom.y.min, current_zoom.y.max])
+    return figure
   except ValueError:
-    return None
+    raise exceptions.PreventUpdate

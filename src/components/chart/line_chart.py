@@ -6,7 +6,7 @@ from plotly.subplots import make_subplots
 
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
-from src.components.chart.chart_properties import DatetimeAxisRange, FloatAxisRange, Model
+from src.components.chart.chart_properties import DatetimeAxisRange, FloatAxisRange, Model, Zoom
 from src.components.enums import DataType, UncertaintyInterval
 from src.util.constants import get_model_color_with_uncertainty_interval
 
@@ -26,7 +26,7 @@ class LineChart(Chart):
   def __hash__(self):
     return hash(self.get_key())
 
-  def refresh_fig(self) -> go.Figure:
+  def refresh_fig(self, current_zoom: Zoom | None = None) -> go.Figure:
     # handle empty properties
     if not (
       self.controls.scenarios
@@ -87,7 +87,7 @@ class LineChart(Chart):
     self._fig.update_yaxes(showspikes=True, spikemode='across')
 
     # calculate chart min/max across all subplots for synchronized axes
-    self._set_axes_ranges(df, self._gold_std_df, num_rows)
+    self._set_axes_ranges(df, self._gold_std_df, num_rows, current_zoom)
 
     self._fig.update_yaxes(title_text=self.controls.target.display_value)
 
@@ -104,35 +104,36 @@ class LineChart(Chart):
 
     return self._fig
 
-  def _set_axes_ranges(self, df: pd.DataFrame, gold_std_df: pd.DataFrame, num_rows: int):
-    x_range, y_range = self._calculate_axes_ranges(df, gold_std_df)
+  def _set_axes_ranges(
+    self,
+    df: pd.DataFrame,
+    gold_std_df: pd.DataFrame,
+    num_rows: int,
+    current_zoom: Zoom | None = None,
+  ):
+    x_range, y_range = self._calculate_axes_ranges(df, gold_std_df, current_zoom)
     if x_range is not None and y_range is not None:
       for i in range(1, num_rows + 1):
         self._fig.update_xaxes(range=[x_range.min, x_range.max], row=i, col=1)
         self._fig.update_yaxes(range=[y_range.min, y_range.max], row=i, col=1)
 
   def _calculate_axes_ranges(
-    self, df: pd.DataFrame, gold_std_df: pd.DataFrame
+    self, df: pd.DataFrame, gold_std_df: pd.DataFrame, current_zoom: Zoom | None = None
   ) -> tuple[DatetimeAxisRange | None, FloatAxisRange | None]:
     """
     Calculate the x and y axis ranges for all subplots in the chart.
     Zoom logic:
-      * If current_zoom is set in the controls, use it
-      * If saved_zoom is set in the controls but not current_zoom, set current_zoom to saved_zoom and use it
-      * If neither current_zoom nor saved_zoom is set, calculate the ranges from the data, then
-        set both zooms to the calculated ranges
-      * If the Use Chart Zoom button is pressed, set both zooms to the current axis values
+      * If the current zoom is not None and is different from saved_zoom, use the current zoom
+      * If the Use Chart Zoom button is pressed, set both zooms to the current zoom values
       * If the zoom is manually changed through either the chart or the controls, do not change saved_zoom, only current_zoom
       * If the insight is saved, set saved_zoom to current_zoom
     """
-    if self.controls.current_zoom is not None:
-      x_range = self.controls.current_zoom.x
-      y_range = self.controls.current_zoom.y
+    if current_zoom is not None:
+      x_range = current_zoom.x
+      y_range = current_zoom.y
       return x_range, y_range
 
     if self.controls.saved_zoom is not None:
-      # Set current_zoom to saved_zoom for first load
-      self.controls.current_zoom = copy.deepcopy(self.controls.saved_zoom)
       x_range = self.controls.saved_zoom.x
       y_range = self.controls.saved_zoom.y
       return x_range, y_range
@@ -198,12 +199,13 @@ class LineChart(Chart):
       y_range = [y_min, y_max]
       y_range_span = y_max - y_min
       y_range[1] = y_max + (y_range_span * 0.02)
-      # Set current_zoom and saved_zoom to calculated values
+      # Create axis range objects from calculated values
       from src.components.chart.chart_properties import Zoom
 
       zoom = Zoom(x_min=x_range[0], x_max=x_range[1], y_min=y_range[0], y_max=y_range[1])
-      self.controls.current_zoom = zoom
-      self.controls.saved_zoom = zoom
+      # Set saved_zoom to calculated values (only if not already set)
+      if self.controls.saved_zoom is None:
+        self.controls.saved_zoom = copy.deepcopy(zoom)
       return zoom.x, zoom.y
     return None, None
 

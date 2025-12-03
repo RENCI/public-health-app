@@ -5,7 +5,13 @@ import dash_mantine_components as dmc
 import plotly.graph_objects as go
 from dash import Input, Output, State, callback, dcc, exceptions, html
 
-from src.components.chart import DEFAULT_CONTROL_VALUES, ChartControls, ChartInstanceManager, Zoom
+from src.components.chart import (
+  DEFAULT_CONTROL_VALUES,
+  Chart,
+  ChartControls,
+  ChartInstanceManager,
+  Zoom,
+)
 
 from .controls import (
   age_group_select,
@@ -63,13 +69,7 @@ def visualization_editor(controls=None, show_controls=True):
 
   # Stores
 
-  # current_zoom_store persists in local storage so zoom persists on refresh
   # saved_zoom_store is in memory and gets initialized from controls (insight saved_zoom)
-  current_zoom_store = dcc.Store(
-    id='current-zoom-store',
-    data=copy.deepcopy(init_zoom) if init_zoom else None,
-    storage_type='local',
-  )
   saved_zoom_store = dcc.Store(
     id='saved-zoom-store',
     data=copy.deepcopy(init_zoom) if init_zoom else None,
@@ -101,10 +101,6 @@ def visualization_editor(controls=None, show_controls=True):
   figure = chart.get_fig() if chart else go.Figure()
   graph = dcc.Graph(id='graph', figure=figure)
 
-  if current_zoom_store.data is None:
-    current_zoom_store.data = (
-      chart.controls.current_zoom.to_dict() if chart.controls.current_zoom else None
-    )
   if saved_zoom_store.data is None:
     saved_zoom_store.data = (
       chart.controls.saved_zoom.to_dict() if chart.controls.saved_zoom else None
@@ -151,7 +147,6 @@ def visualization_editor(controls=None, show_controls=True):
   if not show_controls:
     return html.Div(
       [
-        current_zoom_store,
         saved_zoom_store,
         chart_controls_store,
         initial_page_load_chart_controls_store,
@@ -192,7 +187,6 @@ def visualization_editor(controls=None, show_controls=True):
     [
       dmc.GridCol(
         [
-          current_zoom_store,
           saved_zoom_store,
           chart_controls_store,
           initial_page_load_chart_controls_store,
@@ -294,19 +288,26 @@ def set_chart_loading(current_chart_controls: dict[str, Any] | None):
   Output('graph', 'figure'),
   Output('chart-loading-store', 'data', allow_duplicate=True),
   Input('chart-controls-store', 'data'),
+  State('graph', 'relayoutData'),
   prevent_initial_call=True,
 )
-def update_graph_figure(
+def update_fig_with_new_controls(
   current_chart_controls: dict[str, Any],
+  relayout_data: dict[str, Any] | None,
 ):
   if not current_chart_controls:
     raise exceptions.PreventUpdate
 
+  # Calculate current zoom from relayoutData if available
+  current_zoom = (
+    Chart.calculate_zoom_from_relayout(relayout_data) if relayout_data is not None else None
+  )
+
   try:
     chart_controls = ChartControls.from_dict(current_chart_controls)
 
-    # Get or create chart instance using the manager
-    chart = chart_manager.get_chart(chart_controls)
+    # Get or create chart instance using the manager (cached without current_zoom)
+    chart = chart_manager.get_chart(chart_controls, current_zoom=current_zoom)
 
     if not chart:
       raise Exception('Chart not found')
@@ -324,37 +325,20 @@ def update_graph_figure(
 
 @callback(
   Output('chart-controls-store', 'data', allow_duplicate=True),
-  Input('chart-controls-store', 'data'),
   Input('saved-zoom-store', 'data'),
-  Input('current-zoom-store', 'data'),
+  State('chart-controls-store', 'data'),
   prevent_initial_call=True,
 )
 def update_chart_controls_with_zoom(
+  saved_zoom_data: dict[str, dict[str, Any]] | None,
   current_chart_controls: dict[str, Any] | None,
-  saved_zoom: dict[str, dict[str, Any]] | None,
-  current_zoom: dict[str, dict[str, Any]] | None,
 ):
   if not current_chart_controls:
     raise exceptions.PreventUpdate
-  if saved_zoom is None and current_zoom is not None:
-    saved_zoom = copy.deepcopy(current_zoom)
-  return {**current_chart_controls, 'saved_zoom': saved_zoom, 'current_zoom': current_zoom}
-
-
-@callback(
-  Output('current-zoom-store', 'data', allow_duplicate=True),
-  Input('saved-zoom-store', 'data'),
-  State('current-zoom-store', 'data'),
-  prevent_initial_call=True,
-)
-def initialize_current_zoom_from_saved(
-  saved_zoom: dict[str, dict[str, Any]] | None,
-  current_zoom: dict[str, dict[str, Any]] | None,
-):
-  """If current_zoom doesn't exist but saved_zoom does, copy saved_zoom to current_zoom."""
-  if current_zoom is None and saved_zoom is not None:
-    return copy.deepcopy(saved_zoom)
-  raise exceptions.PreventUpdate
+  saved_zoom = Zoom.from_dict(saved_zoom_data)
+  if saved_zoom is not None:
+    current_chart_controls['saved_zoom'] = saved_zoom.to_dict()
+  return current_chart_controls
 
 
 @callback(
@@ -392,46 +376,3 @@ def update_chart_loading_display(is_loading: bool):
       },
       {'opacity': '1', 'transition': 'opacity 0.2s'},
     )
-
-
-# If the zoom is manually changed through the chart, change only current_zoom, not saved_zoom
-@callback(
-  Output('current-zoom-store', 'data', allow_duplicate=True),
-  Input('graph', 'relayoutData'),
-  prevent_initial_call=True,
-)
-def update_current_zoom_from_chart(relayout: dict[str, Any] | None):
-  if not relayout:
-    raise exceptions.PreventUpdate
-
-  x_range_min = None
-  x_range_max = None
-  y_range_min = None
-  y_range_max = None
-
-  for key in relayout.keys():
-    if key.startswith('xaxis') and '.range' in key:
-      if key.endswith('.range[0]'):
-        x_range_min = relayout.get(key)
-        range_key_1 = key.replace('.range[0]', '.range[1]')
-        x_range_max = relayout.get(range_key_1)
-      elif key.endswith('.range') and isinstance(relayout.get(key), list):
-        x_range = relayout.get(key)
-        if x_range and len(x_range) >= 2:
-          x_range_min = x_range[0]
-          x_range_max = x_range[1]
-    elif key.startswith('yaxis') and '.range' in key:
-      if key.endswith('.range[0]'):
-        y_range_min = relayout.get(key)
-        range_key_1 = key.replace('.range[0]', '.range[1]')
-        y_range_max = relayout.get(range_key_1)
-      elif key.endswith('.range') and isinstance(relayout.get(key), list):
-        y_range = relayout.get(key)
-        if y_range and len(y_range) >= 2:
-          y_range_min = y_range[0]
-          y_range_max = y_range[1]
-  try:
-    zoom = Zoom(x_min=x_range_min, x_max=x_range_max, y_min=y_range_min, y_max=y_range_max)
-    return zoom.to_dict()
-  except ValueError:
-    return None

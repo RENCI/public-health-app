@@ -1,6 +1,5 @@
 import copy
 from abc import ABC, abstractmethod
-from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Self
@@ -201,26 +200,82 @@ class Chart(ABC):
     self.refresh_fig()
 
   def update_zoom(self, saved_zoom: Zoom | None, current_zoom: Zoom | None):
-    """Update both saved_zoom and current_zoom, which then refreshes the figure."""
+    """
+    Update both saved_zoom and current_zoom.
+    Note: current_zoom is calculated from relayoutData in callbacks, not stored in controls.
+    """
     self.update_saved_zoom(saved_zoom)
     self.update_current_zoom(current_zoom)
 
   def update_current_zoom(self, current_zoom: Zoom | None):
-    """Update current_zoom and refresh the figure with unified axes."""
+    """
+    Update current zoom and apply to all subplots with unified axes.
+    This ensures that when one subplot is zoomed, all subplots are synchronized.
+    """
     if current_zoom:
-      self.controls.current_zoom = copy.deepcopy(current_zoom)
-    self.refresh_fig()
+      # Update all x-axes and y-axes across all subplots
+      self._fig.update_xaxes(range=[current_zoom.x.min, current_zoom.x.max])
+      self._fig.update_yaxes(range=[current_zoom.y.min, current_zoom.y.max])
 
   def update_saved_zoom(self, saved_zoom: Zoom | None):
     """Update saved_zoom without refreshing the figure."""
     if saved_zoom:
       self.controls.saved_zoom = copy.deepcopy(saved_zoom)
 
-  def _get_axis_type(self, df: pd.DataFrame) -> type[DatetimeAxisRange | FloatAxisRange]:
+  @staticmethod
+  def calculate_zoom_from_relayout(relayout: dict[str, Any] | None) -> Zoom | None:
+    """
+    Calculate Zoom object from plotly relayoutData.
+    Handles multiple subplots by extracting range from any subplot (they should be synchronized).
+    Returns None if no valid zoom data is found.
+    """
+    if not relayout:
+      return None
+    x_range_min: str | float | None = None
+    x_range_max: str | float | None = None
+    y_range_min: str | float | None = None
+    y_range_max: str | float | None = None
+
+    for key in relayout.keys():
+      if key.startswith('xaxis') and '.range' in key:
+        if key.endswith('.range[0]'):
+          x_range_min = relayout.get(key)
+          range_key_1 = key.replace('.range[0]', '.range[1]')
+          x_range_max = relayout.get(range_key_1)
+        elif key.endswith('.range') and isinstance(relayout.get(key), list):
+          x_range = relayout.get(key)
+          if x_range and len(x_range) >= 2:
+            x_range_min = x_range[0]
+            x_range_max = x_range[1]
+      elif key.startswith('yaxis') and '.range' in key:
+        if key.endswith('.range[0]'):
+          y_range_min = relayout.get(key)
+          range_key_1 = key.replace('.range[0]', '.range[1]')
+          y_range_max = relayout.get(range_key_1)
+        elif key.endswith('.range') and isinstance(relayout.get(key), list):
+          y_range = relayout.get(key)
+          if y_range and len(y_range) >= 2:
+            y_range_min = y_range[0]
+            y_range_max = y_range[1]
+
+    # Only create Zoom if we have all required values
+    if (
+      x_range_min is not None
+      and x_range_max is not None
+      and y_range_min is not None
+      and y_range_max is not None
+    ):
+      try:
+        return Zoom(x_min=x_range_min, x_max=x_range_max, y_min=y_range_min, y_max=y_range_max)
+      except (ValueError, TypeError):
+        return None
+    return None
+
+  def _get_axis_type(self, df: pd.DataFrame) -> type[DatetimeAxisRange] | type[FloatAxisRange]:
     if df.index.dtype == 'datetime64[ns]':
-      return type[DatetimeAxisRange]
+      return DatetimeAxisRange
     elif df.index.dtype == 'float64':
-      return type[FloatAxisRange]
+      return FloatAxisRange
     else:
       raise ValueError(f'Invalid index type: {df.index.dtype}')
 
@@ -229,11 +284,7 @@ class Chart(ABC):
     Get the x-axis range as a DatetimeAxisRange or FloatAxisRange object.
     Returns None if the range cannot be determined.
     """
-    # Try to get range from current_zoom
-    if self.controls.current_zoom:
-      return self.controls.current_zoom.x
-
-    # Try saved_zoom if current_zoom is not available
+    # Try saved_zoom first
     if self.controls.saved_zoom:
       return self.controls.saved_zoom.x
 
@@ -253,44 +304,28 @@ class Chart(ABC):
     """
     x_range = self._get_x_axis_range()
     if x_range is not None:
-      return x_range.midpoint_milliseconds()
+      if isinstance(x_range, DatetimeAxisRange):
+        return DatetimeAxisRange.datetime_to_milliseconds(x_range.midpoint())
+      elif isinstance(x_range, FloatAxisRange):
+        return x_range.midpoint()
     return None
 
-  def _get_y_axis_range(self) -> FloatAxisRange | None:
+  def _get_y_float_axis_range(self) -> FloatAxisRange | None:
     """
     Get the y-axis range as a FloatAxisRange object.
     Returns None if the range cannot be determined.
     """
-    # Try to get range from current_zoom
-    if self.controls.current_zoom:
-      return self.controls.current_zoom.y
-
-    # Try saved_zoom if current_zoom is not available
-    if self.controls.saved_zoom:
-      return self.controls.saved_zoom.y
-
-    # Try to get range from figure layout
-    yaxis = self._fig.layout.yaxis
-    if hasattr(yaxis, 'range') and yaxis.range:
-      y_min_val = yaxis.range[0]
-      y_max_val = yaxis.range[1]
-      try:
-        # Try to create FloatAxisRange from the range values
-        if isinstance(y_min_val, (int, float)) and isinstance(y_max_val, (int, float)):
-          return FloatAxisRange(min=y_min_val, max=y_max_val)
-        elif isinstance(y_min_val, str) and isinstance(y_max_val, str):
-          return FloatAxisRange(min=y_min_val, max=y_max_val)
-      except (ValueError, TypeError):
-        pass
-
-    return None
+    yaxis: dict = self._fig.layout.yaxis.range
+    y_min_val = yaxis['range'][0]
+    y_max_val = yaxis['range'][1]
+    return FloatAxisRange(min=y_min_val, max=y_max_val)
 
   def _get_y_axis_midpoint(self) -> float | None:
     """
     Calculate the midpoint of the y-axis range.
     Returns None if the range cannot be determined.
     """
-    y_range = self._get_y_axis_range()
+    y_range = self._get_y_float_axis_range()
     if y_range is not None:
       return y_range.midpoint()
     return None
@@ -323,15 +358,17 @@ class Chart(ABC):
         )
       elif isinstance(annotation, VerticalAnnotation):
         ms = (
-          DatetimeAxisRange.parse_value(annotation.value).timestamp() * 1000
+          DatetimeAxisRange.datetime_to_milliseconds(
+            DatetimeAxisRange.parse_value(annotation.value)
+          )
           if annotation.value
           else None
         )
 
         # Determine annotation position based on whether it's on left or right half of x-axis
-        x_midpoint = self._get_x_axis_midpoint()
-        if x_midpoint is not None and ms is not None:
-          if ms < x_midpoint:
+        x_midpoint_ms = self._get_x_axis_midpoint()
+        if x_midpoint_ms is not None and ms is not None:
+          if ms < x_midpoint_ms:
             annotation_position = 'top right'
           else:
             annotation_position = 'top left'

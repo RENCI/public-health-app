@@ -6,7 +6,7 @@ from plotly.subplots import make_subplots
 
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
-from src.components.chart.chart_properties import DatetimeAxisRange, FloatAxisRange
+from src.components.chart.chart_properties import DatetimeAxisRange, FloatAxisRange, Zoom
 from src.components.enums import DataType, UncertaintyInterval
 from src.util.constants import get_model_by_name, get_model_color_by_name
 
@@ -101,7 +101,7 @@ class BoxplotChart(Chart):
   def __hash__(self):
     return hash(self.get_key())
 
-  def refresh_fig(self) -> go.Figure:
+  def refresh_fig(self, current_zoom: Zoom | None = None) -> go.Figure:
     # handle empty properties
     if not (
       self.controls.scenarios
@@ -191,7 +191,7 @@ class BoxplotChart(Chart):
     self._fig.update_yaxes(showspikes=False)
 
     # calculate global min/max across all subplots for synchronized axes
-    x_range, y_range = self._calculate_axes_ranges(df, num_rows)
+    x_range, y_range = self._calculate_axes_ranges(df, num_rows, current_zoom)
 
     if x_range is not None or y_range is not None:
       for i in range(1, num_rows + 1):
@@ -247,23 +247,21 @@ class BoxplotChart(Chart):
     self._raw_df = new_raw_df
 
   def _calculate_axes_ranges(
-    self, df: pd.DataFrame, num_rows: int
+    self, df: pd.DataFrame, num_rows: int, current_zoom: Zoom | None = None
   ) -> tuple[DatetimeAxisRange | FloatAxisRange | None, DatetimeAxisRange | FloatAxisRange | None]:
     """
     Calculate the x and y axis ranges for all subplots in the chart.
     Zoom logic:
-      * If current_zoom is set in the controls, use it
-      * If saved_zoom is set in the controls but not current_zoom, set current_zoom to saved_zoom and use it
-      * If neither current_zoom nor saved_zoom is set, calculate the ranges from the data
+      * If current_zoom is provided (from relayoutData), use it
+      * Otherwise, if saved_zoom is set, use it
+      * Otherwise, calculate from data
     """
-    if self.controls.current_zoom is not None:
-      x_range = self.controls.current_zoom.x
-      y_range = self.controls.current_zoom.y
+    if current_zoom is not None:
+      x_range = current_zoom.x
+      y_range = current_zoom.y
       return x_range, y_range
 
     if self.controls.saved_zoom is not None:
-      # Set current_zoom to saved_zoom for first load
-      self.controls.current_zoom = copy.deepcopy(self.controls.saved_zoom)
       x_range = self.controls.saved_zoom.x
       y_range = self.controls.saved_zoom.y
       return x_range, y_range
