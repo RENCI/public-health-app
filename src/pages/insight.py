@@ -27,40 +27,46 @@ from src.util import generate_insight_pdf, load_rounds, slugify
 register_page(__name__, path_template='/insight/<insight_id>', name='Insight Details')
 
 back_button = dmc.Anchor(
-  toolbar_button(
-    'Back to Round Summary',
-    icon=DashIconify(icon='feather:chevron-left'),
-  ),
+  [DashIconify(icon='feather:chevron-left'), 'Back to Round Summary'],
   id='back-to-round-summary',
   href='/',
+  fz='sm',
+  style=dict(display='flex', alignItems='center', gap='0.5rem'),
 )
 
 
-prev_insight_button = dmc.Anchor(
-  toolbar_button(
-    'Previous Insight',
-    icon=DashIconify(icon='feather:chevron-left', width=16),
-    icon_placement='left',
-    id='prev-insight-link-button',
-    disabled=True,
-  ),
-  id='prev-insight-link',
-  href='#',
-)
+def insight_navbar():
+  prev_insight_button = dmc.Anchor(
+    toolbar_button(
+      'Previous Insight',
+      icon=DashIconify(icon='feather:chevron-left', width=16),
+      icon_placement='left',
+      id='prev-insight-link-button',
+      disabled=True,
+    ),
+    id='prev-insight-link',
+    href='#',
+  )
 
 
-next_insight_button = dmc.Anchor(
-  toolbar_button(
-    'Next Insight',
-    icon=DashIconify(icon='feather:chevron-right', width=16),
-    icon_placement='right',
-    id='next-insight-link-button',
-    disabled=True,
-  ),
-  id='next-insight-link',
-  href='#',
-)
+  next_insight_button = dmc.Anchor(
+    toolbar_button(
+      'Next Insight',
+      icon=DashIconify(icon='feather:chevron-right', width=16),
+      icon_placement='right',
+      id='next-insight-link-button',
+      disabled=True,
+    ),
+    id='next-insight-link',
+    href='#',
+  )
 
+  return html.Div([
+    toolbar(
+      left=[prev_insight_button],
+      right=[next_insight_button],
+    )],
+  )
 
 
 download_button = toolbar_button(
@@ -84,16 +90,13 @@ explorer_button = dmc.Anchor(
 
 
 insight_toolbar = toolbar(
-  left=[
-    prev_insight_button,
-    back_button,
-  ],
+  left=[back_button],
   right=[
     insight_yaml_modal_button(),
     download_button,
-    explorer_button,
-    next_insight_button,
-  ]
+    explorer_button
+  ],
+  variant='outline',
 )
 
 
@@ -173,6 +176,7 @@ def annotations_list(annotations: list):
 
 layout = dmc.Container(
   children=[
+    insight_navbar(),
     insight_toolbar,
     dmc.Box(id='dummy-output'),
     dmc.Box(
