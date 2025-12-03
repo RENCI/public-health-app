@@ -1,4 +1,5 @@
 import os
+import json
 import markdown
 from weasyprint import HTML
 
@@ -85,10 +86,10 @@ def generate_insight_pdf(insight):
   description_md = insight.get('description') or 'Details not found'
   description_html = md_to_html(description_md)
   controls = insight.get('controls', {})
-  round_number = controls.get('round', '18')
+  round_number = controls.get('round_num', '18')
 
   rounds = load_rounds()
-  this_round = rounds.get(round_number)
+  this_round = rounds.get(str(round_number))
   round_date = this_round.get('date', '...')
 
   body = f"""
