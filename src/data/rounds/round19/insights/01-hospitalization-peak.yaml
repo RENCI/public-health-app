@@ -18,14 +18,14 @@ updated_at: "2025-05-18T22:45:12Z"
 controls:
   age_group: 0-130
   annotations:
-  - color: '#993366'
-    label: Winter Peak
-    type: vertical
-    value: '2025-12-25'
   - color: '#3cab00'
     label: Fall Peak
     type: vertical
     value: '2025-08-25'
+  - color: '#993366'
+    label: Winter Peak
+    type: vertical
+    value: '2025-12-25'
   location_name: US
   model_names:
   - CEPH-MetaRSV
