@@ -274,7 +274,6 @@ class LineChart(Chart):
     self.refresh_fig()
 
   def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int):
-    print(self.controls.uncertainty_interval)
     for lower_q, upper_q in self.controls.uncertainty_interval.get_bounds():
       lower_model = scenario_df.query('type_id == @lower_q and model_name == @model.id')
       upper_model = scenario_df.query('type_id == @upper_q and model_name == @model.id')

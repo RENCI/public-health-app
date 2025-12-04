@@ -28,7 +28,11 @@ from src.util.constants import DEFAULT_CONTROL_VALUES
 #   pass insight dict into insight_yaml_modal.
 
 
-def insight_save_modal(initial_title='', initial_description=''):
+def insight_save_modal(
+  initial_title='',
+  initial_summary='',
+  initial_description='',
+):
   return dmc.Modal(
     [
       dcc.Store(id='thumbnail-store'),
@@ -42,6 +46,11 @@ def insight_save_modal(initial_title='', initial_description=''):
                 label=dmc.Text('Title', c='blue', fz='lg'),
                 size='lg',
                 variant='filled',
+              ),
+              markdown_editor(
+                editor_id='insight-summary-input',
+                label='Summary',
+                initial_value=initial_summary,
               ),
               markdown_editor(
                 editor_id='insight-description-input',
@@ -123,6 +132,7 @@ clientside_callback(
   Input('thumbnail-store', 'data'),
   State('custom-insights-store', 'data'),
   State('insight-title-input', 'value'),
+  State({'type': 'editor', 'id': 'insight-summary-input'}, 'value'),
   State({'type': 'editor', 'id': 'insight-description-input'}, 'value'),
   State('selected-round-store', 'data'),
   State('chart-controls-store', 'data'),
@@ -133,6 +143,7 @@ def save_custom_insight(
   thumbnail_data,
   current_custom_insights: list[dict[str, Any]],
   title: str,
+  summary: str,
   description: str,
   round_number: str,
   current_chart_controls: dict[str, Any] | None = None,
@@ -147,6 +158,7 @@ def save_custom_insight(
   new_item = dict(
     id=new_id,
     title=title.strip(),
+    summary=summary.strip(),
     description=description.strip(),
     image_url=image_url,
     created_at=now,

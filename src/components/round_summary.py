@@ -160,9 +160,8 @@ def custom_insight_button(item):
     ),
   )
 
-  title = dmc.Text(
-    item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left', flex=1)
-  )
+  title = dmc.Text(item['title'], size='lg')
+  summary = dmc.Text(item['summary'], c='dimmed')
 
   share_button = dmc.ActionIcon(
     DashIconify(icon='feather:share-2', width=16, color='teal'),
@@ -215,7 +214,7 @@ def custom_insight_button(item):
         [
           dmc.Box(graphic, style=dict(width='150px', aspectRatio=1)),
           dmc.Stack(
-            [title, details],
+            [title, summary, details],
             w='100%',
             c='var(--mantine-color-text)',
             px='lg',

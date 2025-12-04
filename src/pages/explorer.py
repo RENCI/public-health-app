@@ -58,10 +58,19 @@ def layout(starter=None):
   insight = get_insight(starter) or {}
 
   title = insight.get('title', '')
+  summary = insight.get('summary', '')
   description = insight.get('description', '')
 
   return dmc.Container(
-    [insight_toolbar, insight_editor(starter), insight_save_modal(initial_title=title, initial_description=description)],
+    [
+      insight_toolbar,
+      insight_editor(starter),
+      insight_save_modal(
+        initial_title=title,
+        initial_summary=summary,
+        initial_description=description,
+      ),
+    ],
     fluid=True,
     id='explorer-container',
   )
