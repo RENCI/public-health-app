@@ -95,6 +95,7 @@ def insight_save_modal_button():
     'Save',
     icon=DashIconify(icon='feather:save'),
     id='insight-save-modal-button',
+    variant='solid',
   )
 
 
