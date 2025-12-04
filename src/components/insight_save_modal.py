@@ -56,6 +56,7 @@ def insight_save_modal(
                 editor_id='insight-description-input',
                 label='Description',
                 initial_value=initial_description,
+                min_height='300px',
               ),
             ],
             gap=24,
