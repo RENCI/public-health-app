@@ -27,11 +27,12 @@ def round_select(value='19'):
     id='round-select',
     value=value,
     data=sorted_options,
-    size='xs',
+    size='md',
     allowDeselect=False,
     renderOption={'function': 'renderRoundOption'},
     style=dict(width='300px'),
     withScrollArea=False,
+    variant='default',
   )
 
 
