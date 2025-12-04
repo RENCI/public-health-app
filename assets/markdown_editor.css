@@ -9,8 +9,8 @@ Markdown Editor
   padding: 1rem;
   min-height: 300px;
   background-color: light-dark(
-    color-mix(in hsl, var(--mantine-primary-color-filled), transparent 90%),
-    color-mix(in hsl, var(--mantine-primary-color-filled), transparent 75%)
+    color-mix(in hsl, var(--mantine-color-body), #ddd 90%),
+    color-mix(in hsl, var(--mantine-color-body), #222 75%)
   );
   resize: vertical;
   border: 0;
@@ -24,8 +24,8 @@ Markdown Editor
   padding: 1rem;
   min-height: 300px;
   background-color: light-dark(
-    color-mix(in hsl, var(--mantine-primary-color-filled), transparent 90%),
-    color-mix(in hsl, var(--mantine-primary-color-filled), transparent 75%)
+    color-mix(in hsl, var(--mantine-color-body), #ddd 90%),
+    color-mix(in hsl, var(--mantine-color-body), #222 75%)
   );
   color: var(--mantine-color-text);
   h1:first-of-type { margin-top: 0; }
