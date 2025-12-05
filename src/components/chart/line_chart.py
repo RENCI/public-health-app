@@ -64,8 +64,6 @@ class LineChart(Chart):
       vertical_spacing=vertical_spacing,
       row_heights=[1] * num_rows,
       subplot_titles=[f'{s.name.split("-")[0]}. {s.description}' for s in self.controls.scenarios],
-      shared_xaxes=True,
-      shared_yaxes=True,
     )
 
     # add traces for each scenario
@@ -80,8 +78,8 @@ class LineChart(Chart):
       self._plot_gold_standard_line(self._gold_std_df, row_num=i)
 
     # apply spike guides for each axis in the chart viewport
-    self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
-    self._fig.update_yaxes(showspikes=True, spikemode='across')
+    self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor', matches='x')
+    self._fig.update_yaxes(showspikes=True, spikemode='across', matches='y')
 
     # calculate chart min/max across all subplots for synchronized axes
     # self._set_axes_ranges(self._df, self._gold_std_df)
