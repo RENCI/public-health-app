@@ -131,7 +131,7 @@ def save_custom_insight(
   if relayout_data:
     current_zoom = Chart.calculate_zoom_from_relayout(relayout_data)
     if current_zoom:
-      controls_to_save['zoom'] = current_zoom.to_dict()
+      controls_to_save['saved_zoom'] = current_zoom.to_dict()
 
   new_item = dict(
     id=new_id,

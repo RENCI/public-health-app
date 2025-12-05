@@ -1,14 +1,12 @@
-import copy
-from datetime import datetime
-
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
-from src.components.chart.chart_properties import DatetimeAxisRange, FloatAxisRange, Zoom
-from src.components.enums import DataType, UncertaintyInterval
+from src.components.chart.chart_properties import Zoom
+from src.components.enums import DataType
+from src.util import all_not_none
 from src.util.constants import get_model_by_name, get_model_color_by_name
 
 SCENARIO_AXIS_LABEL_FONT_SIZE = 10
@@ -19,17 +17,18 @@ class BoxplotChart(Chart):
 
   def __init__(self, controls: ChartControls):
     super().__init__(controls)
-    self._reload_data()
     self._start_date_str, self._end_date_str = self._calculate_data_time_range()
-    self._fig = go.Figure()
-
     self.refresh_fig()
+
+  def filter_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+    df = df.query('age_group == @self.controls.age_group.input_value')
+    return df
 
   def _calculate_data_time_range(self) -> tuple[str, str]:
     min_date: pd.Timestamp = pd.Timestamp.max
     max_date: pd.Timestamp = pd.Timestamp.min
     for scenario in self.controls.scenarios:
-      scenario_df = self._raw_df.query('scenario_id == @scenario.id')
+      scenario_df = self._df.query('scenario_id == @scenario.id')
       scenario_min_date = scenario_df['target_end_date'].min()
       scenario_max_date = scenario_df['target_end_date'].max()
       if scenario_min_date < min_date:
@@ -102,7 +101,7 @@ class BoxplotChart(Chart):
   def __hash__(self):
     return hash(self.get_key())
 
-  def refresh_fig(self, current_zoom: Zoom | None = None) -> go.Figure:
+  def refresh_fig(self) -> go.Figure:
     # handle empty properties
     if not (
       self.controls.scenarios
@@ -122,15 +121,9 @@ class BoxplotChart(Chart):
       vertical_spacing=0.1,
     )
 
-    # start with the raw dataframe
-    df = self._raw_df
-
-    # filter for given age group
-    df = df.query('age_group == @self.controls.age_group.input_value')
-
     # filter for ensemble model, specifically
     ensemble_model_id = get_model_by_name('Ensemble')['id']  # noqa: F841
-    df = df.query('model_name == @ensemble_model_id')
+    df = self._df.query('model_name == @ensemble_model_id')
 
     for i, scenario in enumerate(self.controls.scenarios, start=1):
       scenario_df = df.query('scenario_id == @scenario.id')
@@ -191,8 +184,8 @@ class BoxplotChart(Chart):
     self._fig.update_xaxes(showspikes=False)
     self._fig.update_yaxes(showspikes=False)
 
-    # calculate global min/max across all subplots for synchronized axes
-    self._set_axes_ranges(df, self._gold_std_df, num_rows, current_zoom)
+    # use default zoom from Plotly for now
+    # self._set_axes_ranges(df, self._gold_std_df)
 
     # Add x-axis label only to the last row (bottom plot)
     if num_rows > 1:
@@ -240,16 +233,15 @@ class BoxplotChart(Chart):
     )
     self._raw_df = new_raw_df
 
-  def _calculate_axes_ranges(
-    self, df: pd.DataFrame, num_rows: int, current_zoom: Zoom | None = None
-  ) -> Zoom | None:
-    if current_zoom is not None:
-      return current_zoom
-    if self.controls.saved_zoom is not None:
-      return self.controls.saved_zoom
+  def calculate_axes_ranges(self, df: pd.DataFrame) -> Zoom | None:
+    """Return None for all cases for now, until Zoom objects can work for boxplots."""
     x_min, x_max, y_min, y_max = self._calculate_initial_ranges_from_projections(df)
-
-    return Zoom(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+    if not all_not_none(x_min, x_max) and not all_not_none(y_min, y_max):
+      return None
+    elif all_not_none(x_min, x_max) and not all_not_none(y_min, y_max):
+      return None
+    else:
+      return None
 
   def _calculate_initial_ranges_from_projections(
     self, df: pd.DataFrame
@@ -258,13 +250,19 @@ class BoxplotChart(Chart):
     x_max = None
     y_min = None
     y_max = None
-    return x_min, x_max, y_min, y_max
 
-  def update_uncertainty_interval(self, uncertainty_interval: str | None):
-    """
-    Update the uncertainty interval.
-    """
-    self.controls.uncertainty_interval = (
-      UncertaintyInterval.from_display_value(uncertainty_interval) if uncertainty_interval else None
-    )
-    self.refresh_fig()
+    for scenario in self.controls.scenarios:
+      scenario_df = df.query('scenario_id == @scenario.id')
+      if not scenario_df.empty:
+        for model in self.controls.models:
+          model_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
+          if not model_data.empty:
+            if self.controls.x_axis:
+              x_min, x_max = self.calculate_new_x_range(
+                model_data[self.controls.x_axis], x_min, x_max
+              )
+            if self.controls.y_axis:
+              y_min, y_max = self.calculate_new_y_range(
+                model_data[self.controls.y_axis], y_min, y_max
+              )
+    return x_min, x_max, y_min, y_max

@@ -17,14 +17,17 @@ from .chart_properties import (
 )
 from .line_chart import LineChart
 
+# Global instance of the chart manager
+chart_manager = ChartInstanceManager()
+
 __all__ = [
   'DEFAULT_CONTROL_VALUES',
   'Annotation',
   'BoxplotChart',
   'Chart',
   'ChartControls',
-  'ChartInstanceManager',
   'create_chart',
+  'chart_manager',
   'DatetimeAxisRange',
   'FloatAxisRange',
   'HorizontalAnnotation',

@@ -27,7 +27,7 @@ DEFAULT_CONTROL_VALUES = {
   'age_group': '0-130',
   'x_axis': 'target_end_date',
   'y_axis': 'value',
-  'zoom': None,
+  'saved_zoom': None,
   'annotations': None,
   'uncertainty_interval': 'None',
 }
@@ -64,7 +64,7 @@ class ChartControls:
     x_axis: str | None = None,
     y_axis: str | None = None,
     columns: int = 1,
-    saved_zoom: dict | None = DEFAULT_CONTROL_VALUES['zoom'],
+    saved_zoom: dict | None = DEFAULT_CONTROL_VALUES['saved_zoom'],
     annotations: list[dict] | None = DEFAULT_CONTROL_VALUES['annotations'],
     uncertainty_interval: str = DEFAULT_CONTROL_VALUES['uncertainty_interval'],
   ):
@@ -105,7 +105,7 @@ class ChartControls:
       age_group=data.get('age_group', DEFAULT_CONTROL_VALUES['age_group']),
       x_axis=data.get('x_axis', DEFAULT_CONTROL_VALUES.get('x_axis')),
       y_axis=data.get('y_axis', DEFAULT_CONTROL_VALUES.get('y_axis')),
-      saved_zoom=data.get('zoom', DEFAULT_CONTROL_VALUES['zoom']),
+      saved_zoom=data.get('saved_zoom', DEFAULT_CONTROL_VALUES['saved_zoom']),
       annotations=data.get('annotations', DEFAULT_CONTROL_VALUES['annotations']),
       uncertainty_interval=data.get(
         'uncertainty_interval', DEFAULT_CONTROL_VALUES['uncertainty_interval']

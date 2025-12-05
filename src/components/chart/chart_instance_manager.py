@@ -35,7 +35,7 @@ class ChartInstanceManager:
     """
     return create_chart(controls)
 
-  def get_chart(self, controls: ChartControls, current_zoom: Zoom | None = None) -> Chart:
+  def get_chart(self, controls: ChartControls) -> Chart:
     """
     Get or create a chart instance with LRU caching.
 
@@ -48,8 +48,11 @@ class ChartInstanceManager:
     """
     # Get chart from LRU cache (cached without considering current_zoom)
     chart = self._create_chart(controls)
-    # Apply saved_zoom and current_zoom to the cached chart
-    chart.update_zoom(saved_zoom=controls.saved_zoom, current_zoom=current_zoom)
+    # Apply current_zoom to the cached chart
+    if chart.controls.saved_zoom is None:
+      zoom = chart.get_current_zoom()
+      if zoom is not None:
+        chart.update_saved_zoom(zoom)
 
     return chart
 

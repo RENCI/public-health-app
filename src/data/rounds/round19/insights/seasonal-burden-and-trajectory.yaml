@@ -29,7 +29,7 @@ controls:
   y_axis: value
   columns: 1
   round_num: 19
-  # zoom:
+  # saved_zoom:
   #   x:
   #     min: "2025-01-01"
   #     max: "2026-06-30"

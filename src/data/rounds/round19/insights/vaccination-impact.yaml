@@ -23,7 +23,7 @@ controls:
   age_group: "0-130"
   x_axis: value
   round_num: 19
-  # zoom:
+  # saved_zoom:
   #   x:
   #     min: "2025-01-01"
   #     max: "2026-06-30"

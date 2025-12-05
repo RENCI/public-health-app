@@ -6,8 +6,9 @@ from plotly.subplots import make_subplots
 
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
-from src.components.chart.chart_properties import DatetimeAxisRange, FloatAxisRange, Model, Zoom
+from src.components.chart.chart_properties import Model, Zoom
 from src.components.enums import DataType, UncertaintyInterval
+from src.util import all_not_none, take_valid_max, take_valid_min
 from src.util.constants import get_model_color_with_uncertainty_interval
 
 
@@ -16,8 +17,6 @@ class LineChart(Chart):
 
   def __init__(self, controls: ChartControls):
     super().__init__(controls)
-    self._raw_df = self._raw_df.set_index(self.controls.x_axis)
-
     self.refresh_fig()
 
   def __eq__(self, other):
@@ -26,7 +25,12 @@ class LineChart(Chart):
   def __hash__(self):
     return hash(self.get_key())
 
-  def refresh_fig(self, current_zoom: Zoom | None = None) -> go.Figure:
+  def filter_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+    df = df.set_index(self.controls.x_axis)
+    df = df.query('age_group == @self.controls.age_group.input_value')
+    return df
+
+  def refresh_fig(self) -> go.Figure:
     # handle empty properties
     if not (
       self.controls.scenarios
@@ -53,12 +57,6 @@ class LineChart(Chart):
     else:
       vertical_spacing = 0  # no spacing needed for single subplot
 
-    # start with the raw dataframe
-    df = self._raw_df
-
-    # filter for given age group
-    df = df.query('age_group == @self.controls.age_group.input_value')
-
     # create subplots
     self._fig = make_subplots(
       rows=num_rows,
@@ -66,11 +64,13 @@ class LineChart(Chart):
       vertical_spacing=vertical_spacing,
       row_heights=[1] * num_rows,
       subplot_titles=[f'{s.name.split("-")[0]}. {s.description}' for s in self.controls.scenarios],
+      shared_xaxes=True,
+      shared_yaxes=True,
     )
 
     # add traces for each scenario
     for i, scenario in enumerate(self.controls.scenarios, start=1):
-      scenario_df = df.query('scenario_id == @scenario.id')
+      scenario_df = self._df.query('scenario_id == @scenario.id')
 
       # add traces for each model
       for model in self.controls.models:
@@ -79,15 +79,15 @@ class LineChart(Chart):
 
       self._plot_gold_standard_line(self._gold_std_df, row_num=i)
 
-    # plot annotations
-    self._plot_annotations()
-
     # apply spike guides for each axis in the chart viewport
     self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
     self._fig.update_yaxes(showspikes=True, spikemode='across')
 
     # calculate chart min/max across all subplots for synchronized axes
-    self._set_axes_ranges(df, self._gold_std_df, num_rows, current_zoom)
+    # self._set_axes_ranges(self._df, self._gold_std_df)
+
+    # plot annotations
+    self._plot_annotations()
 
     self._fig.update_yaxes(title_text=self.controls.target.display_value)
 
@@ -104,72 +104,34 @@ class LineChart(Chart):
 
     return self._fig
 
-  def _take_valid_min(
-    self, first: float | datetime | None, second: float | datetime | None
-  ) -> float | datetime | None:
-    """Take the valid minimum of two values. Attempts to find a non-None value, but could return None if both are None."""
-    return (
-      min(first, second)
-      if first is not None and second is not None
-      else first
-      if first is not None
-      else second
-    )
-
-  def _take_valid_max(
-    self, first: float | datetime | None, second: float | datetime | None
-  ) -> float | datetime | None:
-    """Take the valid maximum of two values. Attempts to find a non-None value, but could return None if both are None."""
-    return (
-      max(first, second)
-      if first is not None and second is not None
-      else first
-      if first is not None
-      else second
-    )
-
-  def _calculate_axes_ranges(
-    self, df: pd.DataFrame, gold_std_df: pd.DataFrame, current_zoom: Zoom | None = None
-  ) -> Zoom | None:
+  def calculate_axes_ranges(self, df: pd.DataFrame, gold_std_df: pd.DataFrame) -> Zoom | None:
     """
     Calculate the x and y axis ranges for all subplots in the chart.
     Zoom logic:
-      * If the current zoom is not None and is different from saved_zoom, use the current zoom
-      * If the Use Chart Zoom button is pressed, set both zooms to the current zoom values
-      * If the zoom is manually changed through either the chart or the controls, do not change saved_zoom, only current_zoom
-      * If the insight is saved, set saved_zoom to current_zoom
-      * If saved_zoom exists, use it (respects user's saved zoom or previously calculated zoom)
-      * If saved_zoom is None, calculate from data combining both projections and gold standard
+      * Calculate from projections and gold standard data.
+      * Update saved_zoom, if it is None, with the calculated value.
     """
-    if current_zoom is not None:
-      return current_zoom
-
-    # If saved_zoom exists, use it (respects user's saved zoom or previously calculated zoom)
-    if self.controls.saved_zoom is not None:
-      return self.controls.saved_zoom
-
-    # Calculate the combined ranges from both projections and gold standard
     proj_x_min, proj_x_max, proj_y_min, proj_y_max = (
       self._calculate_initial_ranges_from_projections(df)
     )
     gs_x_min, gs_x_max, gs_y_min, gs_y_max = self._calculate_initial_ranges_from_gold_standard(
       gold_std_df
     )
-    x_min = self._take_valid_min(proj_x_min, gs_x_min)
-    x_max = self._take_valid_max(proj_x_max, gs_x_max)
-    y_min = self._take_valid_min(proj_y_min, gs_y_min)
-    y_max = self._take_valid_max(proj_y_max, gs_y_max)
+    x_min = take_valid_min(proj_x_min, gs_x_min)
+    x_max = take_valid_max(proj_x_max, gs_x_max)
+    y_min = take_valid_min(proj_y_min, gs_y_min)
+    y_max = take_valid_max(proj_y_max, gs_y_max)
 
-    # Set saved_zoom to combined calculated values if we have valid ranges
-    # This ensures saved_zoom includes both projections and gold standard data
-    if x_min is not None and x_max is not None and y_min is not None and y_max is not None:
-      y_range_span = y_max - y_min
-      y_max_with_padding = y_max + (y_range_span * 0.02)
-      combined_zoom = Zoom(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max_with_padding)
-      self.controls.saved_zoom = combined_zoom
-      return combined_zoom
+    if not all_not_none(x_min, x_max, y_min, y_max):
+      return None
 
-    return Zoom(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+    y_range_span = y_max - y_min
+    y_max_with_padding = y_max + (y_range_span * 0.02)
+    calculated_zoom = Zoom(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max_with_padding)
+    # Update saved_zoom with the calculated value so it can be used for reset
+    if self.controls.saved_zoom is None:
+      self.controls.saved_zoom = calculated_zoom
+    return calculated_zoom
 
   def _calculate_initial_ranges_from_projections(
     self, df: pd.DataFrame
@@ -184,7 +146,7 @@ class LineChart(Chart):
       scenario_df = df.query('scenario_id == @scenario.id')
       if not scenario_df.empty:
         # X axis range will be the same for all models in the scenario
-        x_min, x_max = self.calculate_new_x_range(scenario_df, x_min, x_max)
+        x_min, x_max = self.calculate_new_x_range(scenario_df.index, x_min, x_max)
 
         for model in self.controls.models:
           model_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
@@ -198,11 +160,17 @@ class LineChart(Chart):
                   'type_id == @upper_q and model_name == @model.id'
                 )
                 if not lower_model_data.empty:
-                  y_min, y_max = self.calculate_new_y_range(lower_model_data, y_min, y_max)
+                  y_min, y_max = self.calculate_new_y_range(
+                    lower_model_data[self.controls.y_axis], y_min, y_max
+                  )
                 if not upper_model_data.empty:
-                  y_min, y_max = self.calculate_new_y_range(upper_model_data, y_min, y_max)
+                  y_min, y_max = self.calculate_new_y_range(
+                    upper_model_data[self.controls.y_axis], y_min, y_max
+                  )
             else:
-              y_min, y_max = self.calculate_new_y_range(model_data, y_min, y_max)
+              y_min, y_max = self.calculate_new_y_range(
+                model_data[self.controls.y_axis], y_min, y_max
+              )
     return x_min, x_max, y_min, y_max
 
   def _calculate_initial_ranges_from_gold_standard(
@@ -215,8 +183,8 @@ class LineChart(Chart):
     y_max = None
 
     if not gold_std_df.empty:
-      x_min, x_max = self.calculate_new_x_range(gold_std_df, x_min, x_max)
-      y_min, y_max = self.calculate_new_y_range(gold_std_df, y_min, y_max)
+      x_min, x_max = self.calculate_new_x_range(gold_std_df.index, x_min, x_max)
+      y_min, y_max = self.calculate_new_y_range(gold_std_df['value'], y_min, y_max)
 
     return x_min, x_max, y_min, y_max
 

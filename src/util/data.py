@@ -1,5 +1,8 @@
+import inspect
 import os
+from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -55,3 +58,70 @@ def load_rounds():
     }
 
   return rounds
+
+
+def all_not_none(*values: Any, log_result: bool = False) -> bool:
+  """Check if all values are not None."""
+  result = all(value is not None for value in values)
+  print(f'all_not_none: {result}')
+  if log_result:
+    caller_frame = inspect.currentframe().f_back
+    caller_locals = caller_frame.f_locals if caller_frame else {}
+
+    for value in values:
+      var_name = None
+      for name, var_value in caller_locals.items():
+        if var_value is None:
+          var_name = name
+          if var_name:
+            print(f'{var_name} is None\n')
+          else:
+            print('Value is None\n')
+          break
+  return result
+
+
+def any_are_none(*values: Any, log_result: bool = False) -> bool:
+  """Check if any values are None."""
+  result = any(value is None for value in values)
+  print(f'any_are_none: {result}')
+  if log_result:
+    caller_frame = inspect.currentframe().f_back
+    caller_locals = caller_frame.f_locals if caller_frame else {}
+
+    for value in values:
+      var_name = None
+      for name, var_value in caller_locals.items():
+        if var_value is None:
+          var_name = name
+          if var_name:
+            print(f'{var_name} is None\n')
+          else:
+            print('Value is None\n')
+  return result
+
+
+def take_valid_min(
+  first: float | datetime | None, second: float | datetime | None
+) -> float | datetime | None:
+  """Take the valid minimum of two values. Attempts to find a non-None value, but could return None if both are None."""
+  return (
+    min(first, second)
+    if first is not None and second is not None
+    else first
+    if first is not None
+    else second
+  )
+
+
+def take_valid_max(
+  first: float | datetime | None, second: float | datetime | None
+) -> float | datetime | None:
+  """Take the valid maximum of two values. Attempts to find a non-None value, but could return None if both are None."""
+  return (
+    max(first, second)
+    if first is not None and second is not None
+    else first
+    if first is not None
+    else second
+  )

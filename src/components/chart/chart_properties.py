@@ -5,6 +5,7 @@ from enum import StrEnum
 from math import isclose
 from typing import Any, Self
 
+from src.util import all_not_none
 from src.util.constants import (
   get_locations,
   get_model_by_name,
@@ -306,7 +307,7 @@ class Zoom:
     if x is not None and y is not None:
       self.x = x
       self.y = y
-    elif x_min is not None and x_max is not None and y_min is not None and y_max is not None:
+    elif all_not_none(x_min, x_max, y_min, y_max):
       self.x = Zoom._create_x_axis_range(x_min, x_max)
       self.y = FloatAxisRange(min=y_min, max=y_max)
     else:
