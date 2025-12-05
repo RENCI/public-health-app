@@ -274,6 +274,7 @@ class LineChart(Chart):
       fill_color = get_model_color_with_uncertainty_interval(
         model.color,
         uncertainty_interval=UncertaintyInterval.from_bounds([(lower_q, upper_q)]),
+        use_varying_opacity=self.controls.uncertainty_interval==UncertaintyInterval.ALL,
       )
       self._fig.add_trace(
         go.Scatter(

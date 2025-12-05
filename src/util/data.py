@@ -20,11 +20,18 @@ def load_insights(path):
     if filename.endswith('.yaml'):
       filepath = os.path.join(path, filename)
       with open(filepath, 'r') as f:
-        insight = yaml.safe_load(f)
+        insight = yaml.safe_load(f) or {}
         insight['type'] = 'system'
         insights.append(insight)
 
-  insights.sort(key=lambda x: x.get('title', '').lower())
+  # sort by `order`, then by `title`
+  insights.sort(
+    key=lambda x: (
+      x.get('order', float('inf')),
+      x.get('title', '').lower(),
+    )
+  )
+
   return insights
 
 

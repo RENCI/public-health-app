@@ -9,6 +9,7 @@ from dash import (
   State,
   callback,
   clientside_callback,
+  ctx,
   dcc,
   exceptions,
   html,
@@ -26,10 +27,40 @@ from src.util import generate_insight_pdf, load_rounds, slugify
 register_page(__name__, path_template='/insight/<insight_id>', name='Insight Details')
 
 back_button = dmc.Anchor(
-  toolbar_button('Round Summary', icon=DashIconify(icon='feather:chevron-left')),
-  id='back-to-insights-button',
+  toolbar_button(
+    'Back to Round Summary',
+    icon=DashIconify(icon='feather:chevron-left'),
+  ),
+  id='back-to-round-summary',
   href='/',
 )
+
+
+prev_insight_button = dmc.Anchor(
+  toolbar_button(
+    'Previous Insight',
+    icon=DashIconify(icon='feather:chevron-left', width=16),
+    icon_placement='left',
+    id='prev-insight-link-button',
+    disabled=True,
+  ),
+  id='prev-insight-link',
+  href='#',
+)
+
+
+next_insight_button = dmc.Anchor(
+  toolbar_button(
+    'Next Insight',
+    icon=DashIconify(icon='feather:chevron-right', width=16),
+    icon_placement='right',
+    id='next-insight-link-button',
+    disabled=True,
+  ),
+  id='next-insight-link',
+  href='#',
+)
+
 
 
 download_button = toolbar_button(
@@ -53,7 +84,16 @@ explorer_button = dmc.Anchor(
 
 
 insight_toolbar = toolbar(
-  left=[back_button], right=[insight_yaml_modal_button(), download_button, explorer_button]
+  left=[
+    back_button,
+    prev_insight_button,
+    next_insight_button,
+  ],
+  right=[
+    insight_yaml_modal_button(),
+    download_button,
+    explorer_button,
+  ]
 )
 
 
@@ -74,29 +114,6 @@ loading_insight = [
   dcc.Markdown(id='insight-view-description'),
   dcc.Download(id='insight-pdf-download'),
 ]
-
-back_button = dmc.Anchor(
-  '← Back to Round Overview',
-  id='back-to-insights-button',
-  href='/',
-)
-
-explorer_button = dcc.Link(
-  dmc.Button(
-    'Explore',
-    leftSection=DashIconify(icon='feather:arrow-up-right'),
-  ),
-  id='explorer-button',
-  href='#',
-)
-
-download_button = dmc.ActionIcon(
-  DashIconify(icon='feather:download'),
-  variant='subtle',
-  id='download-insight-button',
-  size='lg',
-  loading=False,
-)
 
 def annotations_list(annotations: list):
   if len(annotations) == 0:
@@ -166,6 +183,89 @@ layout = dmc.Container(
   ],
   size=1200,
 )
+
+def compute_navigation(insight_id: str, insights: list[dict], *, wrap=False):
+  """
+  Compute prev/next navigation info for our list of insights.
+
+  Returns:
+    {
+      'prev': {'id': str | None, 'disabled': bool},
+      'next': {'id': str | None, 'disabled': bool},
+    }
+  """
+  ids = [i['id'] for i in insights]
+  count = len(ids)
+
+  if insight_id not in ids:
+    raise ValueError(f'Insight "{insight_id}" not found.')
+
+  index = ids.index(insight_id)
+
+  # --- WRAPPED NAVIGATION ---
+  if wrap:
+    prev_index = (index - 1) % count
+    next_index = (index + 1) % count
+
+    return {
+      'prev': {
+        'id': ids[prev_index],
+        'disabled': False,
+      },
+      'next': {
+        'id': ids[next_index],
+        'disabled': False,
+      },
+    }
+
+  # --- NON-WRAPPED NAVIGATION ---
+  prev_id = ids[index - 1] if index > 0 else None
+  next_id = ids[index + 1] if index < count - 1 else None
+
+  return {
+    'prev': {
+      'id': prev_id,
+      'disabled': prev_id is None,
+    },
+    'next': {
+      'id': next_id,
+      'disabled': next_id is None,
+    },
+}
+
+@callback(
+  Output('prev-insight-link', 'href'),
+  Output('prev-insight-link-button', 'disabled'),
+  Output('next-insight-link', 'href'),
+  Output('next-insight-link-button', 'disabled'),
+  Input('url', 'pathname'),
+  State('selected-round-store', 'data'),
+)
+def update_insight_nav(pathname, round_number):
+  try:
+    current_insight_id = pathname.split('/insight/')[-1]
+
+    if not current_insight_id:
+      raise exceptions.PreventUpdate
+
+    rounds = load_rounds()
+    insights = rounds[round_number]['insights']
+
+    nav = compute_navigation(current_insight_id, insights, wrap=False)
+
+    prev_href = f'/insight/{nav["prev"]["id"]}' if nav['prev']['id'] else None
+    next_href = f'/insight/{nav["next"]["id"]}' if nav['next']['id'] else None
+
+    return (
+      prev_href,
+      nav['prev']['disabled'],
+      next_href,
+      nav['next']['disabled'],
+    )
+
+  except Exception as error:
+    print(error)
+    return no_update, no_update, no_update, no_update
 
 
 @callback(
@@ -298,7 +398,7 @@ def handle_click_download(n_clicks, custom_insights, pathname):
     if not insight:
       raise ValueError(f'Insight {insight_id} not found')
 
-    round_number = insight.get('controls', {}).get('round_number', '18')
+    round_number = insight.get('controls', {}).get('round_num', '18')
     slugified_title = slugify(insight.get('title', ''))
 
     pdf = generate_insight_pdf(insight)

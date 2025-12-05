@@ -1,28 +1,30 @@
+from enum import StrEnum
+from typing import Iterable, Optional, Union
+from dash.development.base_component import Component
 import dash_mantine_components as dmc
 from dash import html
 
 
-def toolbar_button(children, icon, **kwargs):
-  defaults = dict(
-    leftSection=icon,
-    variant='light',
-    size='xs',
-  )
+class IconPlacement(StrEnum):
+  left = 'left'
+  right = 'right'
 
-  # remove conflicting keys from kwargs so defaults win, unless overridden
-  for key in list(defaults.keys()):
-    if key in kwargs:
-      pass
 
-  # merge defaults with incoming overrides
-  final_props = {**defaults, **kwargs}
+def _as_list(x):
+  if x is None:
+    return []
+  return x if isinstance(x, (list, tuple)) else [x]
 
-  return dmc.Button(children, **final_props)
+
+def toolbar_button(children, icon, icon_placement=IconPlacement.left, **kwargs):
+  section_key = 'leftSection' if icon_placement == IconPlacement.left else 'rightSection'
+  defaults = dict(variant='light', size='xs', **{section_key: icon})
+  return dmc.Button(children or '', **{**defaults, **kwargs})
 
 
 def toolbar(
-  left=None,
-  right=None,
+  left: Optional[Union[Component, Iterable[Component]]] = None,
+  right: Optional[Union[Component, Iterable[Component]]] = None,
   *,
   variant='soft',
   p='xs',
@@ -31,59 +33,27 @@ def toolbar(
   gap='xs',
   justify='space-between',
   align='center',
+  wrap=False,
+  left_props=None,
+  right_props=None,
+  **kwargs,
 ):
-  '''
-  Toolbar component.
+  left = _as_list(left)
+  right = _as_list(right)
 
-  Parameters
-  ----------
-  left : Component | list[Component] | None
-    Elements aligned to the left side (e.g., Back button).
-  right : Component | list[Component] | None
-    Elements aligned to the right side (e.g., Download, Explorer buttons).
-  variant : str, default='soft'
-    Mantine Card variant.
-  p : str or int, default='xs'
-    Card padding.
-  mt : str or int | None
-    Top margin.
-  mb : str or int, default=24
-    Bottom margin.
-  gap : str, default='xs'
-    Gap between elements in left/right groups.
-  justify : str, default='space-between'
-    Flex item justification.
-  align : str, default='center'
-    Flex item alignment.
+  left_section = dmc.Flex(left, gap=gap, **(left_props or {})) if left else html.Div()
+  right_section = dmc.Flex(right, gap=gap, **(right_props or {})) if right else html.Div()
 
-  Returns
-  -------
-  dmc.Card
-  '''
-
-  # normalize left and right to lists
-  if left is None:
-    left = []
-  elif not isinstance(left, (list, tuple)):
-    left = [left]
-
-  if right is None:
-    right = []
-  elif not isinstance(right, (list, tuple)):
-    right = [right]
-
-  # inner layout
   return dmc.Card(
     dmc.Flex(
-      children=[
-        dmc.Flex(left, gap=gap) if left else html.Div(),
-        dmc.Flex(right, gap=gap) if right else html.Div(),
-      ],
+      children=[left_section, right_section],
       justify=justify,
       align=align,
+      wrap='wrap' if wrap else 'nowrap',
     ),
     variant=variant,
     p=p,
     mt=mt,
     mb=mb,
+    **kwargs,
   )

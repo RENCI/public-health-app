@@ -1,16 +1,16 @@
 round_number: 19
-name: "Vaccine Recommendation Levels"
+name: "Impact of Booster Recommendations"
 date: June 4, 2025
-report: >
-  In the 19th Round of COVID-19 scenario projections, the US COVID-19 Scenario
-  Modeling Hub aimed to estimate the impact of three vaccine recommendation
+report: |
+  **The Decision:** For which groups should boosters be recommended?
+
+  In the 19th Round of COVID-19 scenario projections, the US COVID-19 Scenario 
+  Modeling Hub aimed to estimate the impact of three vaccine booster recommendation
   levels for the 2025-26 season:
-    i. no recommendation, resulting in minimal
-    vaccine coverage;
-    ii. high-risk group recommendation, including individuals
-    over 65 years and those under 65 years with high-risk conditions; and
-    iii. universal recommendation for all eligible age groups, each with uptake
-    corresponding to 2024-25 coverage levels.
+
+  1. no recommendation, resulting in minimal vaccine coverage;
+  2. high-risk recommendation, including individuals over 65 years and those with high-risk conditions; and
+  3. universal recommendation for all eligible age groups, each with uptake corresponding to 2024-25 coverage levels.
 methods: |
   ### Ensemble methods
   Currently, the Scenario Modeling Hub ensembles individual projections using two methods (both not available for early rounds):
@@ -25,9 +25,6 @@ methods: |
   The truncation threshold is calculated as 80% of the highest observed weekly incidence, adjusted by population size. Once either threshold is crossed, all projections (incident and cumulative case, death, and hospitalization) are truncated using following the following rules:
   - If an individual model projects incident cases or deaths to be higher than the threshold, median projections are not plotted for that model beyond the week at which the threshold is crossed. Uncertainty intervals are retained for all weeks. This truncation is applied to all states, except those for which truncation would remove all projection points.
   - If the Ensemble crosses the threshold, no projections (median or uncertainty intervals) are plotted beyond the first week at which the threshold is crossed.
-
-  ### Ground Truth data
-  The model projections for cumulative hospitalizations start at zero, so no observed data are shown. Starting round 17, same principle will be applied for cumulative death.
 
   ### Licensing
   Models projection are available by default under a CC BY 4.0 license. Some models have specific license. See repository for details.
