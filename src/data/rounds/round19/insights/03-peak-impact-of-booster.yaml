@@ -31,7 +31,7 @@ controls:
     value: 23000
   location_name: US
   model_names:
-  - CEPH-MetaRSV
+  - CFA-Scenarios
   pathogen: covid
   plot_type: line
   round: '19'

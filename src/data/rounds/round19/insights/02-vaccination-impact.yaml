@@ -17,7 +17,7 @@ controls:
   annotations: []
   location_name: US
   model_names:
-  - CEPH-MetaRSV
+  - CFA-Scenarios
   pathogen: covid
   plot_type: boxplot
   round: '19'
