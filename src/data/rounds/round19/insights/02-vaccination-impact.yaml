@@ -17,28 +17,26 @@ controls:
   annotations: []
   location_name: US
   model_names:
-  - CFA-Scenarios
+    - CFA-Scenarios
   pathogen: covid
   plot_type: boxplot
-  round: '19'
+  round: "19"
   round_num: 19
   scenario_ids:
-  - 77
-  - 78
-  - 80
+    - 77
+    - 78
+    - 80
   scenario_names:
-  - A-2023-10-27
-  - B-2023-10-27
+    - A-2023-10-27
+    - B-2023-10-27
   scenario_variables:
-  - name: Vaccination Strategy
-    options:
-    - High risk
-    - All ages
-    selected_option: High risk
+    - name: Vaccination Strategy
+      options:
+        - High risk
+        - All ages
+      selected_option: High risk
   target: incident_hospitalization
   theme: light
-  uncertainty_interval: null
   x_axis: value
-  x_start_date: null
   y_axis: null
-  zoom: null
+  # saved_zoom:

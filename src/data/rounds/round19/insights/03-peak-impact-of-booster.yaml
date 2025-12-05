@@ -1,5 +1,5 @@
 id: peak-impact-of-booster
-title: Boosters also reduce hospitalization over time, including much reduced second peak 
+title: Boosters also reduce hospitalization over time, including much reduced second peak
 order: 3
 summary: The models suggest that booters don't significantly change the timing of the two peaks for incident hospitalization. However, boosters will decrease hospitalizations throughout the modeled time period with the largest decreases seen during the second winter peak.
 description: >
@@ -17,42 +17,41 @@ updated_at: "2025-05-18T22:45:12Z"
 controls:
   age_group: 0-130
   annotations:
-  - color: '#993366'
-    label: Winter Peak
-    type: vertical
-    value: '2025-12-25'
-  - color: '#3cab00'
-    label: Fall Peak
-    type: vertical
-    value: '2025-08-25'
-  - color: '#ff0000'
-    label: 2nd peak w/ no booster
-    type: horizontal
-    value: 23000
+    - color: "#993366"
+      label: Winter Peak
+      type: vertical
+      value: "2025-12-25"
+    - color: "#3cab00"
+      label: Fall Peak
+      type: vertical
+      value: "2025-08-25"
+    - color: "#ff0000"
+      label: 2nd peak w/ no booster
+      type: horizontal
+      value: 23000
   location_name: US
   model_names:
-  - CFA-Scenarios
+    - CFA-Scenarios
   pathogen: covid
   plot_type: line
-  round: '19'
+  round: "19"
   round_num: 19
   scenario_ids:
-  - 77
-  - 78
-  - 80
+    - 77
+    - 78
+    - 80
   scenario_names:
-  - A-2023-10-27
-  - B-2023-10-27
+    - A-2023-10-27
+    - B-2023-10-27
   scenario_variables:
-  - name: Vaccination Strategy
-    options:
-    - High risk
-    - All ages
-    selected_option: High risk
+    - name: Vaccination Strategy
+      options:
+        - High risk
+        - All ages
+      selected_option: High risk
   target: incident_hospitalization
   theme: light
   uncertainty_interval: All
   x_axis: target_end_date
-  x_start_date: '2025-01-01'
   y_axis: value
-  zoom: null
+  # saved_zoom: null
