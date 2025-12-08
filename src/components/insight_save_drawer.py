@@ -23,74 +23,76 @@ from src.util.constants import DEFAULT_CONTROL_VALUES
 
 
 # to use:
-#   import insight_save_modal and insight_save_modal_button.
+#   import insight_save_drawer and insight_save_drawer_button.
 #   ensure both are in the layout.
 #   pass insight dict into insight_yaml_modal.
 
 
-def insight_save_modal(
+def insight_save_drawer(
   initial_title='',
   initial_summary='',
   initial_description='',
 ):
-  return dmc.Modal(
+  return dmc.Drawer(
     [
       dcc.Store(id='thumbnail-store'),
-      dmc.Card(
-        children=[
-          dmc.Stack(
-            [
-              dmc.TextInput(
-                id='insight-title-input',
-                value=initial_title,
-                label=dmc.Text('Title', c='blue', fz='lg'),
-                size='lg',
-                variant='filled',
-              ),
-              markdown_editor(
-                editor_id='insight-summary-input',
-                label='Summary',
-                initial_value=initial_summary,
-              ),
-              markdown_editor(
-                editor_id='insight-description-input',
-                label='Description',
-                initial_value=initial_description,
-                min_height='300px',
-              ),
-            ],
-            gap=24,
+      dmc.Stack(
+        [
+          dmc.TextInput(
+            id='insight-title-input',
+            value=initial_title,
+            label=dmc.Text('Title', c='blue', fz='lg'),
+            size='lg',
+            inputProps=dict(className='insight-form-input'),
+            variant='filled',
           ),
-          dmc.Divider(my=24),
-          dmc.Group(
-            [
-              dmc.Button(
-                'Cancel',
-                leftSection=DashIconify(icon='feather:x'),
-                color='crimson',
-                variant='outline',
-                id='cancel-save-button',
-              ),
-              dmc.Button(
-                'Save',
-                leftSection=DashIconify(icon='feather:check'),
-                id='save-insight-button',
-              ),
-            ],
-            justify='flex-end',
+          markdown_editor(
+            editor_id='insight-summary-input',
+            label='Summary',
+            initial_value=initial_summary,
           ),
-        ]
+          markdown_editor(
+            editor_id='insight-description-input',
+            label='Description',
+            initial_value=initial_description,
+            min_height='300px',
+          ),
+        ],
+        gap=24,
+      ),
+      dmc.Divider(my=24),
+      dmc.Group(
+        [
+          dmc.Button(
+            'Cancel',
+            leftSection=DashIconify(icon='feather:x'),
+            color='crimson',
+            variant='outline',
+            id='cancel-save-button',
+          ),
+          dmc.Button(
+            'Save',
+            leftSection=DashIconify(icon='feather:check'),
+            id='save-insight-button',
+          ),
+        ],
+        justify='flex-end',
       ),
     ],
     title='Save Insight',
     id='insight-save-modal',
     opened=False,
-    size='75%',
-    style=dict(minHeight='75vh'),
+    position='bottom',
+    size='lg',
+    lockScroll=False,
+    style=dict(minHeight='25vh'),
+    overlayProps={
+      'style': dict(display='none'),
+    },
   )
 
 
-def insight_save_modal_button():
+def insight_save_drawer_button():
   return toolbar_button(
     'Save',
     icon=DashIconify(icon='feather:save'),
