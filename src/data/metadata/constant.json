@@ -489,101 +489,242 @@
   ],
   "models": [
     {
+      "id": 1,
+      "name": "JHU_IDD-CovidSP",
+      "color": "rgba(248, 118, 109, 1)"
+    },
+    {
+      "id": 2,
+      "name": "Karlen-pypm",
+      "color": "rgba(0, 189, 56, 1)"
+    },
+    {
       "id": 3,
-      "name": "Ensemble",
-      "color": "rgba(169, 169, 255, 1)"
+      "name": "MOBS_NEU-GLEAM_COVID",
+      "color": "rgba(0, 167, 255, 1)"
+    },
+    {
+      "id": 4,
+      "name": "OliverWyman-Navigator",
+      "color": "rgba(149, 144, 255, 1)"
+    },
+    {
+      "id": 5,
+      "name": "USC-SIkJalpha",
+      "color": "rgba(245, 100, 227, 1)"
     },
     {
       "id": 6,
-      "name": "USC-SIkJalpha",
-      "color": "rgba(255, 103, 164, 1)"
+      "name": "UVA-adaptive",
+      "color": "rgba(216, 144, 0, 1)"
     },
     {
       "id": 7,
-      "name": "CU-RSV_SVIRS",
-      "color": "rgba(108, 218, 250, 1)"
+      "name": "Ensemble",
+      "color": "rgba(183, 159, 0, 1)"
+    },
+    {
+      "id": 8,
+      "name": "JHUAPL-Bucky",
+      "color": "rgba(97, 156, 255, 1)"
+    },
+    {
+      "id": 9,
+      "name": "CU-AGE-ST",
+      "color": "rgba(185, 131, 255, 1)"
+    },
+    {
+      "id": 10,
+      "name": "IHME-IHME_COVID_model_deaths_unscaled",
+      "color": "rgba(229, 135, 0, 1)"
+    },
+    {
+      "id": 11,
+      "name": "UNCC-hierbin",
+      "color": "rgba(138, 171, 0, 1)"
     },
     {
       "id": 12,
-      "name": "MOBS_NEU-GLEAM_RSV",
-      "color": "rgba(175, 128, 255, 1)"
+      "name": "Ensemble_LOP",
+      "color": "rgba(0, 188, 216, 1)"
+    },
+    {
+      "id": 13,
+      "name": "UVA-EpiHiper",
+      "color": "rgba(175, 118, 255, 1)"
+    },
+    {
+      "id": 14,
+      "name": "NotreDame-FRED",
+      "color": "rgba(250, 132, 0, 1)"
     },
     {
       "id": 15,
-      "name": "JHU_UNC-flepiMoP",
-      "color": "rgba(1, 150, 200, 1)"
+      "name": "Ensemble_LOP_untrimmed",
+      "color": "rgba(231, 107, 243, 1)"
+    },
+    {
+      "id": 16,
+      "name": "UF-ABM",
+      "color": "rgba(0, 191, 196, 1)"
+    },
+    {
+      "id": 17,
+      "name": "NCSU-COVSIM",
+      "color": "rgba(153, 183, 233, 1)"
+    },
+    {
+      "id": 18,
+      "name": "UTA-ImmunoSEIRS",
+      "color": "rgba(107, 87, 0, 1)"
+    },
+    {
+      "id": 19,
+      "name": "MOBS_NEU-GLEAM_COVID_OT",
+      "color": "rgba(253, 97, 209, 1)"
+    },
+    {
+      "id": 20,
+      "name": "USC-SIkJalpha-update",
+      "color": "rgba(255, 98, 188, 1)"
+    },
+    {
+      "id": 21,
+      "name": "team1_modela",
+      "color": "rgba(163, 165, 0, 1)"
+    },
+    {
+      "id": 22,
+      "name": "team2_modelb",
+      "color": "rgba(0, 191, 125, 1)"
+    },
+    {
+      "id": 23,
+      "name": "team3_modelc",
+      "color": "rgba(255, 103, 164, 1)"
+    },
+    {
+      "id": 24,
+      "name": "team4_modeld",
+      "color": "rgba(253, 97, 209, 1)"
+    },
+    {
+      "id": 25,
+      "name": "team5_modele",
+      "color": "rgba(248, 118, 109, 1)"
+    },
+    {
+      "id": 26,
+      "name": "team6_modelf",
+      "color": "rgba(254, 110, 138, 1)"
+    },
+    {
+      "id": 27,
+      "name": "team7_modelg",
+      "color": "rgba(0, 192, 151, 1)"
+    },
+    {
+      "id": 28,
+      "name": "PSI-PROF",
+      "color": "rgba(0, 191, 105, 1)"
     },
     {
       "id": 29,
-      "name": "CEPH-MetaRSV",
-      "color": "rgba(139, 58, 58, 1)"
+      "name": "CFA-Scenarios",
+      "color": "rgba(184, 57, 138, 1)"
     },
     {
       "id": 30,
       "name": "JHU_UNC-flepiMoP",
-      "color": "rgba(1, 150, 200, 1)"
+      "color": "rgba(250, 100, 100, 1)"
     },
     {
       "id": 31,
-      "name": "Ensemble_LOP_all",
-      "color": "rgba(75, 75, 75, 1)"
+      "name": "UT-ImmunoSEIRS",
+      "color": "rgba(105, 85, 0, 1)"
     },
     {
       "id": 32,
-      "name": "UNCC-Hierbin",
-      "color": "rgba(170, 51, 106, 1)"
+      "name": "UIUC-IMMCYC",
+      "color": "rgba(0, 110, 0, 1)"
     },
     {
       "id": 33,
-      "name": "UT-ImmunoSEIRS",
-      "color": "rgba(163, 165, 0, 1)"
+      "name": "UNCC-Hierbin",
+      "color": "rgba(138, 171, 0, 1)"
     },
     {
       "id": 34,
-      "name": "NotreDame-FRED",
-      "color": "rgba(0, 191, 125, 1)"
+      "name": "PSI-M_CoV_2025",
+      "color": "rgba(0, 200, 100, 1)"
     },
     {
       "id": 35,
-      "name": "USC-SIkJalpha",
-      "color": "rgba(255, 103, 164, 1)"
+      "name": "EnsembleDTWS",
+      "color": "rgba(50, 100, 150, 1)"
     }
   ],
   "model_colors": {
-    "Ensemble_LOP": "rgba(103, 72, 106, 1)",
-    "Ensemble_LOP_untrimmed": "rgba(136, 174, 225, 1)",
-    "Ensemble": "rgba(169, 169, 255, 1)",
-    "UT-ImmunoSEIRS": "rgba(163, 165, 0, 1)",
-    "NotreDame-FRED": "rgba(0, 191, 125, 1)",
-    "USC-SIkJalpha": "rgba(255, 103, 164, 1)",
+    "JHU_IDD-CovidSP": "rgba(248, 118, 109, 1)",
+    "Karlen-pypm": "rgba(0, 189, 56, 1)",
+    "MOBS_NEU-GLEAM_COVID": "rgba(0, 167, 255, 1)",
+    "OliverWyman-Navigator": "rgba(149, 144, 255, 1)",
+    "USC-SIkJalpha": "rgba(245, 100, 227, 1)",
+    "UVA-adaptive": "rgba(216, 144, 0, 1)",
+    "Ensemble": "rgba(183, 159, 0, 1)",
+    "JHUAPL-Bucky": "rgba(97, 156, 255, 1)",
+    "CU-AGE-ST": "rgba(185, 131, 255, 1)",
+    "IHME-IHME_COVID_model_deaths_unscaled": "rgba(229, 135, 0, 1)",
+    "UNCC-hierbin": "rgba(138, 171, 0, 1)",
+    "UNCC-Hierbin": "rgba(138, 171, 0, 1)",
+    "Ensemble_LOP": "rgba(0, 188, 216, 1)",
+    "UVA-EpiHiper": "rgba(175, 118, 255, 1)",
+    "NotreDame-FRED": "rgba(250, 132, 0, 1)",
+    "Ensemble_LOP_untrimmed": "rgba(231, 107, 243, 1)",
+    "UF-ABM": "rgba(0, 191, 196, 1)",
+    "NCSU-COVSIM": "rgba(153, 183, 233, 1)",
+    "UTA-ImmunoSEIRS": "rgba(107, 87, 0, 1)",
+    "UT-ImmunoSEIRS": "rgba(105, 85, 0, 1)",
+    "MOBS_NEU-GLEAM_COVID_OT": "rgba(253, 97, 209, 1)",
+    "USC-SIkJalpha-update": "rgba(255, 98, 188, 1)",
+    "PSI-PROF": "rgba(0, 191, 105, 1)",
+    "PSI-M_CoV_2025": "rgba(0, 200, 100, 1)",
+    "CFA-Scenarios": "rgba(184, 57, 138, 1)",
+    "JHU_UNC-flepiMoP": "rgba(250, 100, 100, 1)",
+    "UIUC-IMMCYC": "rgba(0, 110, 0, 1)",
+    "EnsembleDTWS": "rgba(50, 100, 150, 1)",
+    "team1_modela": "rgba(163, 165, 0, 1)",
+    "team2_modelb": "rgba(0, 191, 125, 1)",
+    "team3_modelc": "rgba(255, 103, 164, 1)",
+    "team4_modeld": "rgba(253, 97, 209, 1)",
+    "team5_modele": "rgba(248, 118, 109, 1)",
+    "team6_modelf": "rgba(254, 110, 138, 1)",
+    "team7_modelg": "rgba(0, 192, 151, 1)",
     "CU-RSV_SVIRS": "rgba(108, 218, 250, 1)",
     "UVA-EpiHiperRSV": "rgba(0, 72, 251, 1)",
     "NIH-RSV_WIN": "rgba(254, 110, 12, 1)",
-    "PSI-PROF": "rgba(226, 50, 7, 1)",
     "NIH-RSV_MSIRS": "rgba(1, 100, 32, 1)",
     "MOBS_NEU-GLEAM_RSV": "rgba(175, 128, 255, 1)",
     "NIH-RSV_Phenomenological": "rgba(252, 209, 7, 1)",
     "CEPH-MetaRSV": "rgba(139, 58, 58, 1)",
-    "JHU_UNC-flepiMoP": "rgba(1, 150, 200, 1)",
     "Ensemble_LOP_all": "rgba(75, 75, 75, 1)",
-    "UNCC-Hierbin": "rgba(170, 51, 106, 1)",
-    "UT-ImmunoSEIRS-2": "rgba(163, 165, 0, 1)",
-    "NotreDame-FRED-2": "rgba(0, 191, 125, 1)",
-    "USC-SIkJalpha-2": "rgba(255, 103, 164, 1)",
+    "UT-ImmunoSEIRS-2": "rgba(105, 85, 0, 1)",
+    "NotreDame-FRED-2": "rgba(250, 132, 0, 1)",
+    "USC-SIkJalpha-2": "rgba(245, 100, 227, 1)",
     "CU-RSV_SVIRS-2": "rgba(108, 218, 250, 1)",
     "UVA-EpiHiperRSV-2": "rgba(0, 72, 251, 1)",
     "NIH-RSV_WIN-2": "rgba(254, 110, 12, 1)",
-    "PSI-PROF-2": "rgba(226, 50, 7, 1)",
+    "PSI-PROF-2": "rgba(0, 191, 105, 1)",
     "NIH-RSV_MSIRS-2": "rgba(1, 100, 32, 1)",
     "MOBS_NEU-GLEAM_RSV-2": "rgba(175, 128, 255, 1)",
     "NIH-RSV_Phenomenological-2": "rgba(252, 209, 7, 1)",
     "CEPH-MetaRSV-2": "rgba(139, 58, 58, 1)",
-    "JHU_UNC-flepiMoP-2": "rgba(1, 150, 200, 1)",
+    "JHU_UNC-flepiMoP-2": "rgba(250, 100, 100, 1)",
     "Ensemble_LOP_all-2": "rgba(75, 75, 75, 1)",
-    "UNCC-Hierbin-2": "rgba(170, 51, 106, 1)",
-    "UT-ImmunoSEIRS-3": "rgba(163, 165, 0, 1)",
-    "NotreDame-FRED-3": "rgba(0, 191, 125, 1)",
-    "USC-SIkJalpha-3": "rgba(255, 103, 164, 1)",
+    "UNCC-Hierbin-2": "rgba(138, 171, 0, 1)",
+    "UT-ImmunoSEIRS-3": "rgba(105, 85, 0, 1)",
+    "NotreDame-FRED-3": "rgba(250, 132, 0, 1)",
+    "USC-SIkJalpha-3": "rgba(245, 100, 227, 1)",
     "CU-RSV_SVIRS-3": "rgba(108, 218, 250, 1)",
     "UVA-EpiHiperRSV-3": "rgba(0, 72, 251, 1)",
     "NIH-RSV_WIN-3": "rgba(254, 110, 12, 1)"
