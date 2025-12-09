@@ -1,17 +1,14 @@
 import dash_mantine_components as dmc
 
+from src.components.enums import ChartLayout
 
-options = [
-  'Grid',
-  'Stack',
-]
+options = [{'value': l.get_input_value(), 'label': l.get_display_value()} for l in ChartLayout]
 
-
-def layout_select(value: str = 'Stack'):
+def layout_select(value: str = 'stack'):
   return dmc.Select(
     label='Layout',
     placeholder='',
-    id='layout-select',
+    id='chart-layout-select',
     value=value,
     data=options,
     allowDeselect=False,

@@ -20,6 +20,7 @@ default_control_values = {
     }
   ],
   'model_names': ['Ensemble'],
+  'chart_layout': 'stack',
   'location_name': 'US',
   'target': 'incident_hospitalization',
   'age_group': '0-130',

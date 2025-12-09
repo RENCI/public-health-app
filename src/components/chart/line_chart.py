@@ -5,7 +5,7 @@ from plotly.subplots import make_subplots
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
 from src.components.chart.chart_properties import Model
-from src.components.enums import UncertaintyInterval
+from src.components.enums import ChartLayout, UncertaintyInterval
 from src.util.constants import get_model_color_with_uncertainty_interval
 
 
@@ -41,9 +41,14 @@ class LineChart(Chart):
       return self._fig
 
     # update layout
-    num_rows = len(self.controls.scenarios)
-    # stack: num_rows=num_scenarios, num_cols=1
-    # grid: num_ceil(num_scenarios / 2), num_cols=2
+    num_scenarios = len(self.controls.scenarios)
+
+    if self.controls.chart_layout == ChartLayout.STACK:
+      num_cols = 1
+    elif self.controls.chart_layout == ChartLayout.GRID:
+      num_cols = 2
+
+    num_rows = (num_scenarios + num_cols - 1) // num_cols
 
     # Define fixed dimensions
     SUBPLOT_HEIGHT = 300  # Fixed height per subplot in pixels
@@ -76,7 +81,7 @@ class LineChart(Chart):
     # create subplots
     self._fig = make_subplots(
       rows=num_rows,
-      cols=2,
+      cols=num_cols,
       vertical_spacing=vertical_spacing,
       row_heights=[1] * num_rows,
       subplot_titles=[f'{s.name.split("-")[0]}. {s.description}' for s in self.controls.scenarios],
@@ -84,6 +89,9 @@ class LineChart(Chart):
 
     # add traces for each scenario
     for i, scenario in enumerate(self.controls.scenarios, start=1):
+      current_row = (i - 1) // num_cols + 1
+      current_col = (i - 1) % num_cols + 1
+
       # filter for given scenario
       scenario_df = df.query('scenario_id == @scenario.id')
 
@@ -94,7 +102,12 @@ class LineChart(Chart):
       for model in self.controls.models:
         # add uncertainty intervals if necessary
         if should_add_uncertainty_intervals:
-          self._plot_uncertainty_interval(scenario_df=scenario_df, model=model, row_num=i)
+          self._plot_uncertainty_interval(
+            scenario_df=scenario_df,
+            model=model,
+            row_num=current_row,
+            col_num=current_col,
+          )
         else:
           # add main line (0.5 quantile)
           primary_line_data = scenario_df.query('type_id == 0.5 and model_name == @model.id')
@@ -108,8 +121,8 @@ class LineChart(Chart):
               showlegend=(i == 1),
               line=dict(color=model.color),
             ),
-            row=i,
-            col=1,
+            row=current_row,
+            col=current_col,
           )
 
       # add gold standard line
@@ -124,8 +137,8 @@ class LineChart(Chart):
           legendgroup='Actual',
           showlegend=(i == 1),
         ),
-        row=i,
-        col=1,
+        row=current_row,
+        col=current_col,
       )
 
     # plot annotations
@@ -213,9 +226,10 @@ class LineChart(Chart):
         y_range = None
 
     if x_range is not None and y_range is not None:
-      for i in range(1, num_rows + 1):
-        self._fig.update_xaxes(range=x_range, row=i, col=1)
-        self._fig.update_yaxes(range=y_range, row=i, col=1)
+      for r in range(1, num_rows + 1):
+        for c in range(1, num_cols + 1):
+          self._fig.update_xaxes(range=x_range, row=r, col=c)
+          self._fig.update_yaxes(range=y_range, row=r, col=c)
 
     self._fig.update_yaxes(title_text=self.controls.target.display_value)
 
@@ -276,7 +290,7 @@ class LineChart(Chart):
     )
     self.refresh_fig()
 
-  def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int):
+  def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int, col_num: int):
     for lower_q, upper_q in self.controls.uncertainty_interval.get_bounds():
       lower_model = scenario_df.query('type_id == @lower_q and model_name == @model.id')
       upper_model = scenario_df.query('type_id == @upper_q and model_name == @model.id')
@@ -297,7 +311,7 @@ class LineChart(Chart):
           showlegend=False,
         ),
         row=row_num,
-        col=1,
+        col=col_num,
       )
 
   def _reload_data(self):
