@@ -29,6 +29,7 @@ controls:
     label: 2nd peak w/ no booster
     type: horizontal
     value: 23000
+  chart_layout: grid
   location_name: US
   model_names:
   - CFA-Scenarios
