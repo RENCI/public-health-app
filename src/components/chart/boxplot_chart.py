@@ -218,15 +218,16 @@ class BoxplotChart(Chart):
     self._fig.update_yaxes(showspikes=False)
 
     # calculate global min/max across all subplots for synchronized axes
-    should_use_zoom = (
-      self.controls.zoom is not None
-      and self.controls.zoom.x is not None
-      and self.controls.zoom.x.get('min') is not None
-      and self.controls.zoom.x.get('max') is not None
-      and self.controls.zoom.y is not None
-      and self.controls.zoom.y.get('min') is not None
-      and self.controls.zoom.y.get('max') is not None
-    )
+    should_use_zoom = False
+    # (
+    #   self.controls.zoom is not None
+    #   and self.controls.zoom.x is not None
+    #   and self.controls.zoom.x.get('min') is not None
+    #   and self.controls.zoom.x.get('max') is not None
+    #   and self.controls.zoom.y is not None
+    #   and self.controls.zoom.y.get('min') is not None
+    #   and self.controls.zoom.y.get('max') is not None
+    # )
 
     if should_use_zoom:
       x_range = [self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
@@ -279,20 +280,14 @@ class BoxplotChart(Chart):
         y_range = None
 
     if x_range is not None or y_range is not None:
-      for i in range(1, num_rows + 1):
-        if x_range is not None:
-          self._fig.update_xaxes(range=x_range, row=i, col=1)
-        if y_range is not None:
-          self._fig.update_yaxes(range=y_range, row=i, col=1)
+      for r in range(1, num_rows + 1):
+        for c in range(1, num_cols + 1):
+          if x_range is not None:
+            self._fig.update_xaxes(range=x_range, row=r, col=c)
+          if y_range is not None:
+            self._fig.update_yaxes(range=y_range, row=r, col=c)
 
-    # Add x-axis label only to the last row (bottom plot)
-    if num_rows > 1:
-      last_row_xaxis_name = f'xaxis{num_rows}'
-    else:
-      last_row_xaxis_name = 'xaxis'
-    self._fig.layout[last_row_xaxis_name].title = dict(
-      text=self.controls.target.display_value,
-    )
+    self._fig.update_xaxes(title_text=self.controls.target.display_value)
 
     self._fig.update_layout(
       hovermode='closest',
