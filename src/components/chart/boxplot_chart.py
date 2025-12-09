@@ -197,18 +197,18 @@ class BoxplotChart(Chart):
         scenario.description, row_height, SCENARIO_AXIS_LABEL_FONT_SIZE
       )
 
-      self._fig.add_annotation(
-        text=wrapped_text,
-        xref='paper',
-        yref='paper',
-        x=x_paper,
-        y=y_paper,
-        xanchor='left',
-        yanchor='middle',
-        textangle=-90,
-        showarrow=False,
-        font=dict(size=SCENARIO_AXIS_LABEL_FONT_SIZE),
-      )
+      # self._fig.add_annotation(
+      #   text=wrapped_text,
+      #   xref='paper',
+      #   yref='paper',
+      #   x=x_paper,
+      #   y=y_paper,
+      #   xanchor='left',
+      #   yanchor='middle',
+      #   textangle=-90,
+      #   showarrow=False,
+      #   font=dict(size=SCENARIO_AXIS_LABEL_FONT_SIZE),
+      # )
 
     # plot annotations
     # self._plot_annotations()
