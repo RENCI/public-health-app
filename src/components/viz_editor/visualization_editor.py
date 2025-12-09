@@ -11,6 +11,7 @@ from src.util.constants import DEFAULT_CONTROL_VALUES
 from .controls import (
   age_group_select,
   annotations_control,
+  layout_select,
   location_select,
   models_select,
   scenarios_select,
@@ -117,6 +118,7 @@ def visualization_editor(controls=None, show_controls=True):
             dmc.Card(
               dmc.Grid(
                 [
+                  dmc.GridCol(layout_select(), span=dict(base=12)),
                   dmc.GridCol(
                     scenarios_select(value=[str(scenario_id) for scenario_id in init_scenario_ids]),
                     span=dict(base=12),

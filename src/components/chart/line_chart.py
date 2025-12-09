@@ -42,6 +42,9 @@ class LineChart(Chart):
 
     # update layout
     num_rows = len(self.controls.scenarios)
+    # stack: num_rows=num_scenarios, num_cols=1
+    # grid: num_ceil(num_scenarios / 2), num_cols=2
+
     # Define fixed dimensions
     SUBPLOT_HEIGHT = 300  # Fixed height per subplot in pixels
     FIXED_SPACING = 50  # Fixed spacing between subplots in pixels
@@ -73,7 +76,7 @@ class LineChart(Chart):
     # create subplots
     self._fig = make_subplots(
       rows=num_rows,
-      cols=1,
+      cols=2,
       vertical_spacing=vertical_spacing,
       row_heights=[1] * num_rows,
       subplot_titles=[f'{s.name.split("-")[0]}. {s.description}' for s in self.controls.scenarios],

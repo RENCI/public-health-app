@@ -125,3 +125,8 @@ class UncertaintyInterval(Enum):
 
   def __eq__(self, other):
     return isinstance(other, UncertaintyInterval) and self.display_value == other.display_value
+
+class ChartLayout(Enum):
+  STACK = ('Stack', 'stack')
+  GRID = ('Grid', 'grid')
+
