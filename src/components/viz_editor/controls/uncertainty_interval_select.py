@@ -13,4 +13,5 @@ def uncertainty_interval_select(value: str = UncertaintyInterval.NONE.get_displa
     value=value,
     data=options,
     disabled=disabled,
+    comboboxProps={"shadow": "md"},
   )
