@@ -6,6 +6,8 @@ import dash_mantine_components as dmc
 from dash import Input, Output, State, callback, clientside_callback, dcc, exceptions
 from dash_iconify import DashIconify
 
+from src.util.svg import clean_svg
+
 default_control_values = {
   'theme': 'light',
   'plot_type': 'line',
@@ -138,7 +140,8 @@ def save_custom_insight(
 
   now = datetime.datetime.now(datetime.timezone.utc).isoformat()
   new_id = f'custom-{uuid.uuid4()}'
-  image_url = thumbnail_data or 'https://placehold.co/400?text=Visualization'
+  cleaned_thumbnail_data = clean_svg(thumbnail_data)
+  image_url = cleaned_thumbnail_data or 'https://placehold.co/400?text=Visualization'
   new_item = dict(
     id=new_id,
     title=title.strip(),

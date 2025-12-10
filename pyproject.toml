@@ -17,6 +17,7 @@ dependencies = [
     "python-slugify>=8.0.4",
     "pyyaml>=6.0.2",
     "weasyprint>=66.0",
+    "beautifulsoup4>=4.12.3",
 ]
 
 [dependency-groups]
