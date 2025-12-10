@@ -85,7 +85,8 @@ def visualization_editor(controls=None, show_controls=True):
   chart_controls = ChartControls.from_dict(controls_dict)
   chart = chart_manager.get_chart(chart_controls)
   figure = chart.get_fig() if chart else go.Figure()
-  graph = dcc.Graph(id='graph', figure=figure)
+  graph = dcc.Graph(id='graph', figure=figure, 
+                    config={'modeBarButtonsToRemove': ['toImage', 'pan2d', 'lasso2d', 'select2d', 'autoScale2d'], 'displaylogo': False},)
 
   if not chart:
     return html.Div(
@@ -137,11 +138,13 @@ def visualization_editor(controls=None, show_controls=True):
               ),
               variant='soft',
             ),
-            dmc.Card(
-              zoom_control(value=init_zoom),
-              variant='soft',
-              style={'display': 'none'} if init_plot_type == 'boxplot' else {},
-            ),
+            #dmc.Card(
+            #  zoom_control(value=init_zoom),
+            #  variant='soft',
+            #  style={'display': 'none'} if init_plot_type == 'boxplot' else {},
+            #),
+            # Remove zoom control for now, but render the Store to keep things in sync
+            dcc.Store(id='zoom-store', data=init_zoom),
             dmc.Card(
               annotations_control(value=init_annotations),
               variant='soft',
