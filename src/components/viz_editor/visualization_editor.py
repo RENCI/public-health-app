@@ -9,6 +9,7 @@ from dash_iconify import DashIconify
 from src.components.chart import ChartControls
 from src.components.chart.chart_instance_manager import ChartInstanceManager
 from src.components.collapsible_card.collapsible_card import CollapsibleCard
+from src.components.markdown_editor import markdown_editor
 from src.util.constants import DEFAULT_CONTROL_VALUES
 
 from .controls import (
@@ -118,7 +119,29 @@ def visualization_editor(controls=None, show_controls=True):
         dmc.Stack(
           [
             CollapsibleCard(
-              id={'index': 'data-selection'},
+              id={'index': 'insight-title'},
+              title='Title',
+              children=dmc.TextInput(
+                id='insight-title-input',
+                value='initial_title',
+                size='lg',
+                inputProps=dict(className='insight-form-input'),
+                variant='filled',
+              ),
+              initial_open=False,
+            ).layout,
+            CollapsibleCard(
+              id={'index': 'insight-summary'},
+              title='Summary',
+              children=markdown_editor(
+                editor_id='insight-summary-input',
+                label='Summary',
+                initial_value='initial_summary',
+              ),
+              initial_open=False,
+            ).layout,
+            CollapsibleCard(
+              id={'index': 'insight-data-selection'},
               title='Data Selection', 
               children=dmc.Grid(
                 [
@@ -150,9 +173,20 @@ def visualization_editor(controls=None, show_controls=True):
             # Remove zoom control for now, but render the Store to keep things in sync
             dcc.Store(id='zoom-store', data=init_zoom),
             CollapsibleCard(
-              id={'index': 'anntoations'},
+              id={'index': 'insight-annotations'},
               title='Annotations',
               children=annotations_control(value=init_annotations),
+            ).layout,
+            CollapsibleCard(
+              id={'index': 'insight-discussion'},
+              title='Discussion',
+              children=markdown_editor(
+                editor_id='insight-discussion-input',
+                label='',
+                initial_value='initial_description',
+                min_height='300px',
+              ),
+              initial_open=False,
             ).layout,
           ],
           gap='md',

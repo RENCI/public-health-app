@@ -204,7 +204,7 @@ def custom_insight_button(item):
     justify='flex-end',
     p='xs',
     style=dict(
-      backgroundColor='light-dark(var(--mantine-color-disabled), var(--mantine-color-dark-outline))',
+      backgroundColor='light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-8)',
     ),
   )
 

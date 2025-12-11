@@ -17,13 +17,13 @@ class CollapsibleCard:
     id: Dict[str, Any],
     title: str,
     children: Any,
-    initial_state: bool = True,
+    initial_open: bool = True,
   ) -> None:
     self.id = id
 
     self.store = CollapsibleCardStore(
       id=self.id, 
-      initial_state=initial_state
+      initial_open=initial_open
     )
 
     self._layout = dmc.Card(
@@ -45,7 +45,7 @@ class CollapsibleCard:
             children,
           ],
           id={'type': 'collapse', 'index': self.id['index']},
-          opened=initial_state,
+          opened=initial_open,
         ),
         self.store.layout,
       ],

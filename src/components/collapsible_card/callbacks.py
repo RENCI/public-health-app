@@ -41,7 +41,7 @@ class CollapsibleCardCallbacks:
       # rotate when open
       chevron_styles = [
         {
-          'transform': 'rotate(180deg)' if state['isOpen'] else 'rotate(0deg)',
+          'transform': 'rotate(0deg)' if state['isOpen'] else 'rotate(180deg)',
           'transition': 'transform 150ms ease',
         }
         for state in states

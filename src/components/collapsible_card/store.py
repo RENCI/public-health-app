@@ -6,9 +6,9 @@ from typing import Dict, Any
 class CollapsibleCardStore:
   STORE_TYPE = 'collapsible-card-store'
 
-  def __init__(self, id: Dict[str, Any], initial_state: bool = True):
+  def __init__(self, id: Dict[str, Any], initial_open: bool = True):
     self.id = {'type': self.STORE_TYPE, 'index': id['index']}
-    self.initial_state = initial_state
+    self.initial_open = initial_open
 
   @staticmethod
   def get_id(match_all=False):
@@ -22,6 +22,6 @@ class CollapsibleCardStore:
       id=self.id,
       data={
       'id': self.id,
-      'isOpen': self.initial_state,
+      'isOpen': self.initial_open,
       },
     )

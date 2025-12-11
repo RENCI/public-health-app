@@ -11,7 +11,7 @@ from dash import (
 from dash_iconify import DashIconify
 
 from src.components.toolbar import toolbar, toolbar_button
-from src.components.insight_save_drawer import insight_save_drawer_button, insight_save_drawer
+from src.components.insight_save_modal import insight_save_modal_button, insight_save_modal
 from src.components.toolbar import toolbar
 from src.components.viz_editor import visualization_editor
 from src.data.rounds.round19 import get_insight
@@ -37,7 +37,7 @@ reset_button = toolbar_button(
 
 insight_toolbar = toolbar(
   left=[back_button],
-  right=[reset_button, insight_save_drawer_button()],
+  right=[reset_button, insight_save_modal_button()],
 )
 
 
@@ -65,11 +65,7 @@ def layout(starter=None):
     [
       insight_toolbar,
       insight_editor(starter),
-      insight_save_drawer(
-        initial_title=title,
-        initial_summary=summary,
-        initial_description=description,
-      ),
+      insight_save_modal(),
     ],
     fluid=True,
     id='explorer-container',
@@ -101,7 +97,7 @@ def render_or_reset_explorer(reset_clicks, search, custom_insights):
 
 @callback(
   Output('insight-title-input', 'value'),
-  Output({'type': 'editor', 'id': 'insight-description-input'}, 'value'),
+  Output({'type': 'editor', 'id': 'insight-discussion-input'}, 'value'),
   Input('url', 'search'),
   State('custom-insights-store', 'data'),
 )

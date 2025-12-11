@@ -38,25 +38,25 @@ def insight_save_drawer(
       dcc.Store(id='thumbnail-store'),
       dmc.Stack(
         [
-          dmc.TextInput(
-            id='insight-title-input',
-            value=initial_title,
-            label=dmc.Text('Title', c='blue', fz='lg'),
-            size='lg',
-            inputProps=dict(className='insight-form-input'),
-            variant='filled',
-          ),
-          markdown_editor(
-            editor_id='insight-summary-input',
-            label='Summary',
-            initial_value=initial_summary,
-          ),
-          markdown_editor(
-            editor_id='insight-description-input',
-            label='Description',
-            initial_value=initial_description,
-            min_height='300px',
-          ),
+          # dmc.TextInput(
+          #   id='insight-title-input',
+          #   value=initial_title,
+          #   label=dmc.Text('Title', c='blue', fz='lg'),
+          #   size='lg',
+          #   inputProps=dict(className='insight-form-input'),
+          #   variant='filled',
+          # ),
+          # markdown_editor(
+          #   editor_id='insight-summary-input',
+          #   label='Summary',
+          #   initial_value=initial_summary,
+          # ),
+          # markdown_editor(
+          #   editor_id='insight-discussion-input',
+          #   label='Description',
+          #   initial_value=initial_description,
+          #   min_height='300px',
+          # ),
         ],
         gap=24,
       ),
@@ -66,7 +66,7 @@ def insight_save_drawer(
           dmc.Button(
             'Cancel',
             leftSection=DashIconify(icon='feather:x'),
-            color='crimson',
+            color='red.5',
             variant='outline',
             id='cancel-save-button',
           ),
@@ -120,72 +120,72 @@ def toggle_modal(show_clicks, hide_clicks, opened):
   return opened
 
 
-clientside_callback(
-  'window.dash_clientside.clientside.capture_thumbnail',
-  Output('thumbnail-store', 'data'),
-  Input('save-insight-button', 'n_clicks'),
-)
+# clientside_callback(
+#   'window.dash_clientside.clientside.capture_thumbnail',
+#   Output('thumbnail-store', 'data'),
+#   Input('save-insight-button', 'n_clicks'),
+# )
 
 
-@callback(
-  Output('custom-insights-store', 'data', allow_duplicate=True),
-  Output('insight-title-input', 'error'),
-  Output('notification-container', 'sendNotifications', allow_duplicate=True),
-  Output('_pages_location', 'pathname'),  # update path
-  Output('insight-save-modal', 'opened', allow_duplicate=True),
-  Input('thumbnail-store', 'data'),
-  State('custom-insights-store', 'data'),
-  State('insight-title-input', 'value'),
-  State({'type': 'editor', 'id': 'insight-summary-input'}, 'value'),
-  State({'type': 'editor', 'id': 'insight-description-input'}, 'value'),
-  State('selected-round-store', 'data'),
-  State('chart-controls-store', 'data'),
-  suppress_callback_exceptions=True,
-  prevent_initial_call=True,
-)
-def save_custom_insight(
-  thumbnail_data,
-  current_custom_insights: list[dict[str, Any]],
-  title: str,
-  summary: str,
-  description: str,
-  round_number: str,
-  current_chart_controls: dict[str, Any] | None = None,
-):
-  # validation
-  if not (thumbnail_data and title and title.strip() and description and description.strip()):
-    raise exceptions.PreventUpdate
+# @callback(
+#   Output('custom-insights-store', 'data', allow_duplicate=True),
+#   Output('insight-title-input', 'error'),
+#   Output('notification-container', 'sendNotifications', allow_duplicate=True),
+#   Output('_pages_location', 'pathname'),  # update path
+#   Output('insight-save-modal', 'opened', allow_duplicate=True),
+#   Input('thumbnail-store', 'data'),
+#   State('custom-insights-store', 'data'),
+#   State('insight-title-input', 'value'),
+#   State({'type': 'editor', 'id': 'insight-summary-input'}, 'value'),
+#   State({'type': 'editor', 'id': 'insight-discussion-input'}, 'value'),
+#   State('selected-round-store', 'data'),
+#   State('chart-controls-store', 'data'),
+#   suppress_callback_exceptions=True,
+#   prevent_initial_call=True,
+# )
+# def save_custom_insight(
+#   thumbnail_data,
+#   current_custom_insights: list[dict[str, Any]],
+#   title: str,
+#   summary: str,
+#   description: str,
+#   round_number: str,
+#   current_chart_controls: dict[str, Any] | None = None,
+# ):
+#   # validation
+#   if not (thumbnail_data and title and title.strip() and description and description.strip()):
+#     raise exceptions.PreventUpdate
 
-  now = datetime.datetime.now(datetime.timezone.utc).isoformat()
-  new_id = f'custom-{uuid.uuid4()}'
-  image_url = thumbnail_data or 'https://placehold.co/400?text=Visualization'
-  new_item = dict(
-    id=new_id,
-    title=title.strip(),
-    summary=summary.strip(),
-    description=description.strip(),
-    image_url=image_url,
-    created_at=now,
-    updated_at=now,
-    controls={
-      'round': round_number,
-      **DEFAULT_CONTROL_VALUES,
-      **(current_chart_controls or {}),
-    },
-  )
+#   now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+#   new_id = f'custom-{uuid.uuid4()}'
+#   image_url = thumbnail_data or 'https://placehold.co/400?text=Visualization'
+#   new_item = dict(
+#     id=new_id,
+#     title=title.strip(),
+#     summary=summary.strip(),
+#     description=description.strip(),
+#     image_url=image_url,
+#     created_at=now,
+#     updated_at=now,
+#     controls={
+#       'round': round_number,
+#       **DEFAULT_CONTROL_VALUES,
+#       **(current_chart_controls or {}),
+#     },
+#   )
 
-  notification = {
-    'action': 'show',
-    'id': f'save-success-{uuid.uuid4()}',
-    'message': f'Insight "{title.strip()}" saved successfully!',
-    'color': 'limegreen',
-  }
+#   notification = {
+#     'action': 'show',
+#     'id': f'save-success-{uuid.uuid4()}',
+#     'message': f'Insight "{title.strip()}" saved successfully!',
+#     'color': 'limegreen',
+#   }
 
-  current_custom_insights = current_custom_insights or []
-  return (
-    current_custom_insights + [new_item],
-    None,
-    [notification],
-    f'/insight/{new_id}',
-    False,
-  )
+#   current_custom_insights = current_custom_insights or []
+#   return (
+#     current_custom_insights + [new_item],
+#     None,
+#     [notification],
+#     f'/insight/{new_id}',
+#     False,
+#   )
