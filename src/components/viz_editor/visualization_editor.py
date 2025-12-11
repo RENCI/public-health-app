@@ -135,7 +135,6 @@ def visualization_editor(controls=None, show_controls=True):
               title='Summary',
               children=markdown_editor(
                 editor_id='insight-summary-input',
-                label='Summary',
                 initial_value='initial_summary',
               ),
               initial_open=False,
@@ -182,7 +181,6 @@ def visualization_editor(controls=None, show_controls=True):
               title='Discussion',
               children=markdown_editor(
                 editor_id='insight-discussion-input',
-                label='',
                 initial_value='initial_description',
                 min_height='300px',
               ),
