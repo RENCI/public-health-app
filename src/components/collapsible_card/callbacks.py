@@ -30,7 +30,7 @@ class CollapsibleCardCallbacks:
     # each card updates its own Collapse.is_open
     @callback(
       Output({'type': 'collapse', 'index': ALL}, 'opened'),
-      Output({'type': 'collapsible-card-toggle', 'index': ALL}, 'style'),
+      Output({'type': 'collapsible-card-toggle-icon', 'index': ALL}, 'style'),
       Input(CollapsibleCardStore.get_id(match_all=True), 'data'),
     )
     def update_visibility(states):

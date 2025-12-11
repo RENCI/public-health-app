@@ -28,27 +28,22 @@ class CollapsibleCard:
 
     self._layout = dmc.Card(
       [
-        dmc.Group(
-          children=[
-            dmc.Text(title, fw=500),
-            dmc.ActionIcon(
-              DashIconify(icon='feather:chevron-up'),
-              variant='transparent',
-              id={'type': 'collapsible-card-toggle', 'index': self.id['index']},
-            ),
-          ],
+        dmc.Button(
+          dmc.Text(title, fw=500, style=dict(flex=1)),
+          rightSection=DashIconify(icon='feather:chevron-up', id={'type': 'collapsible-card-toggle-icon', 'index': self.id['index']}),
+          id={'type': 'collapsible-card-toggle', 'index': self.id['index']},
           justify='space-between',
+          variant='transparent',
         ),
         dmc.Collapse(
-          [
-            dmc.Space(h=16),
-            children,
-          ],
+          children=children,
           id={'type': 'collapse', 'index': self.id['index']},
           opened=initial_open,
+          p='sm',
         ),
         self.store.layout,
       ],
+      p=0,
       variant='soft',
     )
 
