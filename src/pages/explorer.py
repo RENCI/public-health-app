@@ -97,6 +97,7 @@ def render_or_reset_explorer(reset_clicks, search, custom_insights):
 
 @callback(
   Output('insight-title-input', 'value'),
+  Output({'type': 'editor', 'id': 'insight-summary-input'}, 'value'),
   Output({'type': 'editor', 'id': 'insight-discussion-input'}, 'value'),
   Input('url', 'search'),
   State('custom-insights-store', 'data'),
@@ -105,5 +106,6 @@ def update_modal_initial_values(search, custom_insights):
   starter_id = get_query_param(search, 'starter')
   insight = get_insight(starter_id, custom_insights) or {}
   title = insight.get('title', '')
+  summary = insight.get('summary', '')
   description = insight.get('description', '')
-  return title, description
+  return title, summary, description
