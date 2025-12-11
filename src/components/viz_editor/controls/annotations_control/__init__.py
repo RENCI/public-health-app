@@ -10,7 +10,8 @@ add_annotation_button = dmc.Button(
   leftSection=DashIconify(icon='feather:plus'),
   id='add-annotation-button',
   variant='light',
-  size='sm',
+  size='xs',
+  style=dict(alignSelf='center'),
 )
 
 

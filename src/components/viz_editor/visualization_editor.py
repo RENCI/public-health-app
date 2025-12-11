@@ -125,6 +125,7 @@ def visualization_editor(controls=None, show_controls=True):
                 id='insight-title-input',
                 value='initial_title',
                 size='lg',
+                placeholder='Enter insight title',
                 inputProps=dict(className='insight-form-input'),
                 variant='filled',
               ),

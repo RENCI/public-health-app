@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from dash import ALL, Input, Output, State, callback, ctx, exceptions
+import dash_mantine_components as dmc
 
 from .store import remove_annotation
 from .ui import (
@@ -18,7 +19,15 @@ from .ui import (
 )
 def render_annotations(data):
   if not data:
-    return []
+    return [
+      dmc.Text(
+        ['No annotations exist for this insight yet.'],
+        ta='center',
+        size='sm',
+        c='dimmed',
+        my='md',
+      )
+    ]
   return [
     annotation_row(i, d['type'], d['value'], d['label'], d['color']) for i, d in enumerate(data)
   ]
