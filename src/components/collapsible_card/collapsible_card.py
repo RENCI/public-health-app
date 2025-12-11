@@ -18,6 +18,7 @@ class CollapsibleCard:
     title: str,
     children: Any,
     initial_open: bool = True,
+    style: Dict = {},
   ) -> None:
     self.id = id
 
@@ -45,6 +46,7 @@ class CollapsibleCard:
       ],
       p=0,
       variant='soft',
+      style=style,
     )
 
   @property

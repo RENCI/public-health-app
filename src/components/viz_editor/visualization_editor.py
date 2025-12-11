@@ -176,6 +176,7 @@ def visualization_editor(controls=None, show_controls=True):
               id={'index': 'insight-annotations'},
               title='Annotations',
               children=annotations_control(value=init_annotations),
+              style={'display': 'none'} if init_plot_type == 'boxplot' else {},
             ).layout,
             CollapsibleCard(
               id={'index': 'insight-discussion'},
