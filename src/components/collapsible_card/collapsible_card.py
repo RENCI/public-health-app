@@ -14,9 +14,9 @@ _callbacks = CollapsibleCardCallbacks()
 class CollapsibleCard:
   def __init__(
     self,
+    id: Dict[str, Any],
     title: str,
     children: Any,
-    id: Dict[str, Any],
     initial_state: bool = True,
   ) -> None:
     self.id = id
@@ -40,7 +40,10 @@ class CollapsibleCard:
           justify='space-between',
         ),
         dmc.Collapse(
-          children,
+          [
+            dmc.Space(h=16),
+            children,
+          ],
           id={'type': 'collapse', 'index': self.id['index']},
           opened=initial_state,
         ),

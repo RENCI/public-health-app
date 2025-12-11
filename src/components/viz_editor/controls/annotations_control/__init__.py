@@ -19,8 +19,6 @@ def annotations_control(value=None):
     id='annotations-input',
     children=[
       dcc.Store(id='annotations-store', storage_type='memory', data=value or []),
-      dmc.Text('Annotations', size='md'),
-      dmc.Divider(),
       dmc.Stack(id='annotations-container', children=[], gap='sm'),
       add_annotation_button,
       edit_annotation_modal(),

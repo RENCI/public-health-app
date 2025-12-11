@@ -4,8 +4,11 @@ import dash_mantine_components as dmc
 import plotly.graph_objects as go
 from dash import Input, Output, State, callback, dcc, exceptions, html
 
+from dash_iconify import DashIconify
+
 from src.components.chart import ChartControls
 from src.components.chart.chart_instance_manager import ChartInstanceManager
+from src.components.collapsible_card.collapsible_card import CollapsibleCard
 from src.util.constants import DEFAULT_CONTROL_VALUES
 
 from .controls import (
@@ -108,14 +111,16 @@ def visualization_editor(controls=None, show_controls=True):
           graph,
         ],
         id='visualization-column',
-        span=dict(base=12, xl=8, lg=7),
+        span=dict(base=12, xl=7),
         style={'display': 'flex', 'flexDirection': 'column'},
       ),
       dmc.GridCol(
         dmc.Stack(
           [
-            dmc.Card(
-              dmc.Grid(
+            CollapsibleCard(
+              id={'index': 'data-selection'},
+              title='Data Selection', 
+              children=dmc.Grid(
                 [
                   dmc.GridCol(
                     scenarios_select(value=[str(scenario_id) for scenario_id in init_scenario_ids]),
@@ -136,8 +141,7 @@ def visualization_editor(controls=None, show_controls=True):
                   ),
                 ],
               ),
-              variant='soft',
-            ),
+            ).layout,
             #dmc.Card(
             #  zoom_control(value=init_zoom),
             #  variant='soft',
@@ -145,16 +149,16 @@ def visualization_editor(controls=None, show_controls=True):
             #),
             # Remove zoom control for now, but render the Store to keep things in sync
             dcc.Store(id='zoom-store', data=init_zoom),
-            dmc.Card(
-              annotations_control(value=init_annotations),
-              variant='soft',
-              style={'display': 'none'} if init_plot_type == 'boxplot' else {},
-            ),
+            CollapsibleCard(
+              id={'index': 'anntoations'},
+              title='Annotations',
+              children=annotations_control(value=init_annotations),
+            ).layout,
           ],
           gap='md',
         ),
         id='controls-column',
-        span=dict(base=12, xl=4, lg=5),
+        span=dict(base=12, xl=5),
       ),
     ],
     mb=12,
