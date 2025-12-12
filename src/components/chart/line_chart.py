@@ -106,6 +106,7 @@ class LineChart(Chart):
             scenario_df=scenario_df,
             model=model,
             row_num=current_row,
+            col_num=current_col,
           )
         else:
           # add main line (0.5 quantile)
@@ -289,10 +290,10 @@ class LineChart(Chart):
     )
     self.refresh_fig()
 
-  def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int):
+  def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int, col_num: int):
     all_bounds = self.controls.uncertainty_interval.get_bounds()
-    for i, bounds in enumerate(all_bounds):   
-      lower_q, upper_q = bounds   
+    for i, bounds in enumerate(all_bounds):
+      lower_q, upper_q = bounds
       lower_model = scenario_df.query('type_id == @lower_q and model_name == @model.id')
       upper_model = scenario_df.query('type_id == @upper_q and model_name == @model.id')
       fill_color = get_model_color_with_uncertainty_interval(
@@ -310,12 +311,12 @@ class LineChart(Chart):
           name=f'{model.name}',
           legendgroup=f'{model.name}',
           hoverinfo='skip',
-          showlegend=(row_num == 1 and i == len(all_bounds) - 1),
+          showlegend=(row_num == 1 and col_num == 1 and i == len(all_bounds) - 1),
         ),
         row=row_num,
-        col=1,
+        col=col_num,
       )
-
+  
   def _reload_data(self):
     """
     Reload data, for example if a variable changed, e.g. round number, location, target, etc.
