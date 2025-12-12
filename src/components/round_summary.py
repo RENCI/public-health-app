@@ -107,7 +107,7 @@ def insight_button(item):
     style=dict(
       height='100%',
       aspectRatio=1,
-      objectFit='contain',
+      objectFit='cover',
       borderTopRightRadius=0,
       borderBottomRightRadius=0,
     ),
