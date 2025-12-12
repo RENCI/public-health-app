@@ -23,4 +23,5 @@ def location_select(value='US'):
     value=value,
     required=True,
     data=options,
+    comboboxProps={"shadow": "md"},
   )

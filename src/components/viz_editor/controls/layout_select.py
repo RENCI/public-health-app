@@ -15,4 +15,5 @@ def layout_select(value: str = 'stack'):
     value=value,
     data=options,
     allowDeselect=False,
+    comboboxProps={"shadow": "md"},
   )

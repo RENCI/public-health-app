@@ -13,4 +13,5 @@ def target_select(value: str = Target.INCIDENT_HOSPITALIZATION.get_input_value()
     value=value,
     required=True,
     data=options,
+    comboboxProps={"shadow": "md"},
   )

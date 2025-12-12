@@ -106,7 +106,6 @@ class LineChart(Chart):
             scenario_df=scenario_df,
             model=model,
             row_num=current_row,
-            col_num=current_col,
           )
         else:
           # add main line (0.5 quantile)
@@ -290,8 +289,10 @@ class LineChart(Chart):
     )
     self.refresh_fig()
 
-  def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int, col_num: int):
-    for lower_q, upper_q in self.controls.uncertainty_interval.get_bounds():
+  def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int):
+    all_bounds = self.controls.uncertainty_interval.get_bounds()
+    for i, bounds in enumerate(all_bounds):   
+      lower_q, upper_q = bounds   
       lower_model = scenario_df.query('type_id == @lower_q and model_name == @model.id')
       upper_model = scenario_df.query('type_id == @upper_q and model_name == @model.id')
       fill_color = get_model_color_with_uncertainty_interval(
@@ -311,7 +312,7 @@ class LineChart(Chart):
           showlegend=False,
         ),
         row=row_num,
-        col=col_num,
+        col=1,
       )
   
   def _reload_data(self):

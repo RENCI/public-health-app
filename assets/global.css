@@ -10,3 +10,13 @@
     background-color: var(--bg);
   }
 }
+
+.mantine-MultiSelect-dropdown, .mantine-Select-dropdown {
+  --bd-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-gray-8));
+  border: calc(0.0625rem * var(--mantine-scale)) solid var(--bd-color);
+}
+
+.mantine-Card-root {
+  --bg-color: light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-8));
+  background-color: var(--bg-color);
+}
