@@ -101,40 +101,33 @@ new_insight_prompt = dmc.Card(
 
 
 def insight_button(item):
-  graphic = dmc.Image(
-    src=item['image_url'],
-    radius='sm',
-    style=dict(
-      height='100%',
-      aspectRatio=1,
-      objectFit='cover',
-      borderTopRightRadius=0,
-      borderBottomRightRadius=0,
-    ),
-  )
+  graphic = dmc.Image(src=item['image_url'], h=300, style=dict(aspectRatio=1))
 
   title = dmc.Text(item['title'], size='lg')
   summary = dmc.Text(item['summary'], c='dimmed')
 
   return dmc.Anchor(
     dmc.Card(
-      [
-        dmc.Box(graphic, style=dict(width='150px', aspectRatio=1)),
-        dmc.Stack(
-          [title, summary],
-          align='flex-start',
-          px='lg',
-          py='md',
-          style=dict(flex=1, overflow='hidden'),
-        ),
-      ],
+      dmc.Flex(
+        [
+          dmc.CardSection(graphic),
+          dmc.Stack(
+            [title, summary],
+            align='flex-start',
+            px='lg',
+            py='md',
+            style=dict(flex=1, overflow='hidden'),
+          ),
+        ],
+        direction=dict(base='column', md='row'),
+        gap='md',
+      ),
       withBorder=True,
       className='emphasize-hover',
       style=dict(
         display='flex',
         justifyContent='flex-start',
         alignItems='stretch',
-        minHeight='150px',
         height='min-content',
         padding=0,
         flexDirection='row',
@@ -148,17 +141,7 @@ def insight_button(item):
 def custom_insight_button(item):
   created_at = item.get('created_at', None)
 
-  graphic = dmc.Image(
-    src=item['image_url'],
-    radius='sm',
-    style=dict(
-      height='100%',
-      aspectRatio=1,
-      objectFit='cover',
-      borderTopRightRadius=0,
-      borderBottomRightRadius=0,
-    ),
-  )
+  graphic = dmc.Image(src=item['image_url'], h=300, style=dict(aspectRatio=1))
 
   title = dmc.Text(
     item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left', flex=1)
@@ -209,36 +192,36 @@ def custom_insight_button(item):
     ),
   )
 
-  return dmc.Card(
-    [
-      dmc.Anchor(
+  return dmc.Anchor(
+    dmc.Card(
+      dmc.Flex(
         [
-          dmc.Box(graphic, style=dict(width='150px', aspectRatio=1)),
+          dmc.CardSection(graphic),
           dmc.Stack(
             [title, details],
-            w='100%',
-            c='var(--mantine-color-text)',
+            align='flex-start',
             px='lg',
             py='md',
+            style=dict(flex=1, overflow='hidden'),
           ),
         ],
-        href=f'/insight/{item["id"]}',
-        underline=False,
-        style=dict(flex=1, display='flex', alignItems='stretch'),
+        direction=dict(base='column', md='row'),
+        gap='md',
+        w='100%',
       ),
-      actions,
-    ],
-    withBorder=True,
-    className='emphasize-hover',
-    style=dict(
-      display='flex',
-      justifyContent='flex-start',
-      alignItems='stretch',
-      minHeight='150px',
-      height='min-content',
-      padding=0,
-      flexDirection='row',
+      withBorder=True,
+      className='emphasize-hover',
+      style=dict(
+        display='flex',
+        justifyContent='flex-start',
+        alignItems='stretch',
+        height='min-content',
+        padding=0,
+        flexDirection='row',
+      ),
     ),
+    href=f'/insight/{item["id"]}',
+    underline=False,
   )
 
 
