@@ -26,6 +26,7 @@ DEFAULT_CONTROL_VALUES = dict(
     }
   ],
   model_names=['Ensemble'],
+  chart_layout='stack',
   location_name='US',
   target='incident_hospitalization',
   x_axis='target_end_date',
