@@ -9,7 +9,7 @@ from src.components.chart.chart_properties import (
   ScenarioVariable,
   Zoom,
 )
-from src.components.enums import AgeGroup, DataType, Target, UncertaintyInterval
+from src.components.enums import AgeGroup, ChartLayout, DataType, Target, UncertaintyInterval
 
 
 class ChartControls:
@@ -18,6 +18,7 @@ class ChartControls:
     theme: str,
     plot_type: str,
     round_num: int,
+    chart_layout: str,
     scenario_ids: list[int],
     scenario_variables: list[dict],
     model_names: list[str],
@@ -27,7 +28,6 @@ class ChartControls:
     x_axis: str | None = None,
     y_axis: str | None = None,
     x_start_date: str | None = None,
-    columns: int = 1,
     zoom: dict | None = None,
     annotations: list[dict] | None = None,
     uncertainty_interval: str | None = None,
@@ -40,13 +40,13 @@ class ChartControls:
     self.scenarios = [Scenario(id=scenario_id) for scenario_id in scenario_ids]
     self.scenario_variables = [ScenarioVariable(**var) for var in scenario_variables]
     self.models = [Model(model_name) for model_name in model_names]
+    self.chart_layout = ChartLayout.from_input_value(chart_layout)
     self.location = Location(location_name)
     self.target = Target.from_input_value(target)
     self.age_group = AgeGroup.from_input_value(age_group)
     self.x_axis = x_axis
     self.y_axis = y_axis
     self.x_start_date = datetime.strptime(x_start_date, '%Y-%m-%d') if x_start_date else None
-    self.columns = columns
     self.annotations = (
       [Annotation.from_dict(annotation) for annotation in annotations] if annotations else None
     )
@@ -68,13 +68,13 @@ class ChartControls:
       scenario_ids=data['scenario_ids'],
       scenario_variables=data['scenario_variables'],
       model_names=data['model_names'],
+      chart_layout=data.get('chart_layout', 'stack'),
       location_name=data['location_name'],
       target=data['target'],
       age_group=data['age_group'],
       x_axis=data['x_axis'],
       y_axis=data['y_axis'],
       x_start_date=data['x_start_date'],
-      columns=data.get('columns', 1),
       zoom=data.get('zoom', None),
       annotations=data.get('annotations', None),
       uncertainty_interval=data.get('uncertainty_interval', None),

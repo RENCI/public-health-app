@@ -11,6 +11,7 @@ from src.util.constants import DEFAULT_CONTROL_VALUES
 from .controls import (
   age_group_select,
   annotations_control,
+  layout_select,
   location_select,
   models_select,
   scenarios_select,
@@ -117,6 +118,7 @@ def visualization_editor(controls=None, show_controls=True):
             dmc.Card(
               dmc.Grid(
                 [
+                  dmc.GridCol(layout_select(), span=dict(base=12)),
                   dmc.GridCol(
                     scenarios_select(value=[str(scenario_id) for scenario_id in init_scenario_ids]),
                     span=dict(base=12),
@@ -194,6 +196,7 @@ def update_graph_figure(
   Input('theme-store', 'data'),
   Input('scenarios-select', 'value'),
   Input('models-select', 'value'),
+  Input('chart-layout-select', 'value'),
   Input('location-select', 'value'),
   Input('target-select', 'value'),
   Input('age-group-select', 'value'),
@@ -209,6 +212,7 @@ def update_chart_controls(
   theme: str,
   scenario_ids: list[str],
   model_names: list[str],
+  chart_layout: str,
   location_name: str,
   target: str,
   age_group: str,
@@ -272,6 +276,7 @@ def update_chart_controls(
     theme=theme,
     scenario_ids=[int(scenario_id) for scenario_id in scenario_ids],
     model_names=model_names,
+    chart_layout=chart_layout,
     location_name=location_name,
     target=target,
     age_group=age_group,

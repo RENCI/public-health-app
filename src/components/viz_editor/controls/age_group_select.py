@@ -13,4 +13,5 @@ def age_group_select(value: str = AgeGroup.ALL.get_input_value()):
     value=value,
     required=True,
     data=options,
+    comboboxProps={"shadow": "md"},
   )
