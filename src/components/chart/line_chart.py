@@ -311,7 +311,7 @@ class LineChart(Chart):
           name=f'{model.name}',
           legendgroup=f'{model.name}',
           hoverinfo='skip',
-          showlegend=(row_num == 1 and i == len(all_bounds) - 1),
+          showlegend=(row_num == 1 and col_num == 1 and i == len(all_bounds) - 1),
         ),
         row=row_num,
         col=col_num,
