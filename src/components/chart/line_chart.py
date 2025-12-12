@@ -106,7 +106,6 @@ class LineChart(Chart):
             scenario_df=scenario_df,
             model=model,
             row_num=current_row,
-            col_num=current_col,
           )
         else:
           # add main line (0.5 quantile)
@@ -314,7 +313,7 @@ class LineChart(Chart):
           showlegend=(row_num == 1 and i == len(all_bounds) - 1),
         ),
         row=row_num,
-        col=col_num,
+        col=1,
       )
 
   def _reload_data(self):
