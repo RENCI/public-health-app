@@ -12,6 +12,7 @@ template: default
 created_at: "2025-05-18T22:45:12Z"
 updated_at: "2025-05-18T22:45:12Z"
 controls:
+  chart_layout: stack
   age_group: 0-130
   annotations: []
   chart_layout: stack
