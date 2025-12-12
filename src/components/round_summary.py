@@ -17,6 +17,7 @@ from dash_iconify import DashIconify
 from slugify import slugify
 
 from src.components.toolbar import toolbar
+from src.components.insight_card import insight_card
 from src.util import (
   format_timestamp,
   generate_insight_share_url,
@@ -100,57 +101,14 @@ new_insight_prompt = dmc.Card(
 )
 
 
-def insight_button(item):
-  graphic = dmc.Image(src=item['image_url'], h=300, style=dict(aspectRatio=1))
-
-  title = dmc.Text(item['title'], size='lg')
-  summary = dmc.Text(item['summary'], c='dimmed')
-
-  return dmc.Anchor(
-    dmc.Card(
-      dmc.Flex(
-        [
-          dmc.CardSection(graphic),
-          dmc.Stack(
-            [title, summary],
-            align='flex-start',
-            px='lg',
-            py='md',
-            style=dict(flex=1, overflow='hidden'),
-          ),
-        ],
-        direction=dict(base='column', sm='row'),
-        gap='md',
-      ),
-      withBorder=True,
-      className='emphasize-hover',
-      style=dict(
-        display='flex',
-        justifyContent='flex-start',
-        alignItems='stretch',
-        height='min-content',
-        padding=0,
-        flexDirection='row',
-      ),
-    ),
-    href=f'/insight/{item["id"]}',
-    underline=False,
-  )
-
-
 def custom_insight_button(item):
   created_at = item.get('created_at', None)
-
-  graphic = dmc.Image(src=item['image_url'], h=300, style=dict(aspectRatio=1))
-
-  title = dmc.Text(
-    item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left', flex=1)
-  )
 
   share_button = dmc.ActionIcon(
     DashIconify(icon='feather:share-2', width=16, color='teal'),
     id={'type': 'share-insight', 'id': item['id']},
     variant='subtle',
+    color='gray',
     size='md',
     style=dict(alignSelf='center'),
   )
@@ -159,6 +117,7 @@ def custom_insight_button(item):
     DashIconify(icon='feather:trash-2', width=16, color='crimson'),
     id={'type': 'delete-insight', 'id': item['id']},
     variant='subtle',
+    color='gray',
     size='md',
     style=dict(alignSelf='center'),
   )
@@ -171,57 +130,29 @@ def custom_insight_button(item):
     radius='md',
   )
 
-  details = dmc.Group(
+  summary = dmc.Group(
     [
       custom_insights_badge,
-      tipped_text(f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'),
+      tipped_text(
+        f'Created: {format_timestamp(created_at)}',
+        time_ago(created_at),
+        size='xs',
+      ),
     ],
-    align='center',
+    align='flex-start',
     justify='flex-start',
+    style=dict(flex=1),
   )
 
-  actions = dmc.Stack(
-    [
+  return insight_card(
+    title=item['title'],
+    summary=summary,
+    image_url=item['image_url'],
+    href=f'/insight/{item['id']}',
+    actions=[
       delete_button,
       share_button,
     ],
-    justify='flex-end',
-    p='xs',
-    style=dict(
-      backgroundColor='light-dark(var(--mantine-color-disabled), var(--mantine-color-dark-outline))',
-    ),
-  )
-
-  return dmc.Anchor(
-    dmc.Card(
-      dmc.Flex(
-        [
-          dmc.CardSection(graphic),
-          dmc.Stack(
-            [title, details],
-            align='flex-start',
-            px='lg',
-            py='md',
-            style=dict(flex=1, overflow='hidden'),
-          ),
-        ],
-        direction=dict(base='column', sm='row'),
-        gap='md',
-        w='100%',
-      ),
-      withBorder=True,
-      className='emphasize-hover',
-      style=dict(
-        display='flex',
-        justifyContent='flex-start',
-        alignItems='stretch',
-        height='min-content',
-        padding=0,
-        flexDirection='row',
-      ),
-    ),
-    href=f'/insight/{item["id"]}',
-    underline=False,
   )
 
 
@@ -327,7 +258,12 @@ def update_round_summary(round_number, pathname):
       name=round_name,
     ),
     dcc.Markdown(report),
-    [insight_button(i) for i in insights],
+    [insight_card(
+      title=insight['title'],
+      summary=insight['summary'],
+      image_url=insight['image_url'],
+      href=f'/insight/{insight['id']}',
+    ) for insight in insights],
     dcc.Markdown(methods),
   )
 
