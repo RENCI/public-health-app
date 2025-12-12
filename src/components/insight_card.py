@@ -7,6 +7,7 @@ def actions_tray(actions: list = []):
       justify='flex-end',
       h='100%',
       direction=dict(base='row', sm='column'),
+      gap='xs',
     ),
     p='xs',
     radius='sm',

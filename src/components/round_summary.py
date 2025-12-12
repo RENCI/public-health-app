@@ -101,7 +101,7 @@ new_insight_prompt = dmc.Card(
 )
 
 
-def custom_insight_button(item):
+def custom_insight_card(item):
   created_at = item.get('created_at', None)
 
   share_button = dmc.ActionIcon(
@@ -132,12 +132,9 @@ def custom_insight_button(item):
 
   summary = dmc.Group(
     [
+      item['summary'],
       custom_insights_badge,
-      tipped_text(
-        f'Created: {format_timestamp(created_at)}',
-        time_ago(created_at),
-        size='xs',
-      ),
+      tipped_text(f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'),
     ],
     align='flex-start',
     justify='flex-start',
@@ -219,6 +216,7 @@ def round_summary():
       dmc.Box(id='round-overview'),
       dmc.Title('Insights from the Modeling Hub', order=3, my=16),
       dmc.Stack(id='insights-list', gap='md'),
+      dmc.Space(h=16),
       dmc.Title('Custom Insights', order=3, my=16),
       dmc.Stack(id='custom-insights-list', gap='md'),
       dcc.Download(id='round-pdf-download'),
@@ -284,7 +282,7 @@ def update_custom_insights_list(custom_insights, round_number):
   ]
 
   return (
-    [custom_insight_button(insight) for insight in filtered_custom_insights] + [new_insight_prompt]
+    [custom_insight_card(insight) for insight in filtered_custom_insights] + [new_insight_prompt]
     if len(filtered_custom_insights)
     else [no_insights_message]
   )
