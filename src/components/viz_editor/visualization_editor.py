@@ -15,6 +15,7 @@ from src.util.constants import DEFAULT_CONTROL_VALUES
 from .controls import (
   age_group_select,
   annotations_control,
+  layout_select,
   location_select,
   models_select,
   scenarios_select,
@@ -38,6 +39,7 @@ def visualization_editor(controls=None, show_controls=True):
   init_scenario_ids: list[int] = controls['scenario_ids']
   init_scenario_variables: list[dict] = controls['scenario_variables']
   init_model_names: list[str] = controls['model_names']
+  init_chart_layout: str = controls['chart_layout']
   init_location_name: str = controls['location_name']
   init_target: str = controls['target']
   init_age_group: str = controls['age_group']
@@ -55,6 +57,7 @@ def visualization_editor(controls=None, show_controls=True):
     scenario_ids=init_scenario_ids,
     scenario_variables=init_scenario_variables,
     model_names=init_model_names,
+    chart_layout=init_chart_layout,
     location_name=init_location_name,
     target=init_target,
     age_group=init_age_group,
@@ -145,6 +148,7 @@ def visualization_editor(controls=None, show_controls=True):
               title='Data Selection', 
               children=dmc.Grid(
                 [
+                  dmc.GridCol(layout_select(value=init_chart_layout), span=dict(base=12)),
                   dmc.GridCol(
                     scenarios_select(value=[str(scenario_id) for scenario_id in init_scenario_ids]),
                     span=dict(base=12),
@@ -232,6 +236,7 @@ def update_graph_figure(
   Input('theme-store', 'data'),
   Input('scenarios-select', 'value'),
   Input('models-select', 'value'),
+  Input('chart-layout-select', 'value'),
   Input('location-select', 'value'),
   Input('target-select', 'value'),
   Input('age-group-select', 'value'),
@@ -247,6 +252,7 @@ def update_chart_controls(
   theme: str,
   scenario_ids: list[str],
   model_names: list[str],
+  chart_layout: str,
   location_name: str,
   target: str,
   age_group: str,
@@ -310,6 +316,7 @@ def update_chart_controls(
     theme=theme,
     scenario_ids=[int(scenario_id) for scenario_id in scenario_ids],
     model_names=model_names,
+    chart_layout=chart_layout,
     location_name=location_name,
     target=target,
     age_group=age_group,

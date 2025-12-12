@@ -4,7 +4,7 @@ from plotly.subplots import make_subplots
 
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
-from src.components.enums import UncertaintyInterval
+from src.components.enums import ChartLayout, UncertaintyInterval
 from src.util.constants import get_model_by_name, get_model_color_by_name
 
 SCENARIO_AXIS_LABEL_FONT_SIZE = 10
@@ -125,8 +125,16 @@ class BoxplotChart(Chart):
       return self._fig
 
     # create boxplot for each scenario
-    num_rows = len(self.controls.scenarios)
-    num_cols = 1
+    # update layout
+    num_scenarios = len(self.controls.scenarios)
+
+    if self.controls.chart_layout == ChartLayout.STACK:
+      num_cols = 1
+    elif self.controls.chart_layout == ChartLayout.GRID:
+      num_cols = 2
+
+    num_rows = (num_scenarios + num_cols - 1) // num_cols
+
     self._fig = make_subplots(
       rows=num_rows,
       cols=num_cols,
@@ -147,8 +155,11 @@ class BoxplotChart(Chart):
     # second_df = second_df.query('model_name == @ensemble_model_id')
 
     for i, scenario in enumerate(self.controls.scenarios, start=1):
+      current_row = (i - 1) // num_cols + 1
+      current_col = (i - 1) % num_cols + 1
       scenario_df = df.query('scenario_id == @scenario.id')
       # second_scenario_df = second_df.query('scenario_id == @scenario.id')
+
       trace = go.Box(
         marker_color=get_model_color_by_name('Ensemble'),
         name='',
@@ -160,12 +171,12 @@ class BoxplotChart(Chart):
         trace.y = scenario_df[self.controls.y_axis]
       self._fig.add_trace(
         trace,
-        row=i,
-        col=1,
+        row=current_row,
+        col=current_col,
       )
 
       # Add scenario name as vertical text annotation to the right of the boxplot
-      subplot_idx = ((i - 1) * num_cols) + 1
+      subplot_idx = i
       x_axis = self._fig.layout[f'xaxis{subplot_idx}']
       # Position to the right of subplot domain using paper coordinates
       # x_axis.domain is a list [min, max] in paper coordinates
@@ -186,36 +197,37 @@ class BoxplotChart(Chart):
         scenario.description, row_height, SCENARIO_AXIS_LABEL_FONT_SIZE
       )
 
-      self._fig.add_annotation(
-        text=wrapped_text,
-        xref='paper',
-        yref='paper',
-        x=x_paper,
-        y=y_paper,
-        xanchor='left',
-        yanchor='middle',
-        textangle=-90,
-        showarrow=False,
-        font=dict(size=SCENARIO_AXIS_LABEL_FONT_SIZE),
-      )
+      # self._fig.add_annotation(
+      #   text=wrapped_text,
+      #   xref='paper',
+      #   yref='paper',
+      #   x=x_paper,
+      #   y=y_paper,
+      #   xanchor='left',
+      #   yanchor='middle',
+      #   textangle=-90,
+      #   showarrow=False,
+      #   font=dict(size=SCENARIO_AXIS_LABEL_FONT_SIZE),
+      # )
 
     # plot annotations
-    self._plot_annotations()
+    # self._plot_annotations()
 
     # update axes
     self._fig.update_xaxes(showspikes=False)
     self._fig.update_yaxes(showspikes=False)
 
     # calculate global min/max across all subplots for synchronized axes
-    should_use_zoom = (
-      self.controls.zoom is not None
-      and self.controls.zoom.x is not None
-      and self.controls.zoom.x.get('min') is not None
-      and self.controls.zoom.x.get('max') is not None
-      and self.controls.zoom.y is not None
-      and self.controls.zoom.y.get('min') is not None
-      and self.controls.zoom.y.get('max') is not None
-    )
+    should_use_zoom = False
+    # (
+    #   self.controls.zoom is not None
+    #   and self.controls.zoom.x is not None
+    #   and self.controls.zoom.x.get('min') is not None
+    #   and self.controls.zoom.x.get('max') is not None
+    #   and self.controls.zoom.y is not None
+    #   and self.controls.zoom.y.get('min') is not None
+    #   and self.controls.zoom.y.get('max') is not None
+    # )
 
     if should_use_zoom:
       x_range = [self.controls.zoom.x.get('min'), self.controls.zoom.x.get('max')]
@@ -268,20 +280,14 @@ class BoxplotChart(Chart):
         y_range = None
 
     if x_range is not None or y_range is not None:
-      for i in range(1, num_rows + 1):
-        if x_range is not None:
-          self._fig.update_xaxes(range=x_range, row=i, col=1)
-        if y_range is not None:
-          self._fig.update_yaxes(range=y_range, row=i, col=1)
+      for r in range(1, num_rows + 1):
+        for c in range(1, num_cols + 1):
+          if x_range is not None:
+            self._fig.update_xaxes(range=x_range, row=r, col=c)
+          if y_range is not None:
+            self._fig.update_yaxes(range=y_range, row=r, col=c)
 
-    # Add x-axis label only to the last row (bottom plot)
-    if num_rows > 1:
-      last_row_xaxis_name = f'xaxis{num_rows}'
-    else:
-      last_row_xaxis_name = 'xaxis'
-    self._fig.layout[last_row_xaxis_name].title = dict(
-      text=self.controls.target.display_value,
-    )
+    self._fig.update_xaxes(title_text=self.controls.target.display_value)
 
     self._fig.update_layout(
       hovermode='closest',

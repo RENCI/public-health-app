@@ -13,7 +13,6 @@
 
 .mantine-MultiSelect-dropdown, .mantine-Select-dropdown {
   --bd-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-gray-8));
-   /* this size calc came from another mantine element border */
   border: calc(0.0625rem * var(--mantine-scale)) solid var(--bd-color);
 }
 

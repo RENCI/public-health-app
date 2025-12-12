@@ -22,6 +22,7 @@ def scenarios_select(value: list[str] = default_option):
     value=value,
     required=True,
     data=options,
+    comboboxProps={"shadow": "md"},
   )
 
 
