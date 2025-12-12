@@ -292,8 +292,8 @@ class LineChart(Chart):
 
   def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int, col_num: int):
     all_bounds = self.controls.uncertainty_interval.get_bounds()
-    for i, bounds in enumerate(all_bounds):   
-      lower_q, upper_q = bounds   
+    for i, bounds in enumerate(all_bounds):
+      lower_q, upper_q = bounds
       lower_model = scenario_df.query('type_id == @lower_q and model_name == @model.id')
       upper_model = scenario_df.query('type_id == @upper_q and model_name == @model.id')
       fill_color = get_model_color_with_uncertainty_interval(
@@ -308,9 +308,10 @@ class LineChart(Chart):
           fill='toself',
           fillcolor=fill_color,
           line=dict(color='rgba(0,0,0,0)'),
-          legendgroup=f'Model {model.name}',
+          name=f'{model.name}',
+          legendgroup=f'{model.name}',
           hoverinfo='skip',
-          showlegend=False,
+          showlegend=(row_num == 1 and i == len(all_bounds) - 1),
         ),
         row=row_num,
         col=col_num,
