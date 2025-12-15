@@ -32,6 +32,7 @@ def insight_card(
               radius='sm',
             ),
             p='md',
+            pb=0,
           ),
           dmc.Stack(
             [
