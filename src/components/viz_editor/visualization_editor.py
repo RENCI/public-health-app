@@ -119,82 +119,108 @@ def visualization_editor(controls=None, show_controls=True):
         style={'display': 'flex', 'flexDirection': 'column'},
       ),
       dmc.GridCol(
-        dmc.Stack(
-          [
-            CollapsibleCard(
-              id={'index': 'insight-title'},
-              title='Title',
-              children=dmc.TextInput(
-                id='insight-title-input',
-                value='initial_title',
-                size='sm',
-                placeholder='Enter insight title',
-                inputProps=dict(className='insight-form-input'),
-                variant='filled',
-              ),
-              initial_open=False,
-            ).layout,
-            CollapsibleCard(
-              id={'index': 'insight-summary'},
-              title='Summary',
-              children=markdown_editor(
-                editor_id='insight-summary-input',
-                initial_value='initial_summary',
-              ),
-              initial_open=False,
-            ).layout,
-            CollapsibleCard(
-              id={'index': 'insight-data-selection'},
-              title='Data Selection', 
-              children=dmc.Grid(
+        [
+          dmc.Tabs(
+            [
+              dmc.TabsList(
                 [
-                  dmc.GridCol(layout_select(value=init_chart_layout), span=dict(base=12)),
-                  dmc.GridCol(
-                    scenarios_select(value=[str(scenario_id) for scenario_id in init_scenario_ids]),
-                    span=dict(base=12),
-                  ),
-                  dmc.GridCol(
-                    models_select(value=init_model_names, disabled=init_plot_type == 'boxplot'),
-                    span=dict(base=12),
-                  ),
-                  dmc.GridCol(location_select(value=init_location_name), span=dict(base=12, sm=6)),
-                  dmc.GridCol(target_select(value=init_target), span=dict(base=12, sm=6)),
-                  dmc.GridCol(age_group_select(value=init_age_group), span=dict(base=12, sm=6)),
-                  dmc.GridCol(
-                    uncertainty_interval_select(
-                      value=init_uncertainty_interval, disabled=init_plot_type == 'boxplot'
-                    ),
-                    span=dict(base=12, sm=6),
-                  ),
-                ],
+                  dmc.TabsTab('Chart', value='controls'),
+                  dmc.TabsTab('Metadata', value='metadata'),
+                ]
               ),
-            ).layout,
-            #dmc.Card(
-            #  zoom_control(value=init_zoom),
-            #  variant='soft',
-            #  style={'display': 'none'} if init_plot_type == 'boxplot' else {},
-            #),
-            # Remove zoom control for now, but render the Store to keep things in sync
-            dcc.Store(id='zoom-store', data=init_zoom),
-            CollapsibleCard(
-              id={'index': 'insight-annotations'},
-              title='Annotations',
-              children=annotations_control(value=init_annotations),
-              style={'display': 'none'} if init_plot_type == 'boxplot' else {},
-            ).layout,
-            CollapsibleCard(
-              id={'index': 'insight-discussion'},
-              title='Discussion',
-              children=markdown_editor(
-                editor_id='insight-discussion-input',
-                initial_value='initial_description',
-                min_height='300px',
+              dmc.TabsPanel(
+                dmc.Stack(
+                  [
+                    CollapsibleCard(
+                      id={'index': 'insight-data-selection'},
+                      title='Data Selection', 
+                      children=dmc.Grid(
+                        [
+                          dmc.GridCol(layout_select(value=init_chart_layout), span=dict(base=12)),
+                          dmc.GridCol(
+                            scenarios_select(value=[str(scenario_id) for scenario_id in init_scenario_ids]),
+                            span=dict(base=12),
+                          ),
+                          dmc.GridCol(
+                            models_select(value=init_model_names, disabled=init_plot_type == 'boxplot'),
+                            span=dict(base=12),
+                          ),
+                          dmc.GridCol(location_select(value=init_location_name), span=dict(base=12, sm=6)),
+                          dmc.GridCol(target_select(value=init_target), span=dict(base=12, sm=6)),
+                          dmc.GridCol(age_group_select(value=init_age_group), span=dict(base=12, sm=6)),
+                          dmc.GridCol(
+                            uncertainty_interval_select(
+                              value=init_uncertainty_interval, disabled=init_plot_type == 'boxplot'
+                            ),
+                            span=dict(base=12, sm=6),
+                          ),
+                        ],
+                      ),
+                    ).layout,
+                    #dmc.Card(
+                    #  zoom_control(value=init_zoom),
+                    #  variant='soft',
+                    #  style={'display': 'none'} if init_plot_type == 'boxplot' else {},
+                    #),
+                    # Remove zoom control for now, but render the Store to keep things in sync
+                    dcc.Store(id='zoom-store', data=init_zoom),
+                    CollapsibleCard(
+                      id={'index': 'insight-annotations'},
+                      title='Annotations',
+                      children=annotations_control(value=init_annotations),
+                      style={'display': 'none'} if init_plot_type == 'boxplot' else {},
+                    ).layout,
+                  ],
+                  gap='md',
+                  py='md',
+                ),
+                value='controls',
               ),
-              initial_open=False,
-            ).layout,
-          ],
-          gap='md',
-        ),
+              dmc.TabsPanel(
+                dmc.Stack(
+                  [
+                    CollapsibleCard(
+                      id={'index': 'insight-title'},
+                      title='Title',
+                      children=dmc.TextInput(
+                        id='insight-title-input',
+                        value='initial_title',
+                        size='sm',
+                        placeholder='Enter insight title',
+                        inputProps=dict(className='insight-form-input'),
+                        variant='filled',
+                      ),
+                      initial_open=True,
+                    ).layout,
+                    CollapsibleCard(
+                      id={'index': 'insight-summary'},
+                      title='Summary',
+                      children=markdown_editor(
+                        editor_id='insight-summary-input',
+                        initial_value='initial_summary',
+                      ),
+                      initial_open=True,
+                    ).layout,
+                    CollapsibleCard(
+                      id={'index': 'insight-discussion'},
+                      title='Discussion',
+                      children=markdown_editor(
+                        editor_id='insight-discussion-input',
+                        initial_value='initial_description',
+                        min_height='300px',
+                      ),
+                      initial_open=True,
+                    ).layout,
+                  ],
+                  gap='md',
+                  py='md',
+                ),
+                value='metadata',
+              ),
+            ],
+            value='controls',
+          ),
+        ],
         id='controls-column',
         span=dict(base=12, xl=5),
       ),
