@@ -127,7 +127,7 @@ def visualization_editor(controls=None, show_controls=True):
               children=dmc.TextInput(
                 id='insight-title-input',
                 value='initial_title',
-                size='lg',
+                size='sm',
                 placeholder='Enter insight title',
                 inputProps=dict(className='insight-form-input'),
                 variant='filled',
