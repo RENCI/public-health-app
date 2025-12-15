@@ -133,7 +133,6 @@ def visualization_editor(controls=None, show_controls=True):
                       id={'index': 'insight-data-selection'},
                       title='Data Selection', 
                       children=dmc.Grid([
-                        dmc.GridCol(layout_select(value=init_chart_layout), span=dict(base=12)),
                         dmc.GridCol(scenarios_select(value=[str(scenario_id) for scenario_id in init_scenario_ids]),span=dict(base=12)),
                         dmc.GridCol(models_select(value=init_model_names, disabled=init_plot_type == 'boxplot'),span=dict(base=12)),
                         dmc.GridCol(location_select(value=init_location_name), span=dict(base=12, sm=6)),
@@ -141,6 +140,14 @@ def visualization_editor(controls=None, show_controls=True):
                         dmc.GridCol(age_group_select(value=init_age_group), span=dict(base=12, sm=6)),
                         dmc.GridCol(uncertainty_interval_select(value=init_uncertainty_interval, disabled=init_plot_type == 'boxplot'), span=dict(base=12, sm=6)),
                       ]),
+                    ).layout,
+                    CollapsibleCard(
+                      id={'index': 'insight-presentation'},
+                      title='Presentation', 
+                      children=dmc.Grid([
+                        dmc.GridCol(layout_select(value=init_chart_layout), span=dict(base=12)),
+                      ]),
+                      initial_open=False,
                     ).layout,
                     #dmc.Card(
                     #  zoom_control(value=init_zoom),
