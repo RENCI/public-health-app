@@ -130,15 +130,18 @@ def custom_insight_card(item):
     radius='md',
   )
 
-  summary = dmc.Group(
+  summary = dmc.Stack(
     [
       item.get('summary', 'Summary not found'),
-      custom_insights_badge,
-      tipped_text(f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'),
+      dmc.Group(
+        [
+          custom_insights_badge,
+          tipped_text(f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'),
+        ],
+        align='flex-start',
+        justify='flex-start',
+      ),
     ],
-    align='flex-start',
-    justify='flex-start',
-    style=dict(flex=1),
   )
 
   return insight_card(
