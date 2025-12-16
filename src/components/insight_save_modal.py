@@ -11,6 +11,7 @@ from dash import (
   clientside_callback,
   ctx,
   dcc,
+  exceptions,
 )
 from dash_iconify import DashIconify
 
