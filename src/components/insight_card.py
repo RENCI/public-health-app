@@ -11,7 +11,8 @@ def actions_tray(actions: list = []):
     ),
     p='xs',
     radius='sm',
-    variant='outline',
+    variant='soft',
+    className='mantine-Card-root',
   )
 
 def insight_card(
@@ -21,34 +22,42 @@ def insight_card(
   image_url: str,
   actions=[],
 ):
-  return dmc.Anchor(
-    dmc.Card(
-      dmc.Flex(
+  return dmc.Flex(
+    [
+      dmc.Anchor(
         [
-          dmc.CardSection(
-            dmc.Image(
-              src=image_url,
-              w=dict(base='100%', sm='300px'),
-              radius='sm',
+          dmc.Card(
+            dmc.Flex(
+              [
+                dmc.CardSection(
+                  dmc.Image(
+                    src=image_url,
+                    w=dict(base='100%', sm='300px'),
+                    radius='sm',
+                  ),
+                  p='md',
+                  pb=0,
+                ),
+                dmc.Stack(
+                  [
+                    dmc.Text(title, size='lg'),
+                    dmc.Text(summary, c='dimmed'),
+                  ],
+                  flex=1,
+                ),
+              ],
+              direction=dict(base='column', sm='row'),
+              gap='md',
             ),
-            p='md',
-            pb=0,
+            withBorder=True,
+            className='emphasize-hover',
           ),
-          dmc.Stack(
-            [
-              dmc.Text(title, size='lg'),
-              dmc.Text(summary, c='dimmed'),
-            ],
-            flex=1,
-          ),
-          actions_tray(actions) if len(actions) else None,
         ],
-        direction=dict(base='column', sm='row'),
-        gap='md',
+        href=href,
+        underline=False,
+        style=dict(flex=1),
       ),
-      withBorder=True,
-      className='emphasize-hover',
-    ),
-    href=href,
-    underline=False,
+      actions_tray(actions) if len(actions) else None,
+    ],
+    direction=dict(base='column', sm='row'),
   )
