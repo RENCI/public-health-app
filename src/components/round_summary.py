@@ -132,7 +132,7 @@ def custom_insight_card(item):
 
   summary = dmc.Group(
     [
-      item['summary'],
+      item.get('summary', 'Summary not found'),
       custom_insights_badge,
       tipped_text(f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'),
     ],
