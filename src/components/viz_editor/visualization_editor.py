@@ -126,7 +126,7 @@ def visualization_editor(controls=None, show_controls=True):
                     span=dict(base=12),
                   ),
                   dmc.GridCol(
-                    models_select(value=init_model_names, disabled=init_plot_type == 'boxplot'),
+                    models_select(value=init_model_names),
                     span=dict(base=12),
                   ),
                   dmc.GridCol(location_select(value=init_location_name), span=dict(base=12, sm=6)),
