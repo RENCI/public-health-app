@@ -5,7 +5,6 @@ from plotly.subplots import make_subplots
 from src.components.chart.chart import Chart
 from src.components.chart.chart_controls import ChartControls
 from src.components.enums import ChartLayout, UncertaintyInterval
-from src.util.constants import get_model_by_name, get_model_color_by_name
 
 SCENARIO_AXIS_LABEL_FONT_SIZE = 10
 
@@ -147,33 +146,29 @@ class BoxplotChart(Chart):
 
     # filter for given age group
     df = df.query('age_group == @self.controls.age_group.input_value')
-    # second_df = second_df.query('age_group == @self.controls.age_group.input_value')
-
-    # filter for ensemble model, specifically
-    ensemble_model_id = get_model_by_name('Ensemble')['id']
-    df = df.query('model_name == @ensemble_model_id')
-    # second_df = second_df.query('model_name == @ensemble_model_id')
 
     for i, scenario in enumerate(self.controls.scenarios, start=1):
       current_row = (i - 1) // num_cols + 1
       current_col = (i - 1) % num_cols + 1
       scenario_df = df.query('scenario_id == @scenario.id')
-      # second_scenario_df = second_df.query('scenario_id == @scenario.id')
 
-      trace = go.Box(
-        marker_color=get_model_color_by_name('Ensemble'),
-        name='',
-        showlegend=False,
-      )
-      if self.controls.x_axis:
-        trace.x = scenario_df[self.controls.x_axis]
-      else:
-        trace.y = scenario_df[self.controls.y_axis]
-      self._fig.add_trace(
-        trace,
-        row=current_row,
-        col=current_col,
-      )
+      for model in self.controls.models:
+        model_df = scenario_df.query('model_name == @model.id')
+        trace = go.Box(
+          marker_color=model.color,
+          name=model.name,
+          showlegend=(i == 1),
+          legendgroup=model.name,
+        )
+        if self.controls.x_axis:
+          trace.x = model_df[self.controls.x_axis]
+        else:
+          trace.y = model_df[self.controls.y_axis]
+        self._fig.add_trace(
+          trace,
+          row=current_row,
+          col=current_col,
+        )
 
       # Add scenario name as vertical text annotation to the right of the boxplot
       subplot_idx = i
@@ -295,7 +290,7 @@ class BoxplotChart(Chart):
       title=self.get_title(),
       title_subtitle_text=self.get_subtitle(),
       uirevision=self.__hash__(),
-      showlegend=False,
+      showlegend=True,
     )
 
     self.set_theme()
