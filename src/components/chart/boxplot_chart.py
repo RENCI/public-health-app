@@ -126,6 +126,7 @@ class BoxplotChart(Chart):
     # create boxplot for each scenario
     # update layout
     num_scenarios = len(self.controls.scenarios)
+    num_models = len(self.controls.models)
 
     if self.controls.chart_layout == ChartLayout.STACK:
       num_cols = 1
@@ -134,10 +135,22 @@ class BoxplotChart(Chart):
 
     num_rows = (num_scenarios + num_cols - 1) // num_cols
 
+    BOXPLOT_HEIGHT = 50
+    SUBPLOT_BASE_HEIGHT = 150
+    FIXED_SPACING = 150
+
+    subplot_height = SUBPLOT_BASE_HEIGHT + (BOXPLOT_HEIGHT * num_models)
+    total_chart_height = (subplot_height * num_rows) + (FIXED_SPACING * (num_rows - 1))
+
+    if num_rows > 1:
+      vertical_spacing = FIXED_SPACING / total_chart_height
+    else:
+      vertical_spacing = 0
+
     self._fig = make_subplots(
       rows=num_rows,
       cols=num_cols,
-      vertical_spacing=0.1,
+      vertical_spacing=vertical_spacing,
     )
 
     # start with the raw dataframe
@@ -286,7 +299,7 @@ class BoxplotChart(Chart):
 
     self._fig.update_layout(
       hovermode='closest',
-      height=400 + (200 * max(0, num_rows - 1)),
+      height=total_chart_height,
       title=self.get_title(),
       title_subtitle_text=self.get_subtitle(),
       uirevision=self.__hash__(),
