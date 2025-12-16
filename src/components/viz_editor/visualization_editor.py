@@ -10,6 +10,8 @@ from src.components.chart import ChartControls
 from src.components.chart.chart_instance_manager import ChartInstanceManager
 from src.components.collapsible_card.collapsible_card import CollapsibleCard
 from src.components.markdown_editor import markdown_editor
+from src.components.insight_save_modal import insight_save_modal_button, insight_save_modal
+
 from src.util.constants import DEFAULT_CONTROL_VALUES
 
 from .controls import (
@@ -123,8 +125,8 @@ def visualization_editor(controls=None, show_controls=True):
           dmc.Tabs(
             [
               dmc.TabsList([
-                dmc.TabsTab('Chart', leftSection=DashIconify(icon="feather:sliders"), value='controls'),
-                dmc.TabsTab('Metadata', leftSection=DashIconify(icon="feather:info"), value='metadata'),
+                dmc.TabsTab('Chart Controls', leftSection=DashIconify(icon='feather:sliders'), value='controls'),
+                dmc.TabsTab('Save Insight', leftSection=DashIconify(icon='feather:save'), value='metadata'),
               ]),
               dmc.TabsPanel(
                 dmc.Stack(
@@ -171,6 +173,10 @@ def visualization_editor(controls=None, show_controls=True):
               dmc.TabsPanel(
                 dmc.Stack(
                   [
+                    dmc.Text(
+                      'Additional information is required to save this custom insight. Please complete the fields below to proceed.',
+                      size='sm',
+                    ),
                     CollapsibleCard(
                       id={'index': 'insight-title'},
                       title='Title',
@@ -203,6 +209,8 @@ def visualization_editor(controls=None, show_controls=True):
                       ),
                       initial_open=True,
                     ).layout,
+                    insight_save_modal_button(),
+                    insight_save_modal(),
                   ],
                   gap='md',
                 ),
