@@ -151,6 +151,7 @@ class BoxplotChart(Chart):
       rows=num_rows,
       cols=num_cols,
       vertical_spacing=vertical_spacing,
+      subplot_titles=[f'{s.name.split("-")[0]}. {s.description}' for s in self.controls.scenarios],
     )
 
     # start with the raw dataframe
