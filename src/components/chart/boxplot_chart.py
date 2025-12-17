@@ -217,6 +217,9 @@ class BoxplotChart(Chart):
     self._fig.update_xaxes(showspikes=False)
     self._fig.update_yaxes(showspikes=False)
 
+    # hide hover info
+    self._fig.update_traces(hoverinfo='skip')
+
     # calculate global min/max across all subplots for synchronized axes
     should_use_zoom = False
     # (
