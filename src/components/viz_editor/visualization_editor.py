@@ -10,7 +10,7 @@ from src.components.chart import ChartControls
 from src.components.chart.chart_instance_manager import ChartInstanceManager
 from src.components.collapsible_card.collapsible_card import CollapsibleCard
 from src.components.markdown_editor import markdown_editor
-from src.components.insight_save_modal import insight_save_modal_button, insight_save_modal
+from src.components.insight_save_section import insight_save_section
 
 from src.util.constants import DEFAULT_CONTROL_VALUES
 
@@ -209,8 +209,9 @@ def visualization_editor(controls=None, show_controls=True):
                       ),
                       initial_open=True,
                     ).layout,
-                    insight_save_modal_button(),
-                    insight_save_modal(),
+                    html.Div(
+                      insight_save_section(),
+                    )
                   ],
                   gap='md',
                 ),
