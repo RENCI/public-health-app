@@ -25,10 +25,22 @@ def scenarios_select(value: list[str] = default_option):
     comboboxProps={"shadow": "md"},
   )
 
+@callback(
+  Output('scenarios-select', 'value', allow_duplicate=True),
+  Input('scenarios-select', 'value'),
+  prevent_initial_call=True,
+)
+def on_scenarios_select_change(selected_values: list[str]):
+  if not selected_values:
+    return []
+  
+  # Keep selected values sorted for consistency
+  selected_values.sort()
+  return selected_values
 
 @callback(
   Output('scenarios-select', 'data'),
-  Output('scenarios-select', 'value'),
+  Output('scenarios-select', 'value', allow_duplicate=True),
   Input('selected-round-store', 'data'),
   prevent_initial_call=True,
 )

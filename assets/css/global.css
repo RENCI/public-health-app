@@ -20,3 +20,8 @@
   --bg-color: light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-8));
   background-color: var(--bg-color);
 }
+
+#graph {
+  border-radius: var(--mantine-radius-sm);
+  overflow: hidden;
+}
