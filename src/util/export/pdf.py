@@ -82,7 +82,8 @@ def generate_round_pdf(round_dict):
 def generate_insight_pdf(insight):
   title = insight.get('title', '')
   image_url = insight.get('image_url', 'https://placehold.co/650x300?text=Visualization')
-  summary = insight.get('summary') or ''
+  summary_md = insight.get('summary') or 'Details not found'
+  summary_html = md_to_html(summary_md)
   description_md = insight.get('description') or 'Details not found'
   description_html = md_to_html(description_md)
   controls = insight.get('controls', {})
@@ -103,7 +104,7 @@ def generate_insight_pdf(insight):
     <main>
       <h1>{title}</h1>
 
-      {summary}
+      {summary_html}
       <br />
 
       {description_html}

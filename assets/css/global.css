@@ -4,7 +4,7 @@
 }
 
 .emphasize-hover {
-  --bg: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.1));
+  --bg: light-dark(var(--mantine-color-gray-2), var(--mantine-color-gray-9));
   transition: background-color 250ms;
   &:hover {
     background-color: var(--bg);

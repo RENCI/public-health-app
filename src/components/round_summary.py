@@ -17,6 +17,7 @@ from dash_iconify import DashIconify
 from slugify import slugify
 
 from src.components.toolbar import toolbar
+from src.components.insight_card import insight_card
 from src.util import (
   format_timestamp,
   generate_insight_share_url,
@@ -100,74 +101,14 @@ new_insight_prompt = dmc.Card(
 )
 
 
-def insight_button(item):
-  graphic = dmc.Image(
-    src=item['image_url'],
-    radius='sm',
-    style=dict(
-      height='100%',
-      aspectRatio=1,
-      objectFit='cover',
-      borderTopRightRadius=0,
-      borderBottomRightRadius=0,
-    ),
-  )
-
-  title = dmc.Text(item['title'], size='lg')
-  summary = dmc.Text(item['summary'], c='dimmed')
-
-  return dmc.Anchor(
-    dmc.Card(
-      [
-        dmc.Box(graphic, style=dict(width='150px', aspectRatio=1)),
-        dmc.Stack(
-          [title, summary],
-          align='flex-start',
-          px='lg',
-          py='md',
-          style=dict(flex=1, overflow='hidden'),
-        ),
-      ],
-      withBorder=True,
-      className='emphasize-hover',
-      style=dict(
-        display='flex',
-        justifyContent='flex-start',
-        alignItems='stretch',
-        minHeight='150px',
-        height='min-content',
-        padding=0,
-        flexDirection='row',
-      ),
-    ),
-    href=f'/insight/{item["id"]}',
-    underline=False,
-  )
-
-
-def custom_insight_button(item):
+def custom_insight_card(item):
   created_at = item.get('created_at', None)
-
-  graphic = dmc.Image(
-    src=item['image_url'],
-    radius='sm',
-    style=dict(
-      height='100%',
-      aspectRatio=1,
-      objectFit='cover',
-      borderTopRightRadius=0,
-      borderBottomRightRadius=0,
-    ),
-  )
-
-  title = dmc.Text(
-    item['title'], size='lg', style=dict(whiteSpace='normal', textAlign='left', flex=1)
-  )
 
   share_button = dmc.ActionIcon(
     DashIconify(icon='feather:share-2', width=16, color='teal'),
     id={'type': 'share-insight', 'id': item['id']},
     variant='subtle',
+    color='gray',
     size='md',
     style=dict(alignSelf='center'),
   )
@@ -176,6 +117,7 @@ def custom_insight_button(item):
     DashIconify(icon='feather:trash-2', width=16, color='crimson'),
     id={'type': 'delete-insight', 'id': item['id']},
     variant='subtle',
+    color='gray',
     size='md',
     style=dict(alignSelf='center'),
   )
@@ -188,57 +130,29 @@ def custom_insight_button(item):
     radius='md',
   )
 
-  details = dmc.Group(
+  summary = dmc.Stack(
     [
-      custom_insights_badge,
-      tipped_text(f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'),
+      item.get('summary', 'Summary not found'),
+      dmc.Group(
+        [
+          custom_insights_badge,
+          tipped_text(f'Created: {format_timestamp(created_at)}', time_ago(created_at), size='xs'),
+        ],
+        align='flex-start',
+        justify='flex-start',
+      ),
     ],
-    align='center',
-    justify='flex-start',
   )
 
-  actions = dmc.Stack(
-    [
+  return insight_card(
+    title=item['title'],
+    summary=summary,
+    image_url=item['image_url'],
+    href=f'/insight/{item['id']}',
+    actions=[
       delete_button,
       share_button,
     ],
-    justify='flex-end',
-    p='xs',
-    style=dict(
-      backgroundColor='light-dark(var(--mantine-color-disabled), var(--mantine-color-dark-outline))',
-    ),
-  )
-
-  return dmc.Card(
-    [
-      dmc.Anchor(
-        [
-          dmc.Box(graphic, style=dict(width='150px', aspectRatio=1)),
-          dmc.Stack(
-            [title, details],
-            w='100%',
-            c='var(--mantine-color-text)',
-            px='lg',
-            py='md',
-          ),
-        ],
-        href=f'/insight/{item["id"]}',
-        underline=False,
-        style=dict(flex=1, display='flex', alignItems='stretch'),
-      ),
-      actions,
-    ],
-    withBorder=True,
-    className='emphasize-hover',
-    style=dict(
-      display='flex',
-      justifyContent='flex-start',
-      alignItems='stretch',
-      minHeight='150px',
-      height='min-content',
-      padding=0,
-      flexDirection='row',
-    ),
   )
 
 
@@ -305,6 +219,7 @@ def round_summary():
       dmc.Box(id='round-overview'),
       dmc.Title('Insights from the Modeling Hub', order=3, my=16),
       dmc.Stack(id='insights-list', gap='md'),
+      dmc.Space(h=16),
       dmc.Title('Custom Insights', order=3, my=16),
       dmc.Stack(id='custom-insights-list', gap='md'),
       dcc.Download(id='round-pdf-download'),
@@ -344,7 +259,12 @@ def update_round_summary(round_number, pathname):
       name=round_name,
     ),
     dcc.Markdown(report),
-    [insight_button(i) for i in insights],
+    [insight_card(
+      title=insight['title'],
+      summary=insight['summary'],
+      image_url=insight['image_url'],
+      href=f'/insight/{insight['id']}',
+    ) for insight in insights],
     dcc.Markdown(methods),
   )
 
@@ -365,7 +285,7 @@ def update_custom_insights_list(custom_insights, round_number):
   ]
 
   return (
-    [custom_insight_button(insight) for insight in filtered_custom_insights] + [new_insight_prompt]
+    [custom_insight_card(insight) for insight in filtered_custom_insights] + [new_insight_prompt]
     if len(filtered_custom_insights)
     else [no_insights_message]
   )

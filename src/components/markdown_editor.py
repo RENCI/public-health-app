@@ -2,6 +2,7 @@ import dash_mantine_components as dmc
 from dash import Input, Output, callback, dcc
 from dash.dependencies import MATCH
 from dash_iconify import DashIconify
+import markdown
 
 
 def markdown_editor(
@@ -9,6 +10,7 @@ def markdown_editor(
   preview_id='content-preview',
   label='',
   initial_value='',
+  min_height='6rem',
 ):
   tabs = [
     dmc.TabsTab('Edit', value='edit', leftSection=DashIconify(icon='feather:edit-3')),
@@ -27,12 +29,17 @@ def markdown_editor(
           id={'type': 'editor', 'id': editor_id},
           placeholder='Write markdown here...',
           className='content-editor',
+          style=dict(minHeight=min_height),
         ),
         value='edit',
       ),
       dmc.TabsPanel(
         dcc.Markdown(
-          initial_value, id={'type': 'preview', 'id': editor_id}, className='content-preview'
+          markdown.markdown(initial_value, extensions=['extra']),
+          dangerously_allow_html=True,
+          id={'type': 'preview', 'id': editor_id},
+          className='content-preview',
+          style=dict(minHeight=min_height),
         ),
         value='preview',
       ),
