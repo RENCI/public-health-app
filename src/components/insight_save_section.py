@@ -23,55 +23,77 @@ def insight_save_section():
   """
   Inline Save + Confirm section
   """
-  return dmc.Stack(
-    [
-      dcc.Store(id='thumbnail-store'),
-
-      dmc.Text(
-        'This insight will be saved to your custom insights and will show in your Custom Insights list on the Round Summary page.',
-        size='sm',
-      ),
-      dmc.Text(
-        'You will be redirected to view this saved insight after confirmation.',
-        size='sm',
-        c='dimmed',
-      ),
-
-      dmc.Text(
-        id='insight-save-helper-text',
-        size='sm',
-        c='red',
-      ),
-
-      # primary save button (`idle` state)
-      toolbar_button(
-        'Save',
-        icon=DashIconify(icon='feather:save'),
-        id='insight-save-button',
-        color='blue',
-        size='lg',
-        w='50%',
-        h='4rem',
-        m='2rem auto',
-        style={'display': 'block'},
-      ),
-
-      # confirmation button (`armed` state)
-      toolbar_button(
-        'Confirm Save',
-        icon=DashIconify(icon='feather:check'),
-        id='insight-save-confirm-button',
-        color='red',
-        size='lg',
-        w='50%',
-        h='4rem',
-        m='2rem auto',
-        style={'display': 'none'},
-      ),
-    ],
-    gap='xs',
+  return dmc.Card(
+    dmc.Stack(
+      [
+        dcc.Store(id='thumbnail-store'),
+        dmc.Text(
+          'Saving this insight will add it to your Custom Insights list on the Round Summary page.',
+          size='sm',
+          w='90%',
+          ta='center',
+          m='auto',
+        ),
+        dmc.Text(
+          'You will be redirected to view your newly saved insight upon confirmation.',
+          size='sm',
+          w='90%',
+          ta='center',
+          m='auto',
+          c='dimmed',
+        ),
+        dmc.Text(
+          id='insight-save-helper-text',
+          size='sm',
+          c='lime',
+          ta='center',
+        ),
+        # primary save button (`idle` state)
+        toolbar_button(
+          'Save',
+          icon=DashIconify(icon='feather:save'),
+          id='insight-save-button',
+          color='blue',
+          size='lg',
+          w='50%',
+          h='4rem',
+          m='var(--mantine-spacing-sm) auto',
+          style=dict(display='block'),
+        ),
+        # confirmation button (`armed` state)
+        toolbar_button(
+          'Confirm Save',
+          icon=DashIconify(icon='feather:check'),
+          id='insight-save-confirm-button',
+          color='lime',
+          size='lg',
+          w='50%',
+          h='4rem',
+          m='var(--mantine-spacing-sm) auto',
+          style=dict(display='none'),
+        ),
+        dcc.Interval(
+          id='confirm-timeout',
+          interval=5_000,
+          n_intervals=0,
+          disabled=True
+        )
+      ],
+      gap='xs',
+    )
   )
 
+
+@callback(
+  Output('confirm-timeout', 'disabled'),
+  Input('insight-save-button', 'n_clicks'),
+  Input('insight-save-confirm-button', 'n_clicks'),
+prevent_initial_call=True,
+)
+def toggle_timeout(save_clicks, confirm_clicks):
+  trigger = ctx.triggered_id
+  # Enable interval only when save button is clicked to arm confirmation
+  return trigger != 'insight-save-button'
 
 # button visibility / confirmation flow
 @callback(
@@ -80,9 +102,10 @@ def insight_save_section():
   Output('insight-save-helper-text', 'children'),
   Input('insight-save-button', 'n_clicks'),
   Input('insight-save-confirm-button', 'n_clicks'),
+  Input('confirm-timeout', 'n_intervals'),
   prevent_initial_call=True,
 )
-def toggle_save_buttons(save_clicks, confirm_clicks):
+def toggle_save_buttons(save_clicks, confirm_clicks, timout_intervals):
   trigger = ctx.triggered_id
 
   # first click: arm confirmation
@@ -93,7 +116,7 @@ def toggle_save_buttons(save_clicks, confirm_clicks):
       'Click again to confirm saving this insight.',
     )
 
-  # confirm click (or fallback): reset UI
+  # confirm click or timeout (or fallback): reset UI
   return (
     {'display': 'block'},
     {'display': 'none'},
