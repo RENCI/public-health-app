@@ -195,7 +195,7 @@ def visualization_editor(controls=None, show_controls=True):
                 dmc.Stack(
                   [
                     dmc.Text(
-                      'Additional information is required to save this custom insight. Please complete the fields below to proceed.',
+                      'Edit the fields below to update the information for this insight.',
                       size='sm',
                     ),
                     CollapsibleCard(
