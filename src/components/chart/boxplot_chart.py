@@ -292,8 +292,21 @@ class BoxplotChart(Chart):
     self._fig.update_layout(
       hovermode='closest',
       height=400 + (200 * max(0, num_rows - 1)),
-      title=self.get_title(),
-      title_subtitle_text=self.get_subtitle(),
+      title=dict(
+        text=self.get_title(),
+        x=0.5,
+        y=1,
+        xref='container',
+        xanchor='center',
+        yanchor='top',
+        font=dict(size=28),
+        pad=dict(t=35, r=0, b=0, l=0),
+        subtitle=dict(
+          text=self.get_subtitle(),
+          font=dict(size=16),
+        ),
+      ),
+      margin=dict(t=144, r=48, b=48, l=48),
       uirevision=self.__hash__(),
       showlegend=False,
     )

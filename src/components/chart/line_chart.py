@@ -51,11 +51,11 @@ class LineChart(Chart):
     num_rows = (num_scenarios + num_cols - 1) // num_cols
 
     # Define fixed dimensions
-    SUBPLOT_HEIGHT = 300  # Fixed height per subplot in pixels
-    FIXED_SPACING = 50  # Fixed spacing between subplots in pixels
+    SUBPLOT_HEIGHT = 250  # Fixed height per subplot in pixels
+    FIXED_SPACING = 100  # Fixed spacing between subplots in pixels
 
     # Calculate total figure height accounting for fixed spacing
-    chart_total_height = (SUBPLOT_HEIGHT * num_rows) + (FIXED_SPACING * (num_rows - 1))
+    chart_total_height = (SUBPLOT_HEIGHT * num_rows) + (FIXED_SPACING * (num_rows - 1)) + 180
 
     # Calculate vertical_spacing as a fraction of total height
     # This ensures the actual pixel spacing remains constant
@@ -85,6 +85,8 @@ class LineChart(Chart):
       vertical_spacing=vertical_spacing,
       row_heights=[1] * num_rows,
       subplot_titles=[f'{s.name.split("-")[0]}. {s.description}' for s in self.controls.scenarios],
+      shared_xaxes=True,
+      shared_yaxes=True,
     )
 
     # add traces for each scenario
@@ -143,6 +145,11 @@ class LineChart(Chart):
 
     # plot annotations
     self._plot_annotations()
+
+    # reduce the font size of the subplot titles,
+    # which are treated as annotations by plotly.
+    for annotation in self._fig.layout.annotations:
+      annotation['font'] = dict(size=12)
 
     # apply spike guides for each axis in the chart viewport
     self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
@@ -235,9 +242,22 @@ class LineChart(Chart):
 
     self._fig.update_layout(
       hovermode='x unified',
-      height=chart_total_height + 180,
-      title=self.get_title(),
-      title_subtitle_text=self.get_subtitle(),
+      height=chart_total_height,
+      title=dict(
+        text=self.get_title(),
+        x=0.5,
+        y=1,
+        xref='container',
+        xanchor='center',
+        yanchor='top',
+        font=dict(size=28),
+        pad=dict(t=35, r=0, b=0, l=0),
+        subtitle=dict(
+          text=self.get_subtitle(),
+          font=dict(size=16),
+        ),
+      ),
+      margin=dict(t=144, r=48, b=48, l=48),
       uirevision=self.__hash__(),
     )
 
@@ -256,8 +276,7 @@ class LineChart(Chart):
 
   def get_subtitle(self) -> str:
     return (
-      f'Pathogen: {self.controls.pathogen}'
-      + f' | Location: {self.controls.location.name}'
+      f'Location: {self.controls.location.name}'
       + f' | Age group: {self.controls.age_group.display_value}'
       + (
         f' | Uncertainty interval: {self.controls.uncertainty_interval.display_value}'
