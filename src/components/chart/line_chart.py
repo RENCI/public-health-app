@@ -47,8 +47,21 @@ class LineChart(Chart):
       num_cols = 1
     elif self.controls.chart_layout == ChartLayout.GRID:
       num_cols = 2
+ 
+    def get_scenario_letter(scenario_name: str) -> chr:
+      return scenario_name.split('-')[0]
 
-    num_rows = (num_scenarios + num_cols - 1) // num_cols
+    def get_scenario_position(scenario_letter: chr, num_cols: int) -> tuple[int, int]:
+      index = ord(scenario_letter) - ord('A')
+      return (index // num_cols + 1, index % num_cols + 1)
+    
+    num_rows = get_scenario_position(
+      get_scenario_letter(self.controls.scenarios[-1].name),
+      num_cols,
+    )[0]
+
+    print(num_rows)
+    # num_rows = (num_scenarios + num_cols - 1) // num_cols
 
     # Define fixed dimensions
     SUBPLOT_HEIGHT = 300  # Fixed height per subplot in pixels
@@ -87,10 +100,19 @@ class LineChart(Chart):
       subplot_titles=[f'{s.name.split("-")[0]}. {s.description}' for s in self.controls.scenarios],
     )
 
+    print(self.controls.scenarios)
+
     # add traces for each scenario
     for i, scenario in enumerate(self.controls.scenarios, start=1):
       current_row = (i - 1) // num_cols + 1
       current_col = (i - 1) % num_cols + 1
+
+      scenario_letter = get_scenario_letter(scenario.name)
+      scenario_row, scenario_col = get_scenario_position(scenario_letter, num_cols)
+
+      current_row = scenario_row
+      current_col = scenario_col
+        
 
       # filter for given scenario
       scenario_df = df.query('scenario_id == @scenario.id')
