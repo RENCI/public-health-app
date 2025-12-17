@@ -257,7 +257,7 @@ class LineChart(Chart):
           font=dict(size=16),
         ),
       ),
-      margin=dict(t=144, r=48, b=48, l=48),
+      margin=dict(t=144, r=48, b=48, l=72),
       uirevision=self.__hash__(),
     )
 
