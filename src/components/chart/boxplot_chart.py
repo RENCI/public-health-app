@@ -295,6 +295,15 @@ class BoxplotChart(Chart):
           if y_range is not None:
             self._fig.update_yaxes(range=y_range, row=r, col=c)
 
+    # the right-hand subplots' y-axies label overlap the charts to their left
+    # this takes care of hiding this on alternating subplots when in grid layout.
+    if self.controls.chart_layout == ChartLayout.GRID:
+      for i in range(1, num_scenarios + 1):
+        current_row = (i - 1) // num_cols + 1
+        current_col = (i - 1) % num_cols + 1
+        if current_col == 2:
+          self._fig.update_yaxes(showticklabels=False, row=current_row, col=current_col)
+
     self._fig.update_xaxes(title_text=self.controls.target.display_value)
 
     self._fig.update_layout(
