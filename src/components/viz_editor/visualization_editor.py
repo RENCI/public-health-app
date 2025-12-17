@@ -8,16 +8,11 @@ from dash_iconify import DashIconify
 
 from src.components.chart import ChartControls
 from src.components.chart.chart_instance_manager import ChartInstanceManager
-
 from src.components.collapsible_card.collapsible_card import CollapsibleCard
 from src.components.markdown_editor import markdown_editor
-from src.components.insight_save_section import insight_save_section
+from src.components.insight_save_modal import insight_save_modal_button, insight_save_modal
 
-from src.util.constants import (
-  DEFAULT_CONTROL_VALUES,
-  get_model_by_id,
-  get_unique_model_names,
-)
+from src.util.constants import DEFAULT_CONTROL_VALUES
 
 from .controls import (
   age_group_select,
@@ -98,22 +93,6 @@ def visualization_editor(controls=None, show_controls=True):
   controls_dict = {**DEFAULT_CONTROL_VALUES, **figure_control_values}
   chart_controls = ChartControls.from_dict(controls_dict)
   chart = chart_manager.get_chart(chart_controls)
-
-  # get models with associated records available in the data
-  df = chart.get_raw_dataframe()
-  models_with_data = []
-  if df is not None and not df.empty:
-    model_ids_with_data = df['model_name'].unique().tolist()
-    models_with_data = [
-      get_model_by_id(model_id)['name'] for model_id in model_ids_with_data
-    ]
-
-  all_models = get_unique_model_names()
-  model_options = [
-    {'label': model, 'value': model, 'disabled': model not in models_with_data}
-    for model in all_models
-  ]
-
   figure = chart.get_fig() if chart else go.Figure()
   graph = dcc.Graph(id='graph', figure=figure, 
                     config={'modeBarButtonsToRemove': ['toImage', 'pan2d', 'lasso2d', 'select2d', 'autoScale2d'], 'displaylogo': False},)
@@ -195,7 +174,7 @@ def visualization_editor(controls=None, show_controls=True):
                 dmc.Stack(
                   [
                     dmc.Text(
-                      'Edit the fields below to update the information for this insight.',
+                      'Additional information is required to save this custom insight. Please complete the fields below to proceed.',
                       size='sm',
                     ),
                     CollapsibleCard(
@@ -230,9 +209,8 @@ def visualization_editor(controls=None, show_controls=True):
                       ),
                       initial_open=True,
                     ).layout,
-                    html.Div(
-                      insight_save_section(),
-                    )
+                    insight_save_modal_button(),
+                    insight_save_modal(),
                   ],
                   gap='md',
                 ),
