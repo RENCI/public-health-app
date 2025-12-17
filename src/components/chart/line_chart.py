@@ -41,8 +41,6 @@ class LineChart(Chart):
       return self._fig
 
     # update layout
-    num_scenarios = len(self.controls.scenarios)
-
     if self.controls.chart_layout == ChartLayout.STACK:
       num_cols = 1
     elif self.controls.chart_layout == ChartLayout.GRID:
@@ -59,9 +57,6 @@ class LineChart(Chart):
       get_scenario_letter(self.controls.scenarios[-1].name),
       num_cols,
     )[0]
-
-    print(num_rows)
-    # num_rows = (num_scenarios + num_cols - 1) // num_cols
 
     # Define fixed dimensions
     SUBPLOT_HEIGHT = 300  # Fixed height per subplot in pixels
@@ -91,28 +86,29 @@ class LineChart(Chart):
     gold_std_df = gold_std_df.query('geo_value_fullname == @self.controls.location.name')
     gold_std_df = gold_std_df.loc[self.controls.x_start_date or gold_std_df.index.min() :]
 
+    # Get titles in correct layout
+    subplot_titles = [""] * (num_rows * num_cols)
+    for scenario in self.controls.scenarios:
+      scenario_letter = get_scenario_letter(scenario.name)
+
+      # Use one column because titles are provided in a list
+      scenario_row = get_scenario_position(scenario_letter, 1)
+
+      subplot_titles[scenario_row[0] - 1] = f'{scenario_letter}. {scenario.description}'
+
     # create subplots
     self._fig = make_subplots(
       rows=num_rows,
       cols=num_cols,
       vertical_spacing=vertical_spacing,
       row_heights=[1] * num_rows,
-      subplot_titles=[f'{s.name.split("-")[0]}. {s.description}' for s in self.controls.scenarios],
+      subplot_titles=subplot_titles,
     )
-
-    print(self.controls.scenarios)
 
     # add traces for each scenario
     for i, scenario in enumerate(self.controls.scenarios, start=1):
-      current_row = (i - 1) // num_cols + 1
-      current_col = (i - 1) % num_cols + 1
-
       scenario_letter = get_scenario_letter(scenario.name)
-      scenario_row, scenario_col = get_scenario_position(scenario_letter, num_cols)
-
-      current_row = scenario_row
-      current_col = scenario_col
-        
+      current_row, current_col = get_scenario_position(scenario_letter, num_cols)        
 
       # filter for given scenario
       scenario_df = df.query('scenario_id == @scenario.id')
@@ -129,6 +125,7 @@ class LineChart(Chart):
             model=model,
             row_num=current_row,
             col_num=current_col,
+            showlegend=(i == 1),
           )
         else:
           # add main line (0.5 quantile)
@@ -312,7 +309,7 @@ class LineChart(Chart):
     )
     self.refresh_fig()
 
-  def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int, col_num: int):
+  def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int, col_num: int, showlegend: bool):
     all_bounds = self.controls.uncertainty_interval.get_bounds()
     for i, bounds in enumerate(all_bounds):
       lower_q, upper_q = bounds
@@ -333,7 +330,7 @@ class LineChart(Chart):
           name=f'{model.name}',
           legendgroup=f'{model.name}',
           hoverinfo='skip',
-          showlegend=(row_num == 1 and col_num == 1 and i == len(all_bounds) - 1),
+          showlegend=(showlegend and i == len(all_bounds) - 1),
         ),
         row=row_num,
         col=col_num,
