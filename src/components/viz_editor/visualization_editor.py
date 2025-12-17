@@ -6,7 +6,11 @@ from dash import Input, Output, State, callback, dcc, exceptions, html
 
 from src.components.chart import ChartControls
 from src.components.chart.chart_instance_manager import ChartInstanceManager
-from src.util.constants import DEFAULT_CONTROL_VALUES
+from src.util.constants import (
+  DEFAULT_CONTROL_VALUES,
+  get_model_by_id,
+  get_unique_model_names,
+)
 
 from .controls import (
   age_group_select,
@@ -87,6 +91,22 @@ def visualization_editor(controls=None, show_controls=True):
   controls_dict = {**DEFAULT_CONTROL_VALUES, **figure_control_values}
   chart_controls = ChartControls.from_dict(controls_dict)
   chart = chart_manager.get_chart(chart_controls)
+
+  # get models with associated records available in the data
+  df = chart.get_raw_dataframe()
+  models_with_data = []
+  if df is not None and not df.empty:
+    model_ids_with_data = df['model_name'].unique().tolist()
+    models_with_data = [
+      get_model_by_id(model_id)['name'] for model_id in model_ids_with_data
+    ]
+
+  all_models = get_unique_model_names()
+  model_options = [
+    {'label': model, 'value': model, 'disabled': model not in models_with_data}
+    for model in all_models
+  ]
+
   figure = chart.get_fig() if chart else go.Figure()
   graph = dcc.Graph(id='graph', figure=figure, 
                     config={'modeBarButtonsToRemove': ['toImage', 'pan2d', 'lasso2d', 'select2d', 'autoScale2d'], 'displaylogo': False},)
@@ -126,7 +146,7 @@ def visualization_editor(controls=None, show_controls=True):
                     span=dict(base=12),
                   ),
                   dmc.GridCol(
-                    models_select(value=init_model_names, disabled=init_plot_type == 'boxplot'),
+                    models_select(value=init_model_names, data=model_options),
                     span=dict(base=12),
                   ),
                   dmc.GridCol(location_select(value=init_location_name), span=dict(base=12, sm=6)),
