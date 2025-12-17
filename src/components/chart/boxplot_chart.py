@@ -312,7 +312,7 @@ class BoxplotChart(Chart):
       title=self.get_title(),
       title_subtitle_text=self.get_subtitle(),
       uirevision=self.__hash__(),
-      showlegend=True,
+      showlegend=False,
     )
 
     self.set_theme()
