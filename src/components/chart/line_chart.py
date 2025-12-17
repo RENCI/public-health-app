@@ -41,6 +41,8 @@ class LineChart(Chart):
       return self._fig
 
     # update layout
+    num_scenarios = len(self.controls.scenarios)
+
     if self.controls.chart_layout == ChartLayout.STACK:
       num_cols = 1
     elif self.controls.chart_layout == ChartLayout.GRID:
@@ -52,8 +54,12 @@ class LineChart(Chart):
     def get_scenario_position(scenario_letter: chr, num_cols: int) -> tuple[int, int]:
       index = ord(scenario_letter) - ord('A')
       return (index // num_cols + 1, index % num_cols + 1)
-    
-    num_rows = get_scenario_position(
+
+    def get_scenario_title(scenario: str) -> str:
+      scenario_letter = get_scenario_letter(scenario.name)
+      return f'{scenario_letter}. {scenario.description}'
+
+    num_rows = num_scenarios if self.controls.chart_layout == ChartLayout.STACK else get_scenario_position(
       get_scenario_letter(self.controls.scenarios[-1].name),
       num_cols,
     )[0]
@@ -87,14 +93,19 @@ class LineChart(Chart):
     gold_std_df = gold_std_df.loc[self.controls.x_start_date or gold_std_df.index.min() :]
 
     # Get titles in correct layout
-    subplot_titles = [""] * (num_rows * num_cols)
-    for scenario in self.controls.scenarios:
-      scenario_letter = get_scenario_letter(scenario.name)
+    subplot_titles = []
+    if self.controls.chart_layout == ChartLayout.STACK:
+      for scenario in self.controls.scenarios:
+        subplot_titles.append(get_scenario_title(scenario))   
+    else:
+      subplot_titles = [""] * (num_rows * num_cols)
+      for scenario in self.controls.scenarios:
+        scenario_letter = get_scenario_letter(scenario.name)
 
-      # Use one column because titles are provided in a list
-      scenario_row = get_scenario_position(scenario_letter, 1)
+        # Use one column because titles are provided in a list
+        scenario_row = get_scenario_position(scenario_letter, 1)
 
-      subplot_titles[scenario_row[0] - 1] = f'{scenario_letter}. {scenario.description}'
+        subplot_titles[scenario_row[0] - 1] = get_scenario_title(scenario)
 
     # create subplots
     self._fig = make_subplots(
@@ -108,7 +119,14 @@ class LineChart(Chart):
     # add traces for each scenario
     for i, scenario in enumerate(self.controls.scenarios, start=1):
       scenario_letter = get_scenario_letter(scenario.name)
-      current_row, current_col = get_scenario_position(scenario_letter, num_cols)        
+
+      current_col = 1
+      current_row = 1
+      if self.controls.chart_layout == ChartLayout.STACK:
+        current_row = i
+        current_col = 1
+      else:
+        current_row, current_col = get_scenario_position(scenario_letter, num_cols)        
 
       # filter for given scenario
       scenario_df = df.query('scenario_id == @scenario.id')
