@@ -339,8 +339,7 @@ class BoxplotChart(Chart):
 
   def get_subtitle(self) -> str:
     return (
-      f'Pathogen: {self.controls.pathogen}'
-      + f' | Location: {self.controls.location.name}'
+      f'Location: {self.controls.location.name}'
       + f' | Age group: {self.controls.age_group.display_value}'
       + f' | During: {self._start_date_str} - {self._end_date_str}'
     )
