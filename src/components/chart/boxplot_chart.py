@@ -133,7 +133,21 @@ class BoxplotChart(Chart):
     elif self.controls.chart_layout == ChartLayout.GRID:
       num_cols = 2
 
-    num_rows = (num_scenarios + num_cols - 1) // num_cols
+    def get_scenario_letter(scenario_name: str) -> chr:
+      return scenario_name.split('-')[0]
+
+    def get_scenario_position(scenario_letter: chr, num_cols: int) -> tuple[int, int]:
+      index = ord(scenario_letter) - ord('A')
+      return (index // num_cols + 1, index % num_cols + 1)
+
+    def get_scenario_title(scenario: str) -> str:
+      scenario_letter = get_scenario_letter(scenario.name)
+      return f'{scenario_letter}. {scenario.description}'
+
+    num_rows = num_scenarios if self.controls.chart_layout == ChartLayout.STACK else get_scenario_position(
+      get_scenario_letter(self.controls.scenarios[-1].name),
+      num_cols,
+    )[0]
 
     BOXPLOT_HEIGHT = 50
     SUBPLOT_BASE_HEIGHT = 150
@@ -147,11 +161,26 @@ class BoxplotChart(Chart):
     else:
       vertical_spacing = 0
 
+    # Get titles in correct layout
+    subplot_titles = []
+    if self.controls.chart_layout == ChartLayout.STACK:
+      for scenario in self.controls.scenarios:
+        subplot_titles.append(get_scenario_title(scenario))   
+    else:
+      subplot_titles = [""] * (num_rows * num_cols)
+      for scenario in self.controls.scenarios:
+        scenario_letter = get_scenario_letter(scenario.name)
+
+        # Use one column because titles are provided in a list
+        scenario_row = get_scenario_position(scenario_letter, 1)
+
+        subplot_titles[scenario_row[0] - 1] = get_scenario_title(scenario)
+
     self._fig = make_subplots(
       rows=num_rows,
       cols=num_cols,
       vertical_spacing=vertical_spacing,
-      subplot_titles=[f'{s.name.split("-")[0]}. {s.description}' for s in self.controls.scenarios],
+      subplot_titles=subplot_titles,
     )
 
     # start with the raw dataframe
@@ -162,8 +191,16 @@ class BoxplotChart(Chart):
     df = df.query('age_group == @self.controls.age_group.input_value')
 
     for i, scenario in enumerate(self.controls.scenarios, start=1):
-      current_row = (i - 1) // num_cols + 1
-      current_col = (i - 1) % num_cols + 1
+      scenario_letter = get_scenario_letter(scenario.name)
+
+      current_col = 1
+      current_row = 1
+      if self.controls.chart_layout == ChartLayout.STACK:
+        current_row = i
+        current_col = 1
+      else:
+        current_row, current_col = get_scenario_position(scenario_letter, num_cols) 
+        
       scenario_df = df.query('scenario_id == @scenario.id')
 
       for model in self.controls.models:
