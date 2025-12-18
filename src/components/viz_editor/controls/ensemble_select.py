@@ -15,5 +15,5 @@ def ensemble_select(value: str = 'Ensemble'):
     value=value,
     data=options,
     allowDeselect=False,
-    comboboxProps={"shadow": "md"},
+    comboboxProps={'shadow': 'md'},
   )

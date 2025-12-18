@@ -14,6 +14,6 @@ def models_select(value: list[str] = ['Ensemble'], data: list | None = None, dis
     required=True,
     data=data if data is not None else options,
     disabled=disabled,
-    comboboxProps={"shadow": "md"},
+    comboboxProps={'shadow': 'md'},
     searchable=True,
   )

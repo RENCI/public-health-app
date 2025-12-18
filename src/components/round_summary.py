@@ -148,7 +148,7 @@ def custom_insight_card(item):
     title=item['title'],
     summary=summary,
     image_url=item['image_url'],
-    href=f'/insight/{item['id']}',
+    href=f'/insight/{item["id"]}',
     actions=[
       delete_button,
       share_button,
@@ -259,12 +259,15 @@ def update_round_summary(round_number, pathname):
       name=round_name,
     ),
     dcc.Markdown(report),
-    [insight_card(
-      title=insight['title'],
-      summary=insight['summary'],
-      image_url=insight['image_url'],
-      href=f'/insight/{insight['id']}',
-    ) for insight in insights],
+    [
+      insight_card(
+        title=insight['title'],
+        summary=insight['summary'],
+        image_url=insight['image_url'],
+        href=f'/insight/{insight["id"]}',
+      )
+      for insight in insights
+    ],
     dcc.Markdown(methods),
   )
 

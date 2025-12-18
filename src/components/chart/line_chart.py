@@ -47,7 +47,7 @@ class LineChart(Chart):
       num_cols = 1
     elif self.controls.chart_layout == ChartLayout.GRID:
       num_cols = 2
- 
+
     def get_scenario_letter(scenario_name: str) -> chr:
       return scenario_name.split('-')[0]
 
@@ -59,10 +59,14 @@ class LineChart(Chart):
       scenario_letter = get_scenario_letter(scenario.name)
       return f'{scenario_letter}. {scenario.description}'
 
-    num_rows = num_scenarios if self.controls.chart_layout == ChartLayout.STACK else get_scenario_position(
-      get_scenario_letter(self.controls.scenarios[-1].name),
-      num_cols,
-    )[0]
+    num_rows = (
+      num_scenarios
+      if self.controls.chart_layout == ChartLayout.STACK
+      else get_scenario_position(
+        get_scenario_letter(self.controls.scenarios[-1].name),
+        num_cols,
+      )[0]
+    )
 
     # Define fixed dimensions
     SUBPLOT_HEIGHT = 250  # Fixed height per subplot in pixels
@@ -96,9 +100,9 @@ class LineChart(Chart):
     subplot_titles = []
     if self.controls.chart_layout == ChartLayout.STACK:
       for scenario in self.controls.scenarios:
-        subplot_titles.append(get_scenario_title(scenario))   
+        subplot_titles.append(get_scenario_title(scenario))
     else:
-      subplot_titles = [""] * (num_rows * num_cols)
+      subplot_titles = [''] * (num_rows * num_cols)
       for scenario in self.controls.scenarios:
         scenario_letter = get_scenario_letter(scenario.name)
 
@@ -128,13 +132,15 @@ class LineChart(Chart):
         current_row = i
         current_col = 1
       else:
-        current_row, current_col = get_scenario_position(scenario_letter, num_cols)        
+        current_row, current_col = get_scenario_position(scenario_letter, num_cols)
 
       # filter for given scenario
       scenario_df = df.query('scenario_id == @scenario.id')
 
       # decide whether to add uncertainty intervals
-      should_add_uncertainty_intervals = self.controls.uncertainty_interval is not UncertaintyInterval.NONE
+      should_add_uncertainty_intervals = (
+        self.controls.uncertainty_interval is not UncertaintyInterval.NONE
+      )
 
       # add traces for each model
       for model in self.controls.models:
@@ -346,7 +352,9 @@ class LineChart(Chart):
     )
     self.refresh_fig()
 
-  def _plot_uncertainty_interval(self, scenario_df: pd.DataFrame, model: Model, row_num: int, col_num: int, showlegend: bool):
+  def _plot_uncertainty_interval(
+    self, scenario_df: pd.DataFrame, model: Model, row_num: int, col_num: int, showlegend: bool
+  ):
     all_bounds = self.controls.uncertainty_interval.get_bounds()
     for i, bounds in enumerate(all_bounds):
       lower_q, upper_q = bounds
@@ -355,7 +363,7 @@ class LineChart(Chart):
       fill_color = get_model_color_with_uncertainty_interval(
         model.color,
         uncertainty_interval=UncertaintyInterval.from_bounds([(lower_q, upper_q)]),
-        use_varying_opacity=self.controls.uncertainty_interval==UncertaintyInterval.ALL,
+        use_varying_opacity=self.controls.uncertainty_interval == UncertaintyInterval.ALL,
       )
       self._fig.add_trace(
         go.Scatter(
@@ -372,7 +380,7 @@ class LineChart(Chart):
         row=row_num,
         col=col_num,
       )
-  
+
   def _reload_data(self):
     """
     Reload data, for example if a variable changed, e.g. round number, location, target, etc.

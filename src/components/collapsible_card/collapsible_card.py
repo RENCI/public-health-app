@@ -22,16 +22,16 @@ class CollapsibleCard:
   ) -> None:
     self.id = id
 
-    self.store = CollapsibleCardStore(
-      id=self.id, 
-      initial_open=initial_open
-    )
+    self.store = CollapsibleCardStore(id=self.id, initial_open=initial_open)
 
     self._layout = dmc.Card(
       [
         dmc.Button(
           dmc.Text(title, fw=500, style=dict(flex=1)),
-          rightSection=DashIconify(icon='feather:chevron-up', id={'type': 'collapsible-card-toggle-icon', 'index': self.id['index']}),
+          rightSection=DashIconify(
+            icon='feather:chevron-up',
+            id={'type': 'collapsible-card-toggle-icon', 'index': self.id['index']},
+          ),
           id={'type': 'collapsible-card-toggle', 'index': self.id['index']},
           justify='space-between',
           variant='transparent',

@@ -1,5 +1,6 @@
 import dash_mantine_components as dmc
 
+
 def actions_tray(actions: list = []):
   return dmc.Paper(
     dmc.Flex(
@@ -14,6 +15,7 @@ def actions_tray(actions: list = []):
     variant='soft',
     className='mantine-Card-root',
   )
+
 
 def insight_card(
   title: str,

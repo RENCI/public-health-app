@@ -103,9 +103,7 @@ def visualization_editor(controls=None, show_controls=True):
   models_with_data = []
   if df is not None and not df.empty:
     model_ids_with_data = df['model_name'].unique().tolist()
-    models_with_data = [
-      get_model_by_id(model_id)['name'] for model_id in model_ids_with_data
-    ]
+    models_with_data = [get_model_by_id(model_id)['name'] for model_id in model_ids_with_data]
 
   all_models = get_unique_model_names()
   model_options = [
@@ -114,8 +112,14 @@ def visualization_editor(controls=None, show_controls=True):
   ]
 
   figure = chart.get_fig() if chart else go.Figure()
-  graph = dcc.Graph(id='graph', figure=figure, 
-                    config={'modeBarButtonsToRemove': ['toImage', 'pan2d', 'lasso2d', 'select2d', 'autoScale2d'], 'displaylogo': False},)
+  graph = dcc.Graph(
+    id='graph',
+    figure=figure,
+    config={
+      'modeBarButtonsToRemove': ['toImage', 'pan2d', 'lasso2d', 'select2d', 'autoScale2d'],
+      'displaylogo': False,
+    },
+  )
 
   if not chart:
     return html.Div(
@@ -144,38 +148,67 @@ def visualization_editor(controls=None, show_controls=True):
         [
           dmc.Tabs(
             [
-              dmc.TabsList([
-                dmc.TabsTab('Chart Controls', leftSection=DashIconify(icon='feather:sliders'), value='controls'),
-                dmc.TabsTab('Save Insight', leftSection=DashIconify(icon='feather:save'), value='metadata'),
-              ]),
+              dmc.TabsList(
+                [
+                  dmc.TabsTab(
+                    'Chart Controls',
+                    leftSection=DashIconify(icon='feather:sliders'),
+                    value='controls',
+                  ),
+                  dmc.TabsTab(
+                    'Save Insight', leftSection=DashIconify(icon='feather:save'), value='metadata'
+                  ),
+                ]
+              ),
               dmc.TabsPanel(
                 dmc.Stack(
                   [
                     CollapsibleCard(
                       id={'index': 'insight-data-selection'},
-                      title='Data Selection', 
-                      children=dmc.Grid([
-                        dmc.GridCol(scenarios_select(value=[str(scenario_id) for scenario_id in init_scenario_ids]), span=dict(base=12)),
-                        dmc.GridCol(models_select(value=init_model_names, data=model_options), span=dict(base=12)),
-                        dmc.GridCol(location_select(value=init_location_name), span=dict(base=12, sm=6)),
-                        dmc.GridCol(target_select(value=init_target), span=dict(base=12, sm=6)),
-                        dmc.GridCol(age_group_select(value=init_age_group), span=dict(base=12, sm=6)),
-                        dmc.GridCol(uncertainty_interval_select(value=init_uncertainty_interval, disabled=init_plot_type == 'boxplot'), span=dict(base=12, sm=6)),
-                      ]),
+                      title='Data Selection',
+                      children=dmc.Grid(
+                        [
+                          dmc.GridCol(
+                            scenarios_select(
+                              value=[str(scenario_id) for scenario_id in init_scenario_ids]
+                            ),
+                            span=dict(base=12),
+                          ),
+                          dmc.GridCol(
+                            models_select(value=init_model_names, data=model_options),
+                            span=dict(base=12),
+                          ),
+                          dmc.GridCol(
+                            location_select(value=init_location_name), span=dict(base=12, sm=6)
+                          ),
+                          dmc.GridCol(target_select(value=init_target), span=dict(base=12, sm=6)),
+                          dmc.GridCol(
+                            age_group_select(value=init_age_group), span=dict(base=12, sm=6)
+                          ),
+                          dmc.GridCol(
+                            uncertainty_interval_select(
+                              value=init_uncertainty_interval, disabled=init_plot_type == 'boxplot'
+                            ),
+                            span=dict(base=12, sm=6),
+                          ),
+                        ]
+                      ),
                     ).layout,
                     CollapsibleCard(
                       id={'index': 'insight-presentation'},
-                      title='Presentation', 
-                      children=dmc.Grid([
-                        dmc.GridCol(layout_select(value=init_chart_layout), span=dict(base=12)),
-                      ]),
+                      title='Presentation',
+                      children=dmc.Grid(
+                        [
+                          dmc.GridCol(layout_select(value=init_chart_layout), span=dict(base=12)),
+                        ]
+                      ),
                       initial_open=False,
                     ).layout,
-                    #dmc.Card(
+                    # dmc.Card(
                     #  zoom_control(value=init_zoom),
                     #  variant='soft',
                     #  style={'display': 'none'} if init_plot_type == 'boxplot' else {},
-                    #),
+                    # ),
                     # Remove zoom control for now, but render the Store to keep things in sync
                     dcc.Store(id='zoom-store', data=init_zoom),
                     CollapsibleCard(
@@ -249,4 +282,10 @@ def visualization_editor(controls=None, show_controls=True):
     mb=12,
   )
 
-from .callbacks import update_graph_figure, update_chart_controls, sync_zoom_store, apply_current_zoom
+
+from .callbacks import (
+  update_graph_figure,
+  update_chart_controls,
+  sync_zoom_store,
+  apply_current_zoom,
+)

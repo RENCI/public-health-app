@@ -22,6 +22,7 @@ from .controls import (
 # Global instance of the chart manager
 chart_manager = ChartInstanceManager()
 
+
 @callback(
   Output('graph', 'figure'),
   Input('chart-controls-store', 'data'),

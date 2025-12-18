@@ -62,7 +62,6 @@ next_insight_button = dmc.Anchor(
 )
 
 
-
 download_button = toolbar_button(
   'PDF',
   icon=DashIconify(icon='feather:download'),
@@ -93,7 +92,7 @@ insight_toolbar = toolbar(
     insight_yaml_modal_button(),
     download_button,
     explorer_button,
-  ]
+  ],
 )
 
 
@@ -114,6 +113,7 @@ loading_insight = [
   dcc.Markdown(id='insight-view-description'),
   dcc.Download(id='insight-pdf-download'),
 ]
+
 
 def annotations_list(annotations: list):
   if len(annotations) == 0:
@@ -184,6 +184,7 @@ layout = dmc.Container(
   size=1200,
 )
 
+
 def compute_navigation(insight_id: str, insights: list[dict], *, wrap=False):
   """
   Compute prev/next navigation info for our list of insights.
@@ -231,7 +232,8 @@ def compute_navigation(insight_id: str, insights: list[dict], *, wrap=False):
       'id': next_id,
       'disabled': next_id is None,
     },
-}
+  }
+
 
 @callback(
   Output('prev-insight-link', 'href'),
@@ -316,24 +318,31 @@ def show_insight_details(pathname, custom_insights, theme):
         visualization_editor(controls=controls, show_controls=False),
         style=dict(margin='24px 0'),
       ),
-      dmc.Grid([
-        dmc.GridCol([
-          dmc.Title('Discussion', order=2, my=12),
-          dcc.Markdown(
-            markdown.markdown(insight.get('description', ''), extensions=['extra']),
-            dangerously_allow_html=True,
-            style=dict(lineHeight=2),
+      dmc.Grid(
+        [
+          dmc.GridCol(
+            [
+              dmc.Title('Discussion', order=2, my=12),
+              dcc.Markdown(
+                markdown.markdown(insight.get('description', ''), extensions=['extra']),
+                dangerously_allow_html=True,
+                style=dict(lineHeight=2),
+              ),
+            ],
+            span=dict(base=12, md=7 if len(annotations) else 12),
           ),
-        ], span=dict(base=12, md=7 if len(annotations) else 12)),
-        dmc.GridCol(
-          dmc.Card(
-            dmc.Stack(annotations_list(annotations), id='annotations-list-container'),
-            variant='soft',
-            p='lg',
-          ),
-          span=dict(base=12, md=5),
-        ) if len(annotations) else None,
-      ]),
+          dmc.GridCol(
+            dmc.Card(
+              dmc.Stack(annotations_list(annotations), id='annotations-list-container'),
+              variant='soft',
+              p='lg',
+            ),
+            span=dict(base=12, md=5),
+          )
+          if len(annotations)
+          else None,
+        ]
+      ),
       dcc.Download(id='insight-pdf-download'),
       insight_yaml_modal(insight),
     ]
@@ -372,6 +381,7 @@ clientside_callback(
   Input('download-insight-button', 'n_clicks'),
   prevent_initial_call=True,
 )
+
 
 @callback(
   Output('insight-pdf-download', 'data'),

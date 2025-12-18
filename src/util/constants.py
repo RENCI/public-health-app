@@ -38,6 +38,7 @@ DEFAULT_CONTROL_VALUES = dict(
   zoom=None,
 )
 
+
 def load_constants() -> None:
   """Load constants from JSON file."""
   global _CONSTANTS
@@ -184,4 +185,9 @@ def get_model_color_with_uncertainty_interval(
   use_varying_opacity: bool = True,
 ) -> str:
   """Get the model color with the opacity for a specific uncertainty interval. Defaults to 95%."""
-  return replace_opacity(model_color, get_uncertainty_interval_opacity(uncertainty_interval) if use_varying_opacity else get_uncertainty_interval_opacity(UncertaintyInterval.FIFTY_PERCENT))
+  return replace_opacity(
+    model_color,
+    get_uncertainty_interval_opacity(uncertainty_interval)
+    if use_varying_opacity
+    else get_uncertainty_interval_opacity(UncertaintyInterval.FIFTY_PERCENT),
+  )

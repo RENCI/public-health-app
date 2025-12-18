@@ -21,7 +21,7 @@ class CollapsibleCardStore:
     return dcc.Store(
       id=self.id,
       data={
-      'id': self.id,
-      'isOpen': self.initial_open,
+        'id': self.id,
+        'isOpen': self.initial_open,
       },
     )

@@ -22,8 +22,9 @@ def scenarios_select(value: list[str] = default_option):
     value=value,
     required=True,
     data=options,
-    comboboxProps={"shadow": "md"},
+    comboboxProps={'shadow': 'md'},
   )
+
 
 @callback(
   Output('scenarios-select', 'value', allow_duplicate=True),
@@ -33,10 +34,11 @@ def scenarios_select(value: list[str] = default_option):
 def on_scenarios_select_change(selected_values: list[str]):
   if not selected_values:
     return []
-  
+
   # Keep selected values sorted for consistency
   selected_values.sort()
   return selected_values
+
 
 @callback(
   Output('scenarios-select', 'data'),

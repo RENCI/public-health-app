@@ -23,7 +23,9 @@ from src.util.constants import DEFAULT_CONTROL_VALUES
 def insight_save_modal():
   return dmc.Modal(
     children=[
-      dmc.Text('This insight will be saved to your custom insights and will show in your Custom Insights list on the Round Summary page.'),
+      dmc.Text(
+        'This insight will be saved to your custom insights and will show in your Custom Insights list on the Round Summary page.'
+      ),
       dmc.Space(h=16),
       dmc.Text('You will be redirected to view this saved insight after confirmation.'),
       dmc.Space(h=16),
@@ -81,6 +83,7 @@ def show_modal(open_click, confirm_click, cancel_click):
     return False
 
   return False
+
 
 clientside_callback(
   'window.dash_clientside.clientside.capture_thumbnail',

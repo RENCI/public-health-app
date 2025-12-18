@@ -9,7 +9,6 @@ class CollapsibleCardCallbacks:
     self._setup_callbacks()
 
   def _setup_callbacks(self) -> None:
-
     # toggle open/closed
     @callback(
       Output(CollapsibleCardStore.get_id(match_all=True), 'data'),
