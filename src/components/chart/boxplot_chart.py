@@ -173,6 +173,7 @@ class BoxplotChart(Chart):
           name=model.name,
           showlegend=(i == 1),
           legendgroup=model.name,
+          hoverinfo='skip',
         )
         if self.controls.x_axis:
           trace.x = model_df[self.controls.x_axis]
