@@ -304,6 +304,10 @@ class LineChart(Chart):
       uirevision=self.__hash__(),
     )
 
+    def make_grid_axis_label(axis_name: str) -> str:
+      # Add left and right long arrows to the axes labels
+      return f'⟵ {axis_name} ⟶'
+
     if self.controls.chart_layout == ChartLayout.GRID:
       self._fig.add_annotation(
         showarrow=False,
@@ -313,7 +317,7 @@ class LineChart(Chart):
         yref='paper',
         y=1,
         yshift=64,
-        text=self.controls.grid_axes[0],
+        text=make_grid_axis_label(self.controls.grid_axes[0]),
         font=dict(size=16),
       )
       self._fig.add_annotation(
@@ -326,7 +330,7 @@ class LineChart(Chart):
         yref='paper',
         y=0.5,
         textangle=-90,
-        text=self.controls.grid_axes[1],
+        text=make_grid_axis_label(self.controls.grid_axes[1]),
         font=dict(size=16),
       )
 

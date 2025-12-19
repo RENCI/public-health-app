@@ -17,7 +17,7 @@ DEFAULT_CONTROL_VALUES = dict(
   theme='light',
   plot_type='line',
   round_num=19,
-  grid_axes=["⟵ Immunization timing ⟶", "⟵ Booster age group ⟶"],
+  grid_axes=["Immunization timing", "Booster age group"],
   scenario_ids=[77, 78],
   scenario_variables=[
     {
