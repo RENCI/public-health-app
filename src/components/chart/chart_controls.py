@@ -18,6 +18,7 @@ class ChartControls:
     theme: str,
     plot_type: str,
     round_num: int,
+    grid_axes: list[str],
     chart_layout: str,
     scenario_ids: list[int],
     scenario_variables: list[dict],
@@ -31,11 +32,12 @@ class ChartControls:
     zoom: dict | None = None,
     annotations: list[dict] | None = None,
     uncertainty_interval: str | None = None,
-    pathogen: str = 'covid',
+    pathogen: str = 'covid',    
   ):
     self.theme = theme
     self.plot_type = PlotType(plot_type)
     self.round_num = round_num
+    self.grid_axes = grid_axes
     self.pathogen = pathogen
     self.scenarios = [Scenario(id=scenario_id) for scenario_id in scenario_ids]
     self.scenario_variables = [ScenarioVariable(**var) for var in scenario_variables]
@@ -65,6 +67,7 @@ class ChartControls:
       theme=data['theme'],
       plot_type=data['plot_type'],
       round_num=data['round_num'],
+      grid_axes=data['grid_axes'],
       scenario_ids=data['scenario_ids'],
       scenario_variables=data['scenario_variables'],
       model_names=data['model_names'],

@@ -59,6 +59,7 @@ def load_rounds():
       'report': details.get('report', ''),
       'insights': insights,
       'methods': details.get('methods'),
+      'grid_axes': [details.get('grid_x_axis', 'X Axis'), details.get('grid_y_axis', 'Y Axis')],
     }
 
   return rounds

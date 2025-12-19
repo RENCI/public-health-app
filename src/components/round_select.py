@@ -54,6 +54,7 @@ def update_chart_controls_for_round(round_number: str):
     raise exceptions.PreventUpdate
   return DEFAULT_CONTROL_VALUES | {
     'round_num': int(round_number),
+    'grid_axes': rounds[round_number]['grid_axes'],
   }
 
 

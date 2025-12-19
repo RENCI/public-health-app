@@ -17,7 +17,7 @@ from src.components.chart.chart_properties import (
   VerticalAnnotation,
   Zoom,
 )
-from src.components.enums import AgeGroup, DataType, Target
+from src.components.enums import AgeGroup, DataType, Target, ChartLayout
 
 BASE_DATA_DIR = Path(__file__).resolve().parent.parent.parent / 'data' / 'rounds'
 
@@ -30,7 +30,7 @@ class Chart(ABC):
     Initialize the base chart class. This gets called first by the concrete chart classes'
     constructors.
     """
-    self.controls = controls
+    self.controls = controls   
 
     self._raw_df = Chart.collect_data(
       self.controls.data_type,
@@ -200,6 +200,49 @@ class Chart(ABC):
         )
       else:
         raise ValueError(f'Invalid annotation type: {annotation.type}')
+      
+  def _get_scenario_letter(self, scenario_name: str) -> chr:
+    return scenario_name.split('-')[0]
+
+  def _get_scenario_position(self, scenario_letter: chr, num_cols: int) -> tuple[int, int]:
+    index = ord(scenario_letter) - ord('A')
+    return (index // num_cols + 1, index % num_cols + 1)
+
+  def _get_scenario_title(self, scenario: str) -> str:
+    scenario_letter = self._get_scenario_letter(scenario.name)
+    return f'{scenario_letter}. {scenario.description}'
+
+  def _get_num_rows_cols(self) -> int:
+    if self.controls.chart_layout == ChartLayout.STACK:
+      num_cols = 1
+    elif self.controls.chart_layout == ChartLayout.GRID:
+      num_cols = 2
+
+    num_scenarios = len(self.controls.scenarios)
+
+    num_rows = num_scenarios if self.controls.chart_layout == ChartLayout.STACK else self._get_scenario_position(
+      self._get_scenario_letter(self.controls.scenarios[-1].name),
+      num_cols,
+    )[0]
+
+    return (num_rows, num_cols)
+
+  def _get_subplot_titles(self, num_rows: int, num_cols: int) -> list[str]:
+    subplot_titles = []
+    if self.controls.chart_layout == ChartLayout.STACK:
+      for scenario in self.controls.scenarios:
+        subplot_titles.append(self._get_scenario_title(scenario))
+    else:
+      subplot_titles = [''] * (num_rows * num_cols)
+      for scenario in self.controls.scenarios:
+        scenario_letter = self._get_scenario_letter(scenario.name)
+
+        # Use one column because titles are provided in a list
+        scenario_row = self._get_scenario_position(scenario_letter, 1)
+
+        subplot_titles[scenario_row[0] - 1] = self._get_scenario_title(scenario)
+
+    return subplot_titles
 
   @staticmethod
   @lru_cache(maxsize=128)

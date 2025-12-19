@@ -128,12 +128,7 @@ class BoxplotChart(Chart):
     num_scenarios = len(self.controls.scenarios)
     num_models = len(self.controls.models)
 
-    if self.controls.chart_layout == ChartLayout.STACK:
-      num_cols = 1
-    elif self.controls.chart_layout == ChartLayout.GRID:
-      num_cols = 2
-
-    num_rows = (num_scenarios + num_cols - 1) // num_cols
+    num_rows, num_cols = self._get_num_rows_cols()
 
     BOXPLOT_HEIGHT = 50
     SUBPLOT_BASE_HEIGHT = 150
@@ -147,11 +142,14 @@ class BoxplotChart(Chart):
     else:
       vertical_spacing = 0
 
+    # Get titles in correct layout
+    subplot_titles = self._get_subplot_titles(num_rows, num_cols)
+
     self._fig = make_subplots(
       rows=num_rows,
       cols=num_cols,
       vertical_spacing=vertical_spacing,
-      subplot_titles=[f'{s.name.split("-")[0]}. {s.description}' for s in self.controls.scenarios],
+      subplot_titles=subplot_titles,
     )
 
     # start with the raw dataframe
@@ -162,8 +160,16 @@ class BoxplotChart(Chart):
     df = df.query('age_group == @self.controls.age_group.input_value')
 
     for i, scenario in enumerate(self.controls.scenarios, start=1):
-      current_row = (i - 1) // num_cols + 1
-      current_col = (i - 1) % num_cols + 1
+      scenario_letter = self._get_scenario_letter(scenario.name)
+
+      current_col = 1
+      current_row = 1
+      if self.controls.chart_layout == ChartLayout.STACK:
+        current_row = i
+        current_col = 1
+      else:
+        current_row, current_col = self._get_scenario_position(scenario_letter, num_cols) 
+        
       scenario_df = df.query('scenario_id == @scenario.id')
 
       for model in self.controls.models:
@@ -325,10 +331,40 @@ class BoxplotChart(Chart):
           font=dict(size=16),
         ),
       ),
-      margin=dict(t=144, r=48, b=48, l=48),
+      margin=dict(t=184, r=48, b=48, l=134) if self.controls.chart_layout == ChartLayout.GRID else dict(t=144, r=48, b=48, l=48),
       uirevision=self.__hash__(),
       showlegend=False,
     )
+
+    def make_grid_axis_label(axis_name: str) -> str:
+      # Add left and right long arrows to the axes labels
+      return f'⟵ {axis_name} ⟶'
+
+    if self.controls.chart_layout == ChartLayout.GRID:
+      self._fig.add_annotation(
+        showarrow=False,
+        xanchor='center',
+        xref='paper', 
+        x=0.5, 
+        yref='paper',
+        y=1,
+        yshift=64,
+        text=make_grid_axis_label(self.controls.grid_axes[0]),
+        font=dict(size=16),
+      )
+      self._fig.add_annotation(
+        showarrow=False,
+        xanchor='center',
+        xref='paper', 
+        x=0,
+        xshift=-114,
+        yanchor='middle',
+        yref='paper',
+        y=0.5,
+        textangle=-90,
+        text=make_grid_axis_label(self.controls.grid_axes[1]),
+        font=dict(size=16),
+      )
 
     self.set_theme()
 
