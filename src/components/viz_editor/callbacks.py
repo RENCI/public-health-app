@@ -32,8 +32,8 @@ def update_graph_figure(
   current_chart_controls: dict[str, Any],
 ):
   if not current_chart_controls:
-    raise exceptions.PreventUpdate
-
+    raise exceptions.PreventUpdate  
+  
   try:
     chart_controls = ChartControls.from_dict({**DEFAULT_CONTROL_VALUES, **current_chart_controls})
 

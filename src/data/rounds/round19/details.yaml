@@ -31,3 +31,5 @@ methods: |
 
   ### Disclaimer
   The content of the COVID-19 Scenario Modeling Hub is solely the responsibility of the participating teams and the Hub maintainers and does not represent the official views of any related funding organizations.
+grid_x_axis: "⟵ Immunization timing ⟶"
+grid_y_axis: "⟵ Booster age group ⟶"

@@ -192,7 +192,7 @@ class LineChart(Chart):
     # reduce the font size of the subplot titles,
     # which are treated as annotations by plotly.
     for annotation in self._fig.layout.annotations:
-      annotation['font'] = dict(size=12)
+      annotation['font'] = dict(size=12)      
 
     # apply spike guides for each axis in the chart viewport
     self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
@@ -294,15 +294,41 @@ class LineChart(Chart):
         xanchor='center',
         yanchor='top',
         font=dict(size=28),
-        pad=dict(t=35, r=0, b=0, l=0),
+        pad=dict(t=35, r=0, b=10, l=0),        
         subtitle=dict(
           text=self.get_subtitle(),
-          font=dict(size=16),
+          font=dict(size=12),
         ),
       ),
-      margin=dict(t=144, r=48, b=48, l=72),
+      margin=dict(t=164, r=48, b=48, l=104) if ChartLayout.GRID else dict(t=144, r=48, b=48, l=72),
       uirevision=self.__hash__(),
     )
+
+    if self.controls.chart_layout == ChartLayout.GRID:
+      self._fig.add_annotation(
+        showarrow=False,
+        xanchor='center',
+        xref='paper', 
+        x=0.5, 
+        yref='paper',
+        y=1,
+        yshift=64,
+        text=self.controls.grid_axes[0],
+        font=dict(size=16),
+      )
+      self._fig.add_annotation(
+        showarrow=False,
+        xanchor='center',
+        xref='paper', 
+        x=0,
+        xshift=-78,
+        yanchor='middle',
+        yref='paper',
+        y=0.5,
+        textangle=-90,
+        text=self.controls.grid_axes[1],
+        font=dict(size=16),
+      )
 
     self.set_theme()
 

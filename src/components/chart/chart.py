@@ -30,7 +30,7 @@ class Chart(ABC):
     Initialize the base chart class. This gets called first by the concrete chart classes'
     constructors.
     """
-    self.controls = controls
+    self.controls = controls   
 
     self._raw_df = Chart.collect_data(
       self.controls.data_type,
