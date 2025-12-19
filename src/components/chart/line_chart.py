@@ -300,7 +300,7 @@ class LineChart(Chart):
           font=dict(size=12),
         ),
       ),
-      margin=dict(t=164, r=48, b=48, l=104) if ChartLayout.GRID else dict(t=144, r=48, b=48, l=72),
+      margin=dict(t=164, r=48, b=48, l=104) if self.controls.chart_layout == ChartLayout.GRID else dict(t=144, r=48, b=48, l=72),
       uirevision=self.__hash__(),
     )
 

@@ -362,10 +362,40 @@ class BoxplotChart(Chart):
           font=dict(size=16),
         ),
       ),
-      margin=dict(t=144, r=48, b=48, l=48),
+      margin=dict(t=184, r=48, b=48, l=134) if self.controls.chart_layout == ChartLayout.GRID else dict(t=144, r=48, b=48, l=48),
       uirevision=self.__hash__(),
       showlegend=False,
     )
+
+    def make_grid_axis_label(axis_name: str) -> str:
+      # Add left and right long arrows to the axes labels
+      return f'⟵ {axis_name} ⟶'
+
+    if self.controls.chart_layout == ChartLayout.GRID:
+      self._fig.add_annotation(
+        showarrow=False,
+        xanchor='center',
+        xref='paper', 
+        x=0.5, 
+        yref='paper',
+        y=1,
+        yshift=64,
+        text=make_grid_axis_label(self.controls.grid_axes[0]),
+        font=dict(size=16),
+      )
+      self._fig.add_annotation(
+        showarrow=False,
+        xanchor='center',
+        xref='paper', 
+        x=0,
+        xshift=-114,
+        yanchor='middle',
+        yref='paper',
+        y=0.5,
+        textangle=-90,
+        text=make_grid_axis_label(self.controls.grid_axes[1]),
+        font=dict(size=16),
+      )
 
     self.set_theme()
 
