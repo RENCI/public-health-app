@@ -128,26 +128,7 @@ class BoxplotChart(Chart):
     num_scenarios = len(self.controls.scenarios)
     num_models = len(self.controls.models)
 
-    if self.controls.chart_layout == ChartLayout.STACK:
-      num_cols = 1
-    elif self.controls.chart_layout == ChartLayout.GRID:
-      num_cols = 2
-
-    def get_scenario_letter(scenario_name: str) -> chr:
-      return scenario_name.split('-')[0]
-
-    def get_scenario_position(scenario_letter: chr, num_cols: int) -> tuple[int, int]:
-      index = ord(scenario_letter) - ord('A')
-      return (index // num_cols + 1, index % num_cols + 1)
-
-    def get_scenario_title(scenario: str) -> str:
-      scenario_letter = get_scenario_letter(scenario.name)
-      return f'{scenario_letter}. {scenario.description}'
-
-    num_rows = num_scenarios if self.controls.chart_layout == ChartLayout.STACK else get_scenario_position(
-      get_scenario_letter(self.controls.scenarios[-1].name),
-      num_cols,
-    )[0]
+    num_rows, num_cols = self._get_num_rows_cols()
 
     BOXPLOT_HEIGHT = 50
     SUBPLOT_BASE_HEIGHT = 150
@@ -162,19 +143,7 @@ class BoxplotChart(Chart):
       vertical_spacing = 0
 
     # Get titles in correct layout
-    subplot_titles = []
-    if self.controls.chart_layout == ChartLayout.STACK:
-      for scenario in self.controls.scenarios:
-        subplot_titles.append(get_scenario_title(scenario))   
-    else:
-      subplot_titles = [""] * (num_rows * num_cols)
-      for scenario in self.controls.scenarios:
-        scenario_letter = get_scenario_letter(scenario.name)
-
-        # Use one column because titles are provided in a list
-        scenario_row = get_scenario_position(scenario_letter, 1)
-
-        subplot_titles[scenario_row[0] - 1] = get_scenario_title(scenario)
+    subplot_titles = self._get_subplot_titles(num_rows, num_cols)
 
     self._fig = make_subplots(
       rows=num_rows,
@@ -191,7 +160,7 @@ class BoxplotChart(Chart):
     df = df.query('age_group == @self.controls.age_group.input_value')
 
     for i, scenario in enumerate(self.controls.scenarios, start=1):
-      scenario_letter = get_scenario_letter(scenario.name)
+      scenario_letter = self._get_scenario_letter(scenario.name)
 
       current_col = 1
       current_row = 1
@@ -199,7 +168,7 @@ class BoxplotChart(Chart):
         current_row = i
         current_col = 1
       else:
-        current_row, current_col = get_scenario_position(scenario_letter, num_cols) 
+        current_row, current_col = self._get_scenario_position(scenario_letter, num_cols) 
         
       scenario_df = df.query('scenario_id == @scenario.id')
 
