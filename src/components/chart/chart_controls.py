@@ -1,0 +1,84 @@
+from datetime import datetime
+
+from src.components.chart.chart_properties import (
+  Annotation,
+  Location,
+  Model,
+  PlotType,
+  Scenario,
+  ScenarioVariable,
+  Zoom,
+)
+from src.components.enums import AgeGroup, ChartLayout, DataType, Target, UncertaintyInterval
+
+
+class ChartControls:
+  def __init__(
+    self,
+    theme: str,
+    plot_type: str,
+    round_num: int,
+    grid_axes: list[str],
+    chart_layout: str,
+    scenario_ids: list[int],
+    scenario_variables: list[dict],
+    model_names: list[str],
+    location_name: str,
+    target: str,
+    age_group: str,
+    x_axis: str | None = None,
+    y_axis: str | None = None,
+    x_start_date: str | None = None,
+    zoom: dict | None = None,
+    annotations: list[dict] | None = None,
+    uncertainty_interval: str | None = None,
+    pathogen: str = 'covid',    
+  ):
+    self.theme = theme
+    self.plot_type = PlotType(plot_type)
+    self.round_num = round_num
+    self.grid_axes = grid_axes
+    self.pathogen = pathogen
+    self.scenarios = [Scenario(id=scenario_id) for scenario_id in scenario_ids]
+    self.scenario_variables = [ScenarioVariable(**var) for var in scenario_variables]
+    self.models = [Model(model_name) for model_name in model_names]
+    self.chart_layout = ChartLayout.from_input_value(chart_layout)
+    self.location = Location(location_name)
+    self.target = Target.from_input_value(target)
+    self.age_group = AgeGroup.from_input_value(age_group)
+    self.x_axis = x_axis
+    self.y_axis = y_axis
+    self.x_start_date = datetime.strptime(x_start_date, '%Y-%m-%d') if x_start_date else None
+    self.annotations = (
+      [Annotation.from_dict(annotation) for annotation in annotations] if annotations else None
+    )
+    self.uncertainty_interval = (
+      UncertaintyInterval.from_display_value(uncertainty_interval) if uncertainty_interval else None
+    )
+    if zoom is not None:
+      self.zoom = Zoom(**zoom)
+    else:
+      self.zoom = None
+    self.data_type = DataType.QUANTILE
+
+  @classmethod
+  def from_dict(cls, data: dict):
+    return cls(
+      theme=data['theme'],
+      plot_type=data['plot_type'],
+      round_num=data['round_num'],
+      grid_axes=data['grid_axes'],
+      scenario_ids=data['scenario_ids'],
+      scenario_variables=data['scenario_variables'],
+      model_names=data['model_names'],
+      chart_layout=data.get('chart_layout', 'stack'),
+      location_name=data['location_name'],
+      target=data['target'],
+      age_group=data['age_group'],
+      x_axis=data['x_axis'],
+      y_axis=data['y_axis'],
+      x_start_date=data['x_start_date'],
+      zoom=data.get('zoom', None),
+      annotations=data.get('annotations', None),
+      uncertainty_interval=data.get('uncertainty_interval', None),
+    )

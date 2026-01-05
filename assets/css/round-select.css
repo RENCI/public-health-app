@@ -1,0 +1,72 @@
+.mantine-Select-dropdown {
+  --option-accent-color: var(--mantine-primary-color-filled);
+  --option-hover-accent-color: color-mix(
+    in oklab,
+    var(--mantine-primary-color-filled) 75%,
+    var(--mantine-color-gray-6) 25%
+  );
+  --option-bg-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+  --option-hover-bg-color: color-mix(in hsl, var(--option-bg-color), #999 10%);
+
+  height: min-content;
+  .mantine-ScrollArea-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.round-option {
+  margin: 8px;
+  width: 100%;
+  display: flex;
+  padding: 1rem;
+  border-radius: 4px;
+  position: relative;
+  background-color: var(--option-bg-color);
+  border: 1px solid var(--mantine-color-gray-filled);
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+  .round-option-label {
+    font-weight: bold;
+  }
+  .round-option-sublabel {
+    font-weight: normal;
+    font-style: italic;
+  }
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: calc(100%);
+    width: 5px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    background-color: var(--mantine-color-gray-filled);
+  }
+  &.selected {
+    background-color: var(--option-hover-bg-color);
+    border: 1px solid var(--mantine-primary-color-filled);
+    .round-option-label {
+      color: var(--mantine-primary-color-filled);
+    }
+  }
+  &.selected::before {
+    background-color: var(--mantine-primary-color-filled);
+  }
+}
+
+.mantine-Select-option {
+  padding: 0;
+  background-color: transparent;
+  &:hover {
+    background-color: transparent;
+  }  
+  &:not([data-combobox-active="true"]):hover .round-option {
+    background-color: var(--option-hover-bg-color);
+    /*border: 1px solid var(--option-hover-accent-color);*/
+    &::before {
+      background-color: var(--option-hover-accent-color);
+    }
+  }
+}  

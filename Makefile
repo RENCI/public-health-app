@@ -1,17 +1,18 @@
 # ============
 # 📦 AUTOPHONY
 # Auto-detect targets with help comments
-PHONY_TARGETS := $(shell awk -F':.*?##' '/^[a-zA-Z0-9_.-]+:.*##/ {print $$1}' $(MAKEFILE_LIST))
+# PHONY_TARGETS := $(shell awk -F':.*?##' '/^[a-zA-Z0-9_.-]+:.*##/ {print $$1}' $(MAKEFILE_LIST))
 .PHONY: help $(PHONY_TARGETS)
 # ============
 
 # ============
 # ⚙️ CONFIG
 APP_NAME := accidda-ui
-TAG := 0.5.0
+TAG := 0.6.0-dev
 IMAGE_NAME := containers.renci.org/comms/$(APP_NAME):$(TAG)
 PORT := 80
 RELEASE_NAME ?= $(APP_NAME)
+NAMESPACE ?= comms
 # ============
 
 ##@ Help Commands
@@ -25,17 +26,33 @@ help: ## 📖 Show help
 
 ##@ General Commands
 
-requirements: ## 🔐 Generate requirements.txt from Pipfile.lock (with Pipenv)
-	@command -v pipenv >/dev/null 2>&1 || { echo >&2 "pipenv not installed."; exit 1; }
-	pipenv requirements > requirements.txt
+lint: ## 🤔 Run linter
+	@uv run ruff check .
+
+format: ## ℹ︎ Run formatter
+	@uv run ruff format .
+
+ruff: lint format ## 🔀 Run linter and formatter
+
+test: ## 🧪 Run tests
+	@uv run pytest .
 
 ##@ Docker Commands
 
-build: requirements ## 🛠️  Build Docker image
-	docker build -t $(IMAGE_NAME) .
+build: ## 🛠️  Build Docker image
+	docker build \
+		-t $(IMAGE_NAME) \
+		--platform linux/amd64 \
+		.
 
 run: ## ▶️  Run Docker container
-	docker run --rm --name $(APP_NAME) -it -p $(PORT):8050 $(IMAGE_NAME)
+	docker run \
+		--rm \
+		--platform linux/amd64 \
+		--name $(APP_NAME) \
+		-it \
+		-p $(PORT):8050 \
+		$(IMAGE_NAME)
 
 stop: ## 🛑 Stop the running container
 	@echo "🛑 Stopping Docker container '$(APP_NAME)' if running"
@@ -53,7 +70,7 @@ pod-up: ## 🚀 Install or upgrade Helm release
 	@echo "📦 Using Helm values file: $(VALUES_FILE)"
 	@if [ -f $(VALUES_FILE) ]; then \
 		echo "🔄 Installing or upgrading Helm release '$(RELEASE_NAME)'"; \
-		helm upgrade --install $(RELEASE_NAME) k8s/chart -n comms; \
+		helm upgrade --install $(RELEASE_NAME) k8s/chart -n $(NAMESPACE); \
 	else \
 		echo "❌ Error: Values file not found: $(VALUES_FILE)"; \
 		exit 1; \
@@ -61,4 +78,12 @@ pod-up: ## 🚀 Install or upgrade Helm release
 
 pod-down: ## 💣 Uninstall Helm release
 	@echo "🗑️  Uninstalling Helm release '$(RELEASE_NAME)'"
-	-helm uninstall $(RELEASE_NAME) -n comms || true
+	-helm uninstall $(RELEASE_NAME) -n $(NAMESPACE:="comms") || true
+
+pod-logs: ## 📄 View Helm release logs
+	@echo "📄 Viewing Helm release '$(RELEASE_NAME)' logs"
+	kubectl logs -n $(NAMESPACE) $(RELEASE_NAME)
+
+pod-logs-follow: ## 📄 Follow Helm release logs
+	@echo "📄 Following Helm release '$(RELEASE_NAME)' logs"
+	kubectl logs -n $(NAMESPACE) $(RELEASE_NAME) -f

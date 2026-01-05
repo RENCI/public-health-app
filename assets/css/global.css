@@ -1,0 +1,27 @@
+:root {
+  --mantine-font-family-headings: Montserrat;
+  --mantine-font-family: Inter;
+}
+
+.emphasize-hover {
+  --bg: light-dark(var(--mantine-color-gray-2), var(--mantine-color-gray-9));
+  transition: background-color 250ms;
+  &:hover {
+    background-color: var(--bg);
+  }
+}
+
+.mantine-MultiSelect-dropdown, .mantine-Select-dropdown {
+  --bd-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-gray-8));
+  border: calc(0.0625rem * var(--mantine-scale)) solid var(--bd-color);
+}
+
+.mantine-Card-root {
+  --bg-color: light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-8));
+  background-color: var(--bg-color);
+}
+
+#graph {
+  border-radius: var(--mantine-radius-sm);
+  overflow: hidden;
+}

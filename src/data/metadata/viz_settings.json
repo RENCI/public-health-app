@@ -1,0 +1,269 @@
+{
+  "Round 1 - 2023/2024": {
+    "round_number": 1,
+    "date_round": "2023-11-12",
+    "show": "True",
+    "plot_tab": [
+      "scenario",
+      "spaghetti",
+      "model_specific",
+      "scen_comparison",
+      "peak_time_model",
+      "peak_size",
+      "multipat_plot_comb"
+    ],
+    "target": {
+      "inc hosp": "Incident Hospitalization",
+      "cum hosp": "Cumulative Hospitalization"
+    },
+    "def_target": "hosp",
+    "models": [
+      "Ensemble_LOP_untrimmed",
+      "Ensemble_LOP",
+      "Ensemble",
+      "UT-ImmunoSEIRS",
+      "NotreDame-FRED",
+      "USC-SIkJalpha",
+      "CU-RSV_SVIRS",
+      "UVA-EpiHiperRSV",
+      "NIH-RSV_WIN",
+      "PSI-PROF",
+      "NIH-RSV_MSIRS",
+      "MOBS_NEU-GLEAM_RSV",
+      "NIH-RSV_Phenomenological",
+      "CEPH-MetaRSV",
+      "JHU_UNC-flepiMoP",
+      "Ensemble_LOP_all"
+    ],
+    "scenario_plot": {
+      "peak": {
+        "Peak Season 2022-2023": {
+          "target_specific": "inc hosp",
+          "start_date": "2022-08-01",
+          "end_date": "2023-07-01"
+        }
+      },
+      "notes": {
+        "models": ["CEPH-MetaRSV", "JHU_UNC-flepiMoP"],
+        "text": [
+          "* Two new teams: 'CEPH-MetaRSV', 'JHU_UNC-flepiMoP' and an update to 'NIH-RSV_WIN' were added in April 2024, ",
+          "they are not included in the `Ensemble_LOP` and additional Ensembles. An Ensemble including all teams ",
+          "and all updated version is available ('Ensemble_LOP_all')."
+        ]
+      }
+    },
+    "scenario_comparison": {
+      "reference": {
+        "Optimistic Senior Protection &<br>Optimistic Infant Protection (A)": ["A-2023-10-27", "E-2023-10-27"],
+        "Pessimistic Senior Protection &<br>Optimistic Infant Protection (B)": ["B-2023-10-27", "E-2023-10-27"],
+        "Optimistic Senior Protection &<br>Pessimistic Infant Protection (C)": ["C-2023-10-27", "E-2023-10-27"],
+        "Pessimistic Senior Protection &<br>Pessimistic Infant Protection (D)": ["D-2023-10-27", "E-2023-10-27"]
+      }
+    },
+    "multi-pathogen_plot": {
+      "pathogen": {
+        "covid-19": {
+          "display_name": "COVID-19",
+          "website": "https://covid19scenariomodelinghub.org/",
+          "round": "round17",
+          "scenario": {
+            "id": ["A-2023-04-16", "B-2023-04-16", "C-2023-04-16", "D-2023-04-16", "E-2023-04-16", "F-2023-04-16"],
+            "name": [
+              "No booster, low immune escape",
+              "No booster, high immune escape",
+              "65+ booster, low immune escape",
+              "65+ booster, high immune escape",
+              "All booster, low immune escape",
+              "All booster, high immune escape"
+            ],
+            "dict": {
+              "A-2023-04-16": "65",
+              "B-2023-04-16": "66",
+              "C-2023-04-16": "67",
+              "D-2023-04-16": "68",
+              "E-2023-04-16": "69",
+              "F-2023-04-16": "70"
+            }
+          },
+          "default_selection": ["D-2023-04-16", "F-2023-04-16"]
+        },
+        "flu": {
+          "website": "https://fluscenariomodelinghub.org/",
+          "round": "round4",
+          "round_display": "1 - 2023/2024",
+          "display_name": "Flu",
+          "scenario": {
+            "id": ["A-2023-08-14", "B-2023-08-14", "C-2023-08-14", "D-2023-08-14", "E-2023-08-14", "F-2023-08-14"],
+            "name": [
+              "High vaccine coverage, A/H3N2 dominance",
+              "High vaccine coverage, A/H1N1 dominance",
+              "Business as usual vaccine coverage, A/H3N2 dominance",
+              "Business as usual vaccine coverage, A/H1N1 dominance",
+              "Low vaccine coverage, A/H3N2 dominance",
+              "Low vaccine coverage, A/H1N1 dominance"
+            ],
+            "dict": {
+              "A-2023-08-14": "13",
+              "B-2023-08-14": "14",
+              "C-2023-08-14": "15",
+              "D-2023-08-14": "16",
+              "E-2023-08-14": "17",
+              "F-2023-08-14": "18"
+            }
+          },
+          "default_selection": ["D-2023-08-14"]
+        }
+      },
+      "peak": {
+        "Peak Season 2022-2023": {
+          "start_date": "2022-09-30",
+          "end_date": "2023-07-01"
+        }
+      },
+      "unselect": ["B-2023-10-27", "C-2023-10-27", "D-2023-10-27", "E-2023-10-27", "F-2023-10-27"],
+      "notes": [
+        "* Two new teams: 'CEPH-MetaRSV', 'JHU_UNC-flepiMoP' and an update to 'NIH-RSV_WIN' were added in April 2024."
+      ]
+    }
+  },
+  "Round 1 - 2024/2025": {
+    "round_number": 2,
+    "date_round": "2024-07-28",
+    "show": "True",
+    "plot_tab": [
+      "scenario",
+      "spaghetti",
+      "model_specific",
+      "scen_sample_comp",
+      "peak_time_model",
+      "peak_size",
+      "multipat_plot_comb"
+    ],
+    "target": {
+      "inc hosp": "Incident Hospitalization",
+      "cum hosp": "Cumulative Hospitalization"
+    },
+    "age_group": {
+      "0-0.99": "Under 1 year old",
+      "1-4": "1 to 4 years old (included)",
+      "5-64": "5 to 64 years old (included)",
+      "65-130": "65+ year old",
+      "0-130": "Overall Population"
+    },
+    "def_target": "hosp",
+    "models": [
+      "Ensemble_LOP_untrimmed",
+      "Ensemble_LOP",
+      "Ensemble",
+      "CEPH-MetaRSV",
+      "NIH-RSV_WIN",
+      "UT-ImmunoSEIRS",
+      "NotreDame-FRED",
+      "MOBS_NEU-GLEAM_RSV",
+      "USC-SIkJalpha",
+      "CU-RSV_SVIRS",
+      "PSI-PROF",
+      "NIH-RSV_MSIRS",
+      "JHU_UNC-flepiMoP",
+      "UNCC-Hierbin",
+      "UVA-EpiHiperRSV"
+    ],
+    "point": {
+      "type": "quantile",
+      "type_id": 0.5
+    },
+    "ensemble": {
+      "default": "Ensemble_LOP",
+      "hide": ["Ensemble_LOP_untrimmed", "Ensemble"]
+    },
+    "zeroed_file": "Sample",
+    "horizon_limit": {
+      "required": 45,
+      "optional": 45
+    },
+    "gold_standard": {
+      "inc hosp": "rsvnet_hospitalization",
+      "cum hosp": "rsvnet_round2_cumhosp"
+    },
+    "multi": "True",
+    "abstract": "False",
+    "scenario_plot": {
+      "peak": {
+        "Peak Season 2023-2024": {
+          "target_specific": "inc hosp",
+          "start_date": "2023-08-01",
+          "end_date": "2024-07-01"
+        }
+      },
+      "notes": null
+    },
+    "scenario_comparison": {
+      "A vs E": "Optimistic Senior Waning & Early Timing of Infant Intervention (A)",
+      "B vs E": "Pessimistic Senior Waning & Early Timing of Infant Intervention (B)",
+      "C vs E": "Optimistic Senior Waning & Classic Timing of Infant Intervention (C)",
+      "D vs E": "Pessimistic Senior Waning & Classic Timing of Infant Intervention (D)"
+    },
+    "multi-pathogen_plot": {
+      "pathogen": {
+        "covid-19": {
+          "display_name": "COVID-19",
+          "website": "https://covid19scenariomodelinghub.org/",
+          "round": "round18",
+          "scenario": {
+            "id": ["A-2024-03-01", "B-2024-03-01", "C-2024-03-01", "D-2024-03-01", "E-2024-03-01", "F-2024-03-01"],
+            "name": [
+              "No booster, low immune escape",
+              "No booster, high immune escape",
+              "High-risk booster, low immune escape",
+              "High-risk booster, high immune escape",
+              "All booster, low immune escape",
+              "All booster, high immune escape"
+            ],
+            "dict": {
+              "A-2024-03-01": "71",
+              "B-2024-03-01": "72",
+              "C-2024-03-01": "73",
+              "D-2024-03-01": "74",
+              "E-2024-03-01": "75",
+              "F-2024-03-01": "76"
+            }
+          },
+          "default_selection": ["F-2024-03-01"]
+        },
+        "flu": {
+          "website": "https://fluscenariomodelinghub.org/",
+          "round": "round5",
+          "round_display": "2 - 2023/2024",
+          "display_name": "Flu",
+          "scenario": {
+            "id": ["A-2024-08-01", "B-2024-08-01", "C-2024-08-01", "D-2024-08-01", "E-2024-08-01", "F-2024-08-01"],
+            "name": [
+              "High vaccine coverage, A/H3N2 dominance",
+              "High vaccine coverage, A/H1N1 dominance",
+              "Business as usual vaccine coverage, A/H3N2 dominance",
+              "Business as usual vaccine coverage, A/H1N1 dominance",
+              "Low vaccine coverage, A/H3N2 dominance",
+              "Low vaccine coverage, A/H1N1 dominance"
+            ],
+            "dict": {
+              "A-2024-08-01": "19",
+              "B-2024-08-01": "20",
+              "C-2024-08-01": "21",
+              "D-2024-08-01": "22",
+              "E-2024-08-01": "23",
+              "F-2024-08-01": "24"
+            }
+          },
+          "default_selection": ["C-2024-08-01", "D-2024-08-01"]
+        }
+      },
+      "peak": {
+        "Peak Season 2023-2024": {
+          "start_date": "2023-09-30",
+          "end_date": "2024-07-01"
+        }
+      },
+      "unselect": ["B-2024-09-20", "C-2024-09-20", "D-2024-09-20", "E-2024-09-20", "F-2024-09-20"]
+    }
+  }
+}

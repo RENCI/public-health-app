@@ -1,33 +1,17 @@
-import dash
-from dash import callback, dcc, html
+from dash import register_page
 import dash_mantine_components as dmc
 
-from src.components.controls.debugger import controls_debugger
+from src.components.disclaimer import disclaimer
+from src.components.round_summary import round_summary
 
-dummy_content = dcc.Markdown('''
-## Lorem Ipsum Dolor Sit Amet
 
-### Consectetur Adipiscing Elit
+register_page(__name__, path='/')
 
-Lorem ipsum dolor sit amet, **consectetur adipiscing elit**. _Vestibulum vel sapien euismod_, tincidunt ligula non, scelerisque nulla. 
-
-> "Nulla facilisi. Sed fermentum quam vel erat vehicula, at sagittis nisi varius."
-
-#### Pellentesque Habitant
-
-- **Aenean** et nisl nec libero fermentum pharetra.  
-- **Morbi** convallis, justo eget luctus bibendum, nunc felis sodales velit.  
-- **Suspendisse** potenti.
-''')
 
 layout = dmc.Container(
   [
-    html.H1('Welcome'),
-    html.Hr(),
-    dummy_content,
-    controls_debugger,
+    round_summary(),
+    dmc.Divider(my=48),
+    disclaimer,
   ],
-  fluid=True
 )
-
-dash.register_page('home', layout=layout, path='/')

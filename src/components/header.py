@@ -1,28 +1,33 @@
-from dash import callback, dcc, Input, Output, State
 import dash_mantine_components as dmc
-from dash_iconify import DashIconify
+from dash import dcc
 
-logo = dmc.Text('[ 📈 ACCIDDA ]', c='blue')
+from .round_select import round_select
+from .theme_toggle import theme_toggle
 
-aside_toggle_button = dmc.ActionIcon(
-  id='aside-toggle',
-  variant='light',
-  size='lg',
-  children=DashIconify(icon='feather:settings', width=20),
+logo = dcc.Link(
+  dmc.Image(src='/assets/images/covid19-smh-logo.png', alt='SMH Logo'),
+  style=dict(width='275px'),
+  href='/',
 )
 
 header = dmc.Flex(
   children=[
-    dmc.Group([
-      dmc.Burger(id='navbar-toggle', size='sm', opened={'mobile': True, 'desktop': False}),
-      logo,
-    ]),
-    dmc.Group([
-      dmc.Burger(id='aside-toggle', size='sm', opened=False),
-    ]),
+    dmc.Group(
+      [
+        logo,
+        round_select(),
+      ],
+    ),
+    dmc.Group(
+      [
+        theme_toggle,
+      ]
+    ),
   ],
+  align='stretch',
   justify='space-between',
   style={'flex': 1},
   h='100%',
   px='md',
+  py=0,
 )

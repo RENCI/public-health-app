@@ -1,0 +1,8 @@
+id: template-b
+controls:
+  - scenarios_select
+  - location_select
+  - target_select
+  - age_group_select
+  - uncertainty_interval_select
+  - ensemble_select
