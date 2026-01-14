@@ -128,6 +128,8 @@ class LineChart(Chart):
               legendgroup=f'{model.name}',
               showlegend=(i == 1),
               line=dict(color=model.color),
+              hovertemplate='<b>%{fullData.name}</b><br>'
+              + f'{self.controls.target.display_value}: %{{y}}<extra></extra>',
             ),
             row=current_row,
             col=current_col,
@@ -144,6 +146,8 @@ class LineChart(Chart):
           marker=dict(color='var(--mantine-color-text)', symbol='diamond'),
           legendgroup='Actual',
           showlegend=(i == 1),
+          hovertemplate='<b>%{fullData.name}</b><br>'
+          + f'{self.controls.target.display_value}: %{{y}}<extra></extra>',
         ),
         row=current_row,
         col=current_col,
@@ -155,7 +159,7 @@ class LineChart(Chart):
     # reduce the font size of the subplot titles,
     # which are treated as annotations by plotly.
     for annotation in self._fig.layout.annotations:
-      annotation['font'] = dict(size=12)      
+      annotation['font'] = dict(size=12)
 
     # apply spike guides for each axis in the chart viewport
     self._fig.update_xaxes(showspikes=True, spikemode='across', spikesnap='cursor')
@@ -257,13 +261,15 @@ class LineChart(Chart):
         xanchor='center',
         yanchor='top',
         font=dict(size=28),
-        pad=dict(t=35, r=0, b=10, l=0),        
+        pad=dict(t=35, r=0, b=10, l=0),
         subtitle=dict(
           text=self.get_subtitle(),
           font=dict(size=12),
         ),
       ),
-      margin=dict(t=164, r=48, b=48, l=104) if self.controls.chart_layout == ChartLayout.GRID else dict(t=144, r=48, b=48, l=72),
+      margin=dict(t=164, r=48, b=48, l=104)
+      if self.controls.chart_layout == ChartLayout.GRID
+      else dict(t=144, r=48, b=48, l=72),
       uirevision=self.__hash__(),
     )
 
@@ -275,8 +281,8 @@ class LineChart(Chart):
       self._fig.add_annotation(
         showarrow=False,
         xanchor='center',
-        xref='paper', 
-        x=0.5, 
+        xref='paper',
+        x=0.5,
         yref='paper',
         y=1,
         yshift=64,
@@ -286,7 +292,7 @@ class LineChart(Chart):
       self._fig.add_annotation(
         showarrow=False,
         xanchor='center',
-        xref='paper', 
+        xref='paper',
         x=0,
         xshift=-78,
         yanchor='middle',
